@@ -1,0 +1,30 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+@theme {
+    --font-sans: "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif;
+
+    /* 背景 */
+    --color-background: #F5F7FA;
+
+    /* 主题色 */
+    --color-primary: #c7000b;
+    --color-primary-light: color-mix(in oklab, var(--color-primary) 10%, white);
+
+    /* 中性色 */
+    --color-border: var(--color-gray-200);
+
+    /* Footer */
+    --color-footer-bg: #1a1a1a;
+    --color-footer-text: #a1a1aa;
+
+    /* Admin 侧边栏 */
+    --color-sidebar-bg: #1e293b;
+    --color-sidebar-text: #94a3b8;
+    --color-sidebar-active: #c7000b;
+}
+
+/* 自定义 utility */
+@utility bg-hero-gradient {
+    background: linear-gradient(to bottom, var(--color-primary-light), var(--color-background));
+}
