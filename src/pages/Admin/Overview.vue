@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-interface Article {
-    slug: string
-    category: string
-    title: string
-    created: string
-}
+import type { ArticleBasic } from '@/types/article'
 
 const article_count = ref(1243)
 const this_mounth_article_count = ref(10)
@@ -13,7 +8,7 @@ const image_count = ref(123)
 const attachment_count = ref(132)
 const user_count = ref(19)
 
-const article_list = ref<Article[]>([
+const article_list = ref<ArticleBasic[]>([
     {
         slug: '',
         category: '',

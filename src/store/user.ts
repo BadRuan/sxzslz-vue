@@ -1,10 +1,24 @@
 import { defineStore } from 'pinia'
-import {ref} from 'vue'
+import { ref, computed } from 'vue'
 
-export const useUserStore = defineStore('user',() => {
-    const username = ref<string>('admin')
-    const nickname = ref<string>('管理员')
-    const user_id = ref<string>('123123123')
+export const useUserStore = defineStore('user', () => {
+    const username = ref('')
+    const nickname = ref('')
+    const user_id = ref('')
 
-    return { username, nickname, user_id}
+    const is_logged_in = computed(() => !!username.value)
+
+    function login(info: { username: string; nickname: string; user_id: string }) {
+        username.value = info.username
+        nickname.value = info.nickname
+        user_id.value = info.user_id
+    }
+
+    function logout() {
+        username.value = ''
+        nickname.value = ''
+        user_id.value = ''
+    }
+
+    return { username, nickname, user_id, is_logged_in, login, logout }
 })

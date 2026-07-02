@@ -1,8 +1,16 @@
+@font-face {
+    font-family: 'GoogleSansCode';
+    src: url('/fonts/GoogleSansCode.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
 @theme {
-    --font-sans: "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif;
+    --font-sans: "GoogleSansCode", "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif;
 
     /* 背景 */
     --color-background: #F5F7FA;

@@ -1,17 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { ArticleItem } from '@/types/article'
 
-interface Article {
-    title: string
-    category: string
-    author: string
-    is_public: boolean
-    is_recommended: boolean
-    views: number
-    created: string
-}
-
-const articles = ref<Article[]>([
+const articles = ref<ArticleItem[]>([
     {
         title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作',
         category: '政策法规',
@@ -117,7 +108,7 @@ const articles = ref<Article[]>([
                                         bg-green-50 text-green-600 hover:bg-green-100">
                                 公开
                             </button>
-                            <button v-else="article.is_public" type="submit" class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium cursor-pointer transition-colors
+                            <button v-else type="submit" class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium cursor-pointer transition-colors
                                         bg-gray-100 text-gray-500 hover:bg-gray-200">
                                 隐藏
                             </button>
@@ -127,7 +118,7 @@ const articles = ref<Article[]>([
                                         bg-yellow-50 text-yellow-600 hover:bg-yellow-100">
                                 ★ 推荐
                             </button>
-                            <button v-else="article.is_recommended" type="submit" class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium cursor-pointer transition-colors
+                            <button v-else type="submit" class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium cursor-pointer transition-colors
                                         bg-gray-100 text-gray-400 hover:bg-gray-200">
                                 ☆ 未推荐
                             </button>

@@ -1,25 +1,46 @@
 <script setup lang="ts">
-import { reactive, computed } from 'vue';
-import MarkdownIt from 'markdown-it';
+import { reactive, computed } from 'vue'
+import MarkdownIt from 'markdown-it'
+import type { ArticleDetail } from '@/types/article'
 
-interface Article {
-    slug: string
-    category: string
-    author: string
-    title: string
-    content: string
-    created: string
-    view: number
-}
+const content: string = `## 1、基础资料准备
 
-const article = reactive<Article>({
+- 薪级表；
+- 13薪（纳入绩效工资总量的基本工资额度）表；
+
+## 2、特殊情况
+
+- 岗位晋升情况（岗位、薪级同时变化，取前后平均数字）；
+- 内杠晋升情况（岗位、薪级同时变化，取前后平均数字）；
+- 新进人员（直接用薪级调整后的岗位薪级数字，实习期用实习期工资）；
+
+## 3、数字依赖
+
+- 基础性绩效（薪级调整后），工资表，参考数字700+；
+- 奖励性绩效（薪级调整后），工资表的为0.9换算后，取消再换算回来，参考数字2k内；
+- 基础性绩效奖（薪级调整后），工资表，参考数字3k+；
+
+工资申报表中奖励性绩效 = 13薪 + 奖励性绩效
+
+## 4、计算规则
+
+新**社保基数**为以下内容的合计数：
+
+- 岗位工资
+- 薪级工资
+- 基础性绩效
+- 十三月工资
+- 基础绩效奖
+`
+
+const article = reactive<ArticleDetail>({
     slug: 'string',
     category: 'string',
     author: '沈巷镇水利站',
     title: '鸠江区编办莅临沈巷镇水利站开展防汛备汛专项检查',
-    content: '### 标题',
+    content: content,
     created: '2024年07月23日',
-    view: 121221
+    views: 121221
 })
 
 const md = new MarkdownIt({
@@ -71,12 +92,12 @@ const renderedHtml = computed(() => {
                         {{ article.title }}
                     </h1>
                     <div
-                        class="flex items-center justify-center gap-4 text-sm text-gray-500 px-3 py-1 bg-gray-50 rounded-md inline-flex">
+                        class="inline-flex items-center justify-center gap-4 text-sm text-gray-500 px-3 py-1 bg-gray-50 rounded-md">
                         <time datetime="2024-07-23">{{ article.created }}</time>
                         <span class="hidden sm:inline">|</span>
                         <span>来源：{{ article.author }}</span>
                         <span class="hidden sm:inline">|</span>
-                        <span>阅读量：{{ article.view }}</span>
+                        <span>阅读量：{{ article.views }}</span>
                     </div>
                 </div>
                 <div class="px-6 sm:px-10 py-8 prose prose-primary prose-lg max-w-none

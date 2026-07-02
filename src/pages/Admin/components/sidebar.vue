@@ -23,10 +23,10 @@ const { nickname } = storeToRefs(store)
                 class="flex items-center px-3 py-2 rounded-md text-sm text-sidebar-text hover:bg-white/10 hover:text-white">
                 <span class="mr-3">📰</span> 文章管理
             </RouterLink>
-            <a href="#"
+            <RouterLink :to="{ name: 'AdminCategory' }" active-class="!text-white   !bg-sidebar-active"
                 class="flex items-center px-3 py-2 rounded-md text-sm text-sidebar-text hover:bg-white/10 hover:text-white">
                 <span class="mr-3">📁</span> 分类管理
-            </a>
+            </RouterLink>
             <RouterLink :to="{ name: 'AdminPhoto' }" active-class="!text-white   !bg-sidebar-active"
                 class="flex items-center px-3 py-2 rounded-md text-sm text-sidebar-text hover:bg-white/10 hover:text-white">
                 <span class="mr-3">🖼️</span> 照片管理

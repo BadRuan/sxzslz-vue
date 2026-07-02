@@ -1,9 +1,16 @@
 <script setup lang="ts">
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
 
 const store = useUserStore()
 const { nickname } = storeToRefs(store)
+const router = useRouter()
+
+function handleLogout() {
+    store.logout()
+    router.push({ name: 'Home' })
+}
 </script>
 
 
@@ -12,7 +19,7 @@ const { nickname } = storeToRefs(store)
         <div class="text-lg font-semibold text-gray-900">仪表盘</div>
         <div class="flex items-center gap-4">
             <span class="text-sm text-gray-600">{{ nickname }}</span>
-            <RouterLink :to="{ name: 'Home' }" class="text-sm text-primary hover:underline">退出登录</RouterLink>
+            <button @click="handleLogout" class="text-sm text-primary hover:underline">退出登录</button>
         </div>
     </header>
 </template>
