@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { useStationrStore } from '@/store/station';
 
 const station_store = useStationrStore()
-const { station_array } = storeToRefs(station_store)
+const { station_array, url_head } = storeToRefs(station_store)
 </script>
 
 <template>
@@ -20,8 +20,7 @@ const { station_array } = storeToRefs(station_store)
             <div v-for="(station, index) in station_array" :key="index"
                 class="bg-white rounded-lg shadow-xs shadow-slate-200 ring-1 ring-border flex flex-col overflow-hidden transition-transform duration-300 hover:-translate-y-2">
                 <div class="overflow-hidden h-52">
-                    <img class="w-full h-full"
-                        src="http://100.68.9.83:8666/image/289ce6f95488446f96c33fa21d39fef4.JPG?_type=thumb" alt="pic">
+                    <img class="w-full h-full" :src="url_head + 'image/' + station.thumb" alt="pic">
                 </div>
                 <div class="p-4 flex flex-col gap-2">
                     <div class="flex items-center">
@@ -35,7 +34,7 @@ const { station_array } = storeToRefs(station_store)
                         <div class="text-center">
                             <div class="text-sm text-gray-500"><span class="text-gray-800 text-lg">{{
                                 station.zhuangji
-                                    }}</span>台
+                                    }}</span> 台
                             </div>
                             <div class="text-gray-500 text-sm">机组</div>
                         </div>
@@ -43,7 +42,7 @@ const { station_array } = storeToRefs(station_store)
                         <div class="text-center">
                             <div class="text-sm text-gray-500"><span class="text-gray-800 text-lg">{{
                                 station.zongrongliang
-                                    }}</span>kw
+                                    }}</span> kw
                             </div>
                             <div class="text-gray-500 text-sm">容量</div>
                         </div>

@@ -4,6 +4,7 @@ export interface StationPicModel {
 }
 
 export interface StationModel {
+    thumb: string
     station_name: string,
     station_location: string
 

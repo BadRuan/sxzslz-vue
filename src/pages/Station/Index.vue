@@ -4,14 +4,16 @@ import { useStationrStore } from '@/store/station';
 import { useRoute, useRouter } from 'vue-router';
 
 const station_store = useStationrStore();
-const { station_array } = storeToRefs(station_store);
+const { station_array, url_head } = storeToRefs(station_store);
 const route = useRoute();
 const router = useRouter()
 const indexValue = Number(route.query.index)
 const length = station_array.value.length
+
 if (isNaN(indexValue) || indexValue < 0 || indexValue >= length) {
     router.replace({ name: 'Home' });
 }
+
 </script>
 
 <template>
@@ -289,34 +291,16 @@ if (isNaN(indexValue) || indexValue < 0 || indexValue >= length) {
 
             <div class="w-6xl mx-auto">
                 <div class="flex flex-col items-center">
-                    <div class="w-2/3 rounded py-4">
+                    <div v-for="(item, index) in station_array[indexValue]?.station_pic_list" :key="index"
+                        class="w-2/3 rounded py-4">
                         <div class="flex flex-col">
                             <div class="overflow-hidden  rounded ">
                                 <img alt="gallery"
                                     class="w-full h-full object-cover object-center hover:scale-110 ease-in-out transition-all duration-500"
-                                    src="http://100.68.9.83:8666/image/4a1efd84fbe44ed484f3a7ef83270645.JPG">
+                                    :src="url_head + 'image/' + item.src">
                             </div>
-                            <h2 class="text-center title-font text-lg font-medium text-gray-600 my-4">主厂房</h2>
-                        </div>
-                    </div>
-                    <div class="w-2/3 rounded py-4">
-                        <div class="flex flex-col">
-                            <div class="overflow-hidden  rounded ">
-                                <img alt="gallery"
-                                    class="w-full h-full object-cover object-center hover:scale-110 ease-in-out transition-all duration-500"
-                                    src="http://100.68.9.83:8666/image/4a1efd84fbe44ed484f3a7ef83270645.JPG">
-                            </div>
-                            <h2 class="text-center title-font text-lg font-medium text-gray-600 my-4">主厂房</h2>
-                        </div>
-                    </div>
-                    <div class="w-2/3 rounded py-4">
-                        <div class="flex flex-col">
-                            <div class="overflow-hidden  rounded ">
-                                <img alt="gallery"
-                                    class="w-full h-full object-cover object-center hover:scale-110 ease-in-out transition-all duration-500"
-                                    src="http://100.68.9.83:8666/image/4a1efd84fbe44ed484f3a7ef83270645.JPG">
-                            </div>
-                            <h2 class="text-center title-font text-lg font-medium text-gray-600 my-4">主厂房</h2>
+                            <h2 class="text-center title-font text-lg font-medium text-gray-600 my-4">{{ item.title }}
+                            </h2>
                         </div>
                     </div>
                 </div>

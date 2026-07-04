@@ -1,10 +1,13 @@
 import { defineStore } from 'pinia';
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import type { StationModel } from "@/types/station";
 
 export const useStationrStore = defineStore('station', () => {
+    
+    const url_head = ref('http://100.68.9.83:8666/');
     const station_array = reactive<StationModel[]>([
     {
+        thumb: 'f4b1736834f24101bf8e57b509af9933.JPG',
         station_name: "藏墩二站",
         station_location: "芜湖市鸠江区沈巷镇凤城行政村",
         birth_day: 2004,
@@ -36,15 +39,16 @@ export const useStationrStore = defineStore('station', () => {
         yalixiang_koujing: "1.7X2.2双孔",
         yalixiang_jiegou: "钢混",
         station_pic_list: [
-            { title: "泵站远景", src: "DSC_0717.JPG" },
-            { title: "泵站近景", src: "DSC_0726.JPG" },
-            { title: "主厂房", src: "DSC_0733.JPG" },
-            { title: "开关柜", src: "DSC_0739.JPG" },
-            { title: "进水闸", src: "DSC_0751.JPG" },
-            { title: "出水闸", src: "DSC_0719.JPG" }
+            { title: "泵站远景", src: "e35f6e9918ac498d894e04d807b34847.JPG" },
+            { title: "泵站近景", src: "71495c59d1b649c88a64c8c62a70ceb4.JPG" },
+            { title: "主厂房", src: "f4b1736834f24101bf8e57b509af9933.JPG" },
+            { title: "控制柜", src: "17eed9a9e26641b59cc912d2c4de598f.JPG" },
+            { title: "进水闸", src: "0af4cb24eaa64a59af7200e512fdd85f.JPG" },
+            { title: "出水闸", src: "ceaab74a2146473381ebd2fbd52432a0.JPG" }
         ]
     },
     {
+        thumb: 'b79cabcf2b454bfd82d91681f688e8e5.JPG',
         station_name: "藏墩一站",
         station_location: "芜湖市鸠江区沈巷镇南埂行政村",
         birth_day: 1965,
@@ -76,14 +80,15 @@ export const useStationrStore = defineStore('station', () => {
         yalixiang_koujing: "2X2.5 双孔",
         yalixiang_jiegou: "钢混",
         station_pic_list: [
-            { title: "泵站远景", src: "DSC_0811.JPG" },
-            { title: "主厂房", src: "DSC_0820.JPG" },
-            { title: "开关柜", src: "DSC_0828.JPG" },
-            { title: "进水闸", src: "DSC_0815.JPG" },
-            { title: "出水闸", src: "DSC_0808.JPG" },
+            { title: "泵站远景", src: "4aa94a81b5b24469a4fcd3a05c1fc98c.JPG" },
+            { title: "主厂房", src: "b79cabcf2b454bfd82d91681f688e8e5.JPG" },
+            { title: "开关柜", src: "79332e40c2484060bd25b8ea52ec5963.JPG" },
+            { title: "进水闸", src: "045f78ab69b94a5ca242ea9caf40d770.JPG" },
+            { title: "出水闸", src: "649e4d965d23441cb29123100c2289ef.JPG" },
         ],
     },
     {
+        thumb: 'f61c97c382244114a16bea01416a29d8.JPG',
         station_name: "大桥泵站",
         station_location: "芜湖市鸠江区沈巷镇灯塔行政村",
         birth_day: 1973,
@@ -115,14 +120,15 @@ export const useStationrStore = defineStore('station', () => {
         yalixiang_koujing: "1.9X2",
         yalixiang_jiegou: "钢混",
         station_pic_list: [
-            { title: "泵站远景", src: "DSC_0914.JPG" },
-            { title: "主厂房", src: "DSC_0907.JPG" },
-            { title: "开关柜", src: "DSC_0913.JPG" },
-            { title: "进水闸", src: "DSC_0906.JPG" },
-            { title: "出水闸", src: "DSC_0916.JPG" },
+            { title: "泵站远景", src: "fdfaf002033b4574bfbb6b76cf05dec5.JPG" },
+            { title: "主厂房", src: "a574b36aff064eacb79128762f187e6f.JPG" },
+            { title: "开关柜", src: "374f42c3856e4610a7b801b6ec53df8f.JPG" },
+            { title: "进水闸", src: "45418e995eb64069a7ecb5d73c1d971a.JPG" },
+            { title: "出水闸", src: "980ca63679454787a3bc82049c0b1528.JPG" },
         ],
     },
     {
+        thumb: '2f8ab79b22f44eff834fad97dcd2aca0.JPG',
         station_name: "河南汤站",
         station_location: "芜湖市鸠江区沈巷镇五显社区",
         birth_day: 1987,
@@ -154,14 +160,15 @@ export const useStationrStore = defineStore('station', () => {
         yalixiang_koujing: "1.4X1.6",
         yalixiang_jiegou: "钢混",
         station_pic_list: [
-            { title: "泵站远景", src: "DSC_0924.JPG" },
-            { title: "主厂房", src: "DSC_0929.JPG" },
-            { title: "开关柜", src: "DSC_0935.JPG" },
-            { title: "进水闸", src: "DSC_0936.JPG" },
-            { title: "出水闸", src: "DSC_0920.JPG" },
+            { title: "泵站远景", src: "1a3be8c46b0046aa8eb62ffbb35d2602.JPG" },
+            { title: "主厂房", src: "1fefa37c9959429bb5373e1360d50b4b.JPG" },
+            { title: "开关柜", src: "37e93d433d0b49d3b83992691201dd0b.JPG" },
+            { title: "进水闸", src: "6b992b7da06c4604a0df65c549c5ac0d.JPG" },
+            { title: "出水闸", src: "b79cabcf2b454bfd82d91681f688e8e5.JPG" },
         ],
     },
     {
+        thumb: '2dce3759473644b39dea959ce848e7f6.JPG',
         station_name: "黄山寺排灌站（老站）",
         station_location: "芜湖市鸠江区沈巷镇黄山寺社区",
         birth_day: 1958,
@@ -193,14 +200,15 @@ export const useStationrStore = defineStore('station', () => {
         yalixiang_koujing: "2.2X3",
         yalixiang_jiegou: "钢混",
         station_pic_list: [
-            { title: "泵站远景", src: "DSC_1059.JPG" },
-            { title: "主厂房", src: "DSC_1075.JPG" },
-            { title: "控制室", src: "DSC_1079.JPG" },
-            { title: "进水闸", src: "DSC_1067.JPG" },
-            { title: "出水闸", src: "DSC_1056.JPG" },
+            { title: "泵站远景", src: "f56a21a83af54d5497c9628e166f92c2.JPG" },
+            { title: "主厂房", src: "2dce3759473644b39dea959ce848e7f6.JPG" },
+            { title: "控制室", src: "b61a8fae0197482e894ad098be111df4.JPG" },
+            { title: "进水闸", src: "95de9350ba2d4f76bf40a31b7ea4f076.JPG" },
+            { title: "出水闸", src: "57322cf5be04430f91ca0bb579ca2b19.JPG" },
         ],
     },
     {
+        thumb: '6c60f610b1e049a18b9958f9506db8fc.JPG',
         station_name: "黄山寺排灌站（新站）",
         station_location: "芜湖市鸠江区沈巷镇黄山寺社区",
         birth_day: 2004,
@@ -232,13 +240,14 @@ export const useStationrStore = defineStore('station', () => {
         yalixiang_koujing: "2.7X3",
         yalixiang_jiegou: "钢混",
         station_pic_list: [
-            { title: "泵站远景", src: "DSC_1062.JPG" },
-            { title: "主厂房", src: "DSC_1089.JPG" },
-            { title: "进水闸", src: "DSC_1074.JPG" },
-            { title: "出水闸", src: "DSC_1058.JPG" },
+            { title: "泵站远景", src: "98f0d72f7f364253bda1bd0241b0af2d.JPG" },
+            { title: "主厂房", src: "6c60f610b1e049a18b9958f9506db8fc.JPG" },
+            { title: "进水闸", src: "efc8c15a3ced45899869ce83a66c1de0.JPG" },
+            { title: "出水闸", src: "8b67bd6aa63046a49629fda24971049a.JPG" },
         ],
     },
     {
+        thumb: '15bcdcb45b924549ba048443b0b00953.JPG',
         station_name: "老坝泵站",
         station_location: "芜湖市鸠江区沈巷镇双坝行政村",
         birth_day: 1968,
@@ -270,14 +279,15 @@ export const useStationrStore = defineStore('station', () => {
         yalixiang_koujing: "3.3X3.3",
         yalixiang_jiegou: "钢混",
         station_pic_list: [
-            { title: "泵站远景", src: "DSC_0848.JPG" },
-            { title: "主厂房", src: "DSC_0856.JPG" },
-            { title: "开关柜", src: "DSC_0861.JPG" },
-            { title: "进水闸", src: "DSC_0866.JPG" },
-            { title: "出水闸", src: "DSC_0851.JPG" },
+            { title: "泵站远景", src: "873093c3600240b4b9ff71ca59d995b8.JPG" },
+            { title: "主厂房", src: "15bcdcb45b924549ba048443b0b00953.JPG" },
+            { title: "开关柜", src: "dc1c9bb584dc4b9c8602c3eaab80e226.JPG" },
+            { title: "进水闸", src: "8010433cc9dc4d21859e18df23061fd9.JPG" },
+            { title: "出水闸", src: "f1eea51cd7ef4067b5cd15f1a3ad7b6a.JPG" },
         ],
     },
     {
+        thumb: '7af1f1f9208f4fbbb69492715a4279c8.JPG',
         station_name: "童子圩泵站",
         station_location: "芜湖市鸠江区沈巷镇孙庄行政村",
         birth_day: 1987,
@@ -309,12 +319,13 @@ export const useStationrStore = defineStore('station', () => {
         yalixiang_koujing: "1.4X1.6",
         yalixiang_jiegou: "钢混",
         station_pic_list: [
-            { title: "泵站远景", src: "DSC_0945.JPG" },
-            { title: "主厂房", src: "DSC_0946.JPG" },
-            { title: "进水渠", src: "DSC_0953.JPG" },
+            { title: "泵站远景", src: "61bd899269c648118c4ad92e19e45d73.JPG" },
+            { title: "主厂房", src: "7af1f1f9208f4fbbb69492715a4279c8.JPG" },
+            { title: "进水渠", src: "987192c6a8c64fafa604cbb877e535f0.JPG" },
         ],
     },
     {
+        thumb: 'f1e83e1c70f74fb3a8d91c3fe4ed29d9.JPG',
         station_name: "新坝泵站",
         station_location: "芜湖市鸠江区沈巷镇新坝行政村",
         birth_day: 2000,
@@ -346,14 +357,15 @@ export const useStationrStore = defineStore('station', () => {
         yalixiang_koujing: "1.8X2",
         yalixiang_jiegou: "钢混",
         station_pic_list: [
-            { title: "泵站远景", src: "DSC_0835.JPG" },
-            { title: "主厂房", src: "DSC_0841.JPG" },
-            { title: "开关柜", src: "DSC_0843.JPG" },
-            { title: "进水闸", src: "DSC_0845.JPG" },
-            { title: "出水闸", src: "DSC_0833.JPG" },
+            { title: "泵站远景", src: "debd279343f641859f9e5d8eb8f146a9.JPG" },
+            { title: "主厂房", src: "f1e83e1c70f74fb3a8d91c3fe4ed29d9.JPG" },
+            { title: "开关柜", src: "83f1fd09bcd442e2ad2d9bc2bd05ffae.JPG" },
+            { title: "进水闸", src: "14ca004330504c6682646055a1b5db0f.JPG" },
+            { title: "出水闸", src: "85ab05e03e884f149eec9c1c7e4c0297.JPG" },
         ],
     },
     {
+        thumb: 'd87520c0295748b89b67bc14cd89f754.JPG',
         station_name: "姚郭泵站",
         station_location: "芜湖市鸠江区沈巷镇双河行政村",
         birth_day: 1958,
@@ -385,14 +397,15 @@ export const useStationrStore = defineStore('station', () => {
         yalixiang_koujing: "1.8X2.5 双孔",
         yalixiang_jiegou: "钢混",
         station_pic_list: [
-            { title: "泵站远景", src: "DSC_0875.JPG" },
-            { title: "主厂房", src: "DSC_0892.JPG" },
-            { title: "开关柜", src: "DSC_0902.JPG" },
-            { title: "进水闸", src: "DSC_0886.JPG" },
-            { title: "出水闸", src: "DSC_0877.JPG" },
+            { title: "泵站远景", src: "0a022817f0b345189284c1f1ca3e0017.JPG" },
+            { title: "主厂房", src: "d87520c0295748b89b67bc14cd89f754.JPG" },
+            { title: "开关柜", src: "5a7133436675433d889c42333446c382.JPG" },
+            { title: "进水闸", src: "f676e2d667b545c5b4b3ba6c3dac1e39.JPG" },
+            { title: "出水闸", src: "8af3d00818d547d18ac81ffb391bf830.JPG" },
         ],
     },
     {
+        thumb: '22549ed407fc4684a1d50b9d2f95b0a8.JPG',
         station_name: "雍镇泵站",
         station_location: "芜湖市鸠江区沈巷镇雍镇社区",
         birth_day: 1954,
@@ -424,14 +437,15 @@ export const useStationrStore = defineStore('station', () => {
         yalixiang_koujing: "2.3X2.5 双孔",
         yalixiang_jiegou: "钢混",
         station_pic_list: [
-            { title: "泵站远景", src: "DSC_0799.JPG" },
-            { title: "主厂房", src: "DSC_0782.JPG" },
-            { title: "开关柜", src: "DSC_0786.JPG" },
-            { title: "进水闸", src: "DSC_0791.JPG" },
-            { title: "出水闸", src: "DSC_0803.JPG" },
+            { title: "泵站远景", src: "8962cc5a247b4e60a369f9dc6c331fac.JPG" },
+            { title: "主厂房", src: "242a089af8624e86acfbbeaf3884afce.JPG" },
+            { title: "开关柜", src: "95ac7759f35546f4bc6731f2229668ea.JPG" },
+            { title: "进水闸", src: "de39b566726e4420bdca4c984ed3fea3.JPG" },
+            { title: "出水闸", src: "22549ed407fc4684a1d50b9d2f95b0a8.JPG" },
         ],
     },
     {
+        thumb: '6809a9860845474e86516b55233c09b0.JPG',
         station_name: "裕溪泵站",
         station_location: "芜湖市鸠江区沈巷镇裕溪社区",
         birth_day: 1958,
@@ -463,14 +477,14 @@ export const useStationrStore = defineStore('station', () => {
         yalixiang_koujing: "2X2",
         yalixiang_jiegou: "钢混",
         station_pic_list: [
-            { title: "泵站远景", src: "DSC_0756.JPG" },
-            { title: "主厂房", src: "DSC_0774.JPG" },
-            { title: "开关柜", src: "DSC_0760.JPG" },
-            { title: "进水闸", src: "DSC_0766.JPG" },
-            { title: "出水闸", src: "DSC_0753.JPG" },
+            { title: "泵站远景", src: "6c28e6d04d264921a367aaf63a87c20c.JPG" },
+            { title: "主厂房", src: "99383bb9c1074d7c9331233bcee0affe.JPG" },
+            { title: "开关柜", src: "d4b2d951846a4533815652aaa7275bdf.JPG" },
+            { title: "进水闸", src: "3482c4b763fc4e93b7e470af931e88ab.JPG" },
+            { title: "出水闸", src: "0a05fd86ab2c4006a1ab87c923a31b85.JPG" },
         ],
     }
 ])
 
-    return { station_array }
+    return { station_array, url_head }
 })
