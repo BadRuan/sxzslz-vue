@@ -7,12 +7,13 @@
                 <h2 class="text-lg font-semibold text-gray-900">泵站特色</h2>
             </div>
         </div>
-        <div class="text-gray-600 body-font">
+
+        <div class="text-gray-600 body-font mb-8">
             <div class="container px-5 py-4 mx-auto">
                 <div class="flex flex-wrap -m-4">
                     <div class="p-4 lg:w-1/3">
                         <div
-                            class="h-full bg-white bg-opacity-75 px-8 pt-16 pb-24 rounded-lg overflow-hidden text-center relative shadow">
+                            class="h-full bg-white bg-opacity-75 px-8 pt-16 pb-24 rounded-lg overflow-hidden text-center relative shadow transition-transform duration-300 hover:-translate-y-2">
                             <h2 class="tracking-widest text-sm title-font font-medium text-gray-400 mb-1">运管养护</h2>
                             <h1 class="title-font sm:text-2xl text-xl font-medium text-gray-900 mb-3">
                                 坚持月度安全检制度，筑牢常态化安全防线</h1>
@@ -29,7 +30,7 @@
                     </div>
                     <div class="p-4 lg:w-1/3">
                         <div
-                            class="h-full bg-white bg-opacity-75 px-8 pt-16 pb-24 rounded-lg overflow-hidden text-center relative shadow">
+                            class="h-full bg-white bg-opacity-75 px-8 pt-16 pb-24 rounded-lg overflow-hidden text-center relative shadow transition-transform duration-300 hover:-translate-y-2">
                             <h2 class="tracking-widest text-sm title-font font-medium text-gray-400 mb-1">运管养护</h2>
                             <h1 class="title-font sm:text-2xl text-xl font-medium text-gray-900 mb-3">
                                 坚持月度安全检制度，筑牢常态化安全防线</h1>
@@ -46,7 +47,7 @@
                     </div>
                     <div class="p-4 lg:w-1/3">
                         <div
-                            class="h-full bg-white bg-opacity-75 px-8 pt-16 pb-24 rounded-lg overflow-hidden text-center relative shadow">
+                            class="h-full bg-white bg-opacity-75 px-8 pt-16 pb-24 rounded-lg overflow-hidden text-center relative shadow transition-transform duration-300 hover:-translate-y-2">
                             <h2 class="tracking-widest text-sm title-font font-medium text-gray-400 mb-1">运管养护</h2>
                             <h1 class="title-font sm:text-2xl text-xl font-medium text-gray-900 mb-3">
                                 坚持月度安全检制度，筑牢常态化安全防线</h1>

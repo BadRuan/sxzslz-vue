@@ -67,7 +67,7 @@ const article_list = reactive<ArticleSummary[]>([
 <template>
     <main class="bg-background">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col gap-8 lg:flex-row">
+            <div class="py-4 flex flex-col gap-8 lg:flex-row">
                 <aside class="lg:w-64 shrink-0">
                     <div class="rounded-lg bg-white p-4 shadow-xs ring-1 ring-border">
                         <h3 class="text-sm font-semibold text-gray-900 mb-3">新闻分类</h3>

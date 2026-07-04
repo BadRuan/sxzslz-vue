@@ -19,6 +19,11 @@ const routes: RouteRecordRaw[] = [
                 component: () => import("@/pages/About/Index.vue")
             },
             {
+                path: '/station',
+                name: 'Station',
+                component: () => import("@/pages/Station/Index.vue")
+            },
+            {
                 path: 'list',
                 name: 'ArticleList',
                 component: () => import('@/pages/Article/List.vue'),
@@ -79,6 +84,9 @@ const routes: RouteRecordRaw[] = [
 export const router = createRouter({
     history: createWebHistory(),
     routes,
+    scrollBehavior(to, from, savedPosition) {
+        return { top: 0 }
+    }
 })
 
 router.beforeEach((to) => {
