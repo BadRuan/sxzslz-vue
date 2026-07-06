@@ -4,6 +4,7 @@ import type { ArticleItem } from '@/types/article'
 
 const articles = ref<ArticleItem[]>([
     {
+        slug: '',
         title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作',
         category: '政策法规',
         author: '系统管理员',
@@ -13,6 +14,7 @@ const articles = ref<ArticleItem[]>([
         created: '2026-05-01'
     },
     {
+        slug: '',
         title: '冬季检修全面启动保障泵站安全运行',
         category: '通知公告',
         author: '用户01',
@@ -22,6 +24,7 @@ const articles = ref<ArticleItem[]>([
         created: '2026-04-05'
     },
     {
+        slug: '',
         title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作',
         category: '工程简报',
         author: '张三',
@@ -31,6 +34,7 @@ const articles = ref<ArticleItem[]>([
         created: '2025-12-21'
     },
     {
+        slug: '',
         title: '沈巷镇水利站电网账号管理规定',
         category: '要闻动态',
         author: '李伟',
@@ -40,6 +44,7 @@ const articles = ref<ArticleItem[]>([
         created: '2025-10-09'
     },
     {
+        slug: '',
         title: '冬季检修全面启动保障泵站安全运行',
         category: '政策法规',
         author: '张三',
@@ -49,6 +54,7 @@ const articles = ref<ArticleItem[]>([
         created: '2024-03-08'
     },
     {
+        slug: '',
         title: '水利工程标准化管理暨安全生产工作会议召开',
         category: '要闻动态',
         author: '赵四',
@@ -58,6 +64,7 @@ const articles = ref<ArticleItem[]>([
         created: '2023-09-05'
     },
     {
+        slug: '',
         title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作',
         category: '工程简报',
         author: '张强',

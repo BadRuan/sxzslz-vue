@@ -1,3 +1,12 @@
+<script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import type { ArticleItem } from '@/types/article'
+import { useStationrStore } from '@/store/station';
+
+const station_store = useStationrStore()
+const { url_head } = storeToRefs(station_store)
+const pic_src = url_head.value + 'image/f4b1736834f24101bf8e57b509af9933.JPG'
+</script>
 <template>
     <main class="flex-1 overflow-y-auto p-6">
         <div class="flex items-center justify-between mb-6">
@@ -66,7 +75,7 @@
             <!-- 照片卡片 1 -->
             <div class="bg-white rounded-lg shadow-xs ring-1 ring-border overflow-hidden group">
                 <div class="relative aspect-square overflow-hidden">
-                    <img src="http://100.68.9.83:8666/image/f4b1736834f24101bf8e57b509af9933.JPG" alt="泵站厂房"
+                    <img :src="pic_src" alt="泵站厂房"
                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     <div
                         class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -104,7 +113,7 @@
             <!-- 照片卡片 2 -->
             <div class="bg-white rounded-lg shadow-xs ring-1 ring-border overflow-hidden group">
                 <div class="relative aspect-square overflow-hidden">
-                    <img src="http://100.68.9.83:8666/image/f4b1736834f24101bf8e57b509af9933.JPG" alt="设备运行"
+                    <img :src="pic_src" alt="设备运行"
                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     <div
                         class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -142,7 +151,7 @@
             <!-- 照片卡片 3 -->
             <div class="bg-white rounded-lg shadow-xs ring-1 ring-border overflow-hidden group">
                 <div class="relative aspect-square overflow-hidden">
-                    <img src="http://100.68.9.83:8666/image/f4b1736834f24101bf8e57b509af9933.JPG" alt="站区外景"
+                    <img :src="pic_src" alt="站区外景"
                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     <div
                         class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -180,7 +189,7 @@
             <!-- 照片卡片 4 -->
             <div class="bg-white rounded-lg shadow-xs ring-1 ring-border overflow-hidden group">
                 <div class="relative aspect-square overflow-hidden">
-                    <img src="http://100.68.9.83:8666/image/f4b1736834f24101bf8e57b509af9933.JPG" alt="防汛演练"
+                    <img :src="pic_src" alt="防汛演练"
                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     <div
                         class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">

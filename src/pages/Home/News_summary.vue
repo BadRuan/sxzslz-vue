@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue';
+import { storeToRefs } from 'pinia';
 import type { ArticleItem } from '@/types/article'
+import { useStationrStore } from '@/store/station';
+
+const station_store = useStationrStore()
+const { url_head } = storeToRefs(station_store)
 
 interface Slide {
     title: string
@@ -45,6 +50,7 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
 
 const articles = ref<ArticleItem[]>([
     {
+        slug: '',
         title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作',
         category: '政策法规',
         author: '系统管理员',
@@ -54,6 +60,7 @@ const articles = ref<ArticleItem[]>([
         created: '2026-05-01'
     },
     {
+        slug: '',
         title: '冬季检修全面启动保障泵站安全运行',
         category: '通知公告',
         author: '用户01',
@@ -63,6 +70,7 @@ const articles = ref<ArticleItem[]>([
         created: '2026-04-05'
     },
     {
+        slug: '',
         title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作',
         category: '工程简报',
         author: '张三',
@@ -72,6 +80,7 @@ const articles = ref<ArticleItem[]>([
         created: '2025-12-21'
     },
     {
+        slug: '',
         title: '沈巷镇水利站电网账号管理规定',
         category: '要闻动态',
         author: '李伟',
@@ -81,6 +90,7 @@ const articles = ref<ArticleItem[]>([
         created: '2025-10-09'
     },
     {
+        slug: '',
         title: '冬季检修全面启动保障泵站安全运行',
         category: '政策法规',
         author: '张三',
@@ -111,7 +121,7 @@ const articles = ref<ArticleItem[]>([
             <div class="w-7xl flex flex-row items-center justify-around py-4">
                 <div
                     class="w-100 bg-white rounded-sm overflow-hidden shadow transition-transform duration-300 hover:-translate-y-2">
-                    <img class="w-full h-60" src="http://100.68.9.83:8666/image/30a52efbffe742d3a0adea052fdfd43c.JPG"
+                    <img class="w-full h-60" :src="url_head + 'image/30a52efbffe742d3a0adea052fdfd43c.JPG'"
                         alt="new_pic">
                     <div class="p-6">
                         <div class="flex flex-row justify-between items-center">
@@ -126,7 +136,7 @@ const articles = ref<ArticleItem[]>([
 
                 <div
                     class="w-100 bg-white rounded-sm overflow-hidden shadow transition-transform duration-300 hover:-translate-y-2">
-                    <img class="w-full h-60" src="http://100.68.9.83:8666/image/2f8ab79b22f44eff834fad97dcd2aca0.JPG"
+                    <img class="w-full h-60" :src="url_head + 'image/2f8ab79b22f44eff834fad97dcd2aca0.JPG'"
                         alt="new_pic">
                     <div class="p-6">
                         <div class="flex flex-row justify-between items-center">
@@ -141,7 +151,7 @@ const articles = ref<ArticleItem[]>([
 
                 <div
                     class="w-100 bg-white rounded-sm overflow-hidden shadow transition-transform duration-300 hover:-translate-y-2">
-                    <img class="w-full h-60" src="http://100.68.9.83:8666/image/649e4d965d23441cb29123100c2289ef.JPG"
+                    <img class="w-full h-60" :src="url_head + 'image/649e4d965d23441cb29123100c2289ef.JPG'"
                         alt="new_pic">
                     <div class="p-6">
                         <div class="flex flex-row justify-between items-center">

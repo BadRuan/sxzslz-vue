@@ -1,5 +1,6 @@
 /** 文章基础信息（列表/卡片场景） */
 export interface ArticleBasic {
+    slug: string
     title: string
     category: string
     author: string

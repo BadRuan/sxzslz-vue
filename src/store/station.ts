@@ -4,6 +4,7 @@ import type { StationModel } from "@/types/station";
 
 export const useStationrStore = defineStore('station', () => {
     
+    // const url_head = ref('/pic/');
     const url_head = ref('http://100.68.9.83:8666/');
     const station_array = reactive<StationModel[]>([
     {

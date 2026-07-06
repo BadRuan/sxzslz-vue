@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import type { ArticleSummary } from '@/types/article'
+import { storeToRefs } from 'pinia';
+import type { ArticleItem } from '@/types/article'
+import { useStationrStore } from '@/store/station';
+
+const station_store = useStationrStore()
+const { url_head } = storeToRefs(station_store)
+
+const pic_str = url_head.value + 'image/649e4d965d23441cb29123100c2289ef.JPG'
 
 const categories = ref<string[]>([
     '要闻动态',
@@ -95,9 +103,7 @@ const article_list = reactive<ArticleSummary[]>([
                         <article v-for="(article, index) in article_list" :index="index"
                             class="flex flex-row overflow-hidden rounded bg-white shadow-xs ring-1 ring-border hover:shadow-md transition">
                             <div class="w-1/5 h-22 overflow-hidden rounded">
-                                <img class="w-full h-full"
-                                    src="http://100.68.9.83:8666/image/649e4d965d23441cb29123100c2289ef.JPG"
-                                    alt="news_pic" />
+                                <img class="w-full h-full" :src="pic_str" alt="news_pic" />
                             </div>
                             <div class="w-4/5 p-4 flex justify-between items-center">
                                 <div class="flex-1">

@@ -1,3 +1,16 @@
+<script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import type { ArticleItem } from '@/types/article'
+import { useStationrStore } from '@/store/station';
+
+const station_store = useStationrStore()
+const { url_head } = storeToRefs(station_store)
+
+
+const default_author = url_head.value + 'image/192878a6502947989a25d49d55f39266.jpg'
+const leader_author = url_head.value + 'image/4cefbb90ab8448e78322cf878423db0e.jpg'
+
+</script>
 <template>
     <section class="m-auto w-7xl">
         <div class="text-gray-600 body-font">
@@ -13,7 +26,7 @@
                             class="h-full flex sm:flex-row flex-col items-center sm:justify-start justify-center text-center sm:text-left">
                             <img alt="team"
                                 class="flex-shrink-0 rounded-lg w-48 h-48 object-cover object-center sm:mb-0 mb-4"
-                                src="http://100.68.9.83:8666/image/4cefbb90ab8448e78322cf878423db0e.jpg">
+                                :src="leader_author">
                             <div class="flex-grow sm:pl-8">
                                 <h2 class="title-font font-medium text-lg text-gray-900">余庆斌</h2>
                                 <h3 class="text-gray-500 mb-3">书记兼站长</h3>
@@ -27,7 +40,7 @@
                             class="h-full flex sm:flex-row flex-col items-center sm:justify-start justify-center text-center sm:text-left">
                             <img alt="team"
                                 class="flex-shrink-0 rounded-lg w-48 h-48 object-cover object-center sm:mb-0 mb-4"
-                                src="http://100.68.9.83:8666/image/4cefbb90ab8448e78322cf878423db0e.jpg">
+                                :src="leader_author">
                             <div class="flex-grow sm:pl-8">
                                 <h2 class="title-font font-medium text-lg text-gray-900">刘桂胜</h2>
                                 <h3 class="text-gray-500 mb-3">副站长</h3>
@@ -40,7 +53,7 @@
                             class="h-full flex sm:flex-row flex-col items-center sm:justify-start justify-center text-center sm:text-left">
                             <img alt="team"
                                 class="flex-shrink-0 rounded-lg w-48 h-48 object-cover object-center sm:mb-0 mb-4"
-                                src="http://100.68.9.83:8666/image/4cefbb90ab8448e78322cf878423db0e.jpg">
+                                :src="leader_author">
                             <div class="flex-grow sm:pl-8">
                                 <h2 class="title-font font-medium text-lg text-gray-900">王健</h2>
                                 <h3 class="text-gray-500 mb-3">副站长</h3>
@@ -61,7 +74,7 @@
                         <div class="h-full flex items-center border-gray-200 border p-4 rounded-lg">
                             <img alt="team"
                                 class="w-16 h-16 bg-gray-100 object-cover object-center flex-shrink-0 rounded-full mr-4"
-                                src="http://100.68.9.83:8666/image/192878a6502947989a25d49d55f39266.jpg">
+                                :src="default_author">
                             <div class="flex-grow">
                                 <h2 class="text-gray-900 title-font font-medium">周道清</h2>
                                 <p class="text-gray-500">童子圩站</p>
@@ -72,7 +85,7 @@
                         <div class="h-full flex items-center border-gray-200 border p-4 rounded-lg">
                             <img alt="team"
                                 class="w-16 h-16 bg-gray-100 object-cover object-center flex-shrink-0 rounded-full mr-4"
-                                src="http://100.68.9.83:8666/image/192878a6502947989a25d49d55f39266.jpg">
+                                :src="default_author">
                             <div class="flex-grow">
                                 <h2 class="text-gray-900 title-font font-medium">张兵</h2>
                                 <p class="text-gray-500">河南汤站</p>
@@ -83,7 +96,7 @@
                         <div class="h-full flex items-center border-gray-200 border p-4 rounded-lg">
                             <img alt="team"
                                 class="w-16 h-16 bg-gray-100 object-cover object-center flex-shrink-0 rounded-full mr-4"
-                                src="http://100.68.9.83:8666/image/192878a6502947989a25d49d55f39266.jpg">
+                                :src="default_author">
                             <div class="flex-grow">
                                 <h2 class="text-gray-900 title-font font-medium">俞仁虎</h2>
                                 <p class="text-gray-500">大桥站</p>
@@ -94,7 +107,7 @@
                         <div class="h-full flex items-center border-gray-200 border p-4 rounded-lg">
                             <img alt="team"
                                 class="w-16 h-16 bg-gray-100 object-cover object-center flex-shrink-0 rounded-full mr-4"
-                                src="http://100.68.9.83:8666/image/192878a6502947989a25d49d55f39266.jpg">
+                                :src="default_author">
                             <div class="flex-grow">
                                 <h2 class="text-gray-900 title-font font-medium">奚敏</h2>
                                 <p class="text-gray-500">姚郭站</p>
@@ -105,7 +118,7 @@
                         <div class="h-full flex items-center border-gray-200 border p-4 rounded-lg">
                             <img alt="team"
                                 class="w-16 h-16 bg-gray-100 object-cover object-center flex-shrink-0 rounded-full mr-4"
-                                src="http://100.68.9.83:8666/image/192878a6502947989a25d49d55f39266.jpg">
+                                :src="default_author">
                             <div class="flex-grow">
                                 <h2 class="text-gray-900 title-font font-medium">黄宏志</h2>
                                 <p class="text-gray-500">臧墩一站</p>
@@ -116,7 +129,7 @@
                         <div class="h-full flex items-center border-gray-200 border p-4 rounded-lg">
                             <img alt="team"
                                 class="w-16 h-16 bg-gray-100 object-cover object-center flex-shrink-0 rounded-full mr-4"
-                                src="http://100.68.9.83:8666/image/192878a6502947989a25d49d55f39266.jpg">
+                                :src="default_author">
                             <div class="flex-grow">
                                 <h2 class="text-gray-900 title-font font-medium">张和友</h2>
                                 <p class="text-gray-500">雍镇站</p>
@@ -127,7 +140,7 @@
                         <div class="h-full flex items-center border-gray-200 border p-4 rounded-lg">
                             <img alt="team"
                                 class="w-16 h-16 bg-gray-100 object-cover object-center flex-shrink-0 rounded-full mr-4"
-                                src="http://100.68.9.83:8666/image/192878a6502947989a25d49d55f39266.jpg">
+                                :src="default_author">
                             <div class="flex-grow">
                                 <h2 class="text-gray-900 title-font font-medium">蔡荣君</h2>
                                 <p class="text-gray-500">老坝站、新坝站</p>
