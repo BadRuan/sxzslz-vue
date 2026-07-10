@@ -99,22 +99,22 @@ const article_list = reactive<ArticleSummary[]>([
                         <span class="text-gray-900">新闻中心</span>
                     </div>
 
-                    <div class="space-y-4">
+                    <div class="grid grid-cols-3 gap-8">
                         <article v-for="(article, index) in article_list" :index="index"
-                            class="flex flex-row overflow-hidden rounded bg-white shadow-xs ring-1 ring-border hover:shadow-md transition">
-                            <div class="w-1/5 h-22 overflow-hidden rounded">
+                            class="flex flex-col overflow-hidden bg-white rounded shadow-xs ring-1 ring-border">
+                            <div class="w-full overflow-hidden">
                                 <img class="w-full h-full" :src="pic_str" alt="news_pic" />
                             </div>
-                            <div class="w-4/5 p-4 flex justify-between items-center">
-                                <div class="flex-1">
-                                    <h2 class="text-base font-semibold text-gray-900 hover:text-primary">
-                                        <RouterLink :to="{ name: 'ArticleDetail' }">{{ article.title }}</RouterLink>
-                                    </h2>
-
+                            <div class="p-4 flex flex-col gap-4">
+                                <div>
+                                    <time class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">
+                                        {{ article.date }}
+                                    </time>
                                 </div>
-                                <time class="ml-4 shrink-0 text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">
-                                    {{ article.date }}
-                                </time>
+                                <h2
+                                    class="text-base font-semibold text-gray-800 hover:text-primary h-12 overflow-hidden">
+                                    <RouterLink :to="{ name: 'ArticleDetail' }">{{ article.title }}</RouterLink>
+                                </h2>
                             </div>
                         </article>
 

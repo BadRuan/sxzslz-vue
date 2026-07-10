@@ -292,15 +292,22 @@ if (isNaN(indexValue) || indexValue < 0 || indexValue >= length) {
             <div class="w-6xl mx-auto">
                 <div class="flex flex-col items-center">
                     <div v-for="(item, index) in station_array[indexValue]?.station_pic_list" :key="index"
-                        class="w-2/3 rounded py-4">
+                        class="w-2/3 shadow-lg my-4 bg-white">
                         <div class="flex flex-col">
-                            <div class="overflow-hidden  rounded ">
+                            <div class="overflow-hidden ">
                                 <img alt="gallery"
                                     class="w-full h-full object-cover object-center hover:scale-110 ease-in-out transition-all duration-500"
                                     :src="url_head + 'image/' + item.src">
                             </div>
-                            <h2 class="text-center title-font text-lg font-medium text-gray-600 my-4">{{ item.title }}
-                            </h2>
+                            <div class="flex flex-row items-center justify-between px-8 py-4">
+                                <div>
+                                    <div class="text-sm font-bold">{{ station_array[indexValue]?.station_name }}</div>
+                                    <div class="text-gray-500 text-sm">2025年08月04日 09:05:10</div>
+                                </div>
+                                <div class="font-medium text-gray-800">{{ item.title
+                                    }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
