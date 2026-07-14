@@ -1,105 +1,36 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { pic_prefix } from '@/utils/baseInfo';
+import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
-import type { ArticleItem } from '@/types/article'
-import { useStationrStore } from '@/store/station';
+import dayjs from 'dayjs';
+import { useCategoryStore } from '@/store/category';
+import { useArticleStore } from '@/store/article';
 
-const station_store = useStationrStore()
-const { url_head } = storeToRefs(station_store)
+const category_store = useCategoryStore()
+const article_store = useArticleStore()
 
-interface Slide {
-    title: string
-    date: string
-    image: string
+const { categories } = storeToRefs(category_store)
+const { latest_article } = storeToRefs(article_store)
+
+const date_text = (date_value: string) => {
+    return dayjs(date_value).format('YYYY-MM-DD')
 }
 
-const slides = ref<Slide[]>([
-    { title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作', date: '2025‑07‑23', image: '/pic/banner.jpg' },
-    { title: '水利工程标准化管理暨安全生产工作会议召开', date: '2025‑07‑21', image: '/pic/news.webp' },
-])
+onMounted(() => {
+    category_store.fetchCategories();
+    article_store.getLatest();
+})
 
-const currentSlide = ref(0)
-let timer: ReturnType<typeof setInterval> | null = null
-
-function goTo(index: number) {
-    currentSlide.value = index
-    resetTimer()
-}
-
-function prev() {
-    currentSlide.value = (currentSlide.value - 1 + slides.value.length) % slides.value.length
-    resetTimer()
-}
-
-function next() {
-    currentSlide.value = (currentSlide.value + 1) % slides.value.length
-    resetTimer()
-}
-
-function startTimer() {
-    timer = setInterval(next, 5000)
-}
-
-function resetTimer() {
-    if (timer) clearInterval(timer)
-    startTimer()
-}
-
-onMounted(startTimer)
-onUnmounted(() => { if (timer) clearInterval(timer) })
-
-const articles = ref<ArticleItem[]>([
-    {
-        slug: '',
-        title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作',
-        category: '政策法规',
-        author: '系统管理员',
-        is_public: true,
-        is_recommended: true,
-        views: 123,
-        created: '2026-05-01'
-    },
-    {
-        slug: '',
-        title: '冬季检修全面启动保障泵站安全运行',
-        category: '通知公告',
-        author: '用户01',
-        is_public: true,
-        is_recommended: true,
-        views: 123,
-        created: '2026-04-05'
-    },
-    {
-        slug: '',
-        title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作',
-        category: '工程简报',
-        author: '张三',
-        is_public: false,
-        is_recommended: true,
-        views: 5123,
-        created: '2025-12-21'
-    },
-    {
-        slug: '',
-        title: '沈巷镇水利站电网账号管理规定',
-        category: '要闻动态',
-        author: '李伟',
-        is_public: true,
-        is_recommended: false,
-        views: 9123,
-        created: '2025-10-09'
-    },
-    {
-        slug: '',
-        title: '冬季检修全面启动保障泵站安全运行',
-        category: '政策法规',
-        author: '张三',
-        is_public: false,
-        is_recommended: true,
-        views: 4123,
-        created: '2024-03-08'
+const category_text = (category_id: number) => {
+    let text: string = '默认分类'
+    for (let item of categories.value) {
+        if (category_id == item.id) {
+            text = item.name
+        }
     }
-])
+    return text
+}
+
 </script>
 
 <template>
@@ -118,49 +49,20 @@ const articles = ref<ArticleItem[]>([
                     查看更多 &gt;
                 </RouterLink>
             </div>
+
             <div class="w-7xl flex flex-row items-center justify-around py-4">
-                <div
+                <div v-for="(article, index) in latest_article" :key="index"
                     class="w-100 bg-white rounded-sm overflow-hidden shadow transition-transform duration-300 hover:-translate-y-2">
-                    <img class="w-full h-60" :src="url_head + 'image/30a52efbffe742d3a0adea052fdfd43c.JPG'"
-                        alt="new_pic">
-                    <div class="p-6">
-                        <div class="flex flex-row justify-between items-center">
-                            <div class="text-sm text-gray-600 bg-gray-100 p-2 rounded">
-                                综合新闻
-                            </div>
-                            <span class="text-gray-600 text-sm text-right">2026-06-08</span>
-                        </div>
-                        <div class="bg-white my-2">鸠江区编办莅临沈巷镇水利站开展防汛检查工作开</div>
-                    </div>
-                </div>
-
-                <div
-                    class="w-100 bg-white rounded-sm overflow-hidden shadow transition-transform duration-300 hover:-translate-y-2">
-                    <img class="w-full h-60" :src="url_head + 'image/2f8ab79b22f44eff834fad97dcd2aca0.JPG'"
-                        alt="new_pic">
+                    <img class="w-full h-60" :src="pic_prefix + article.cover_img" alt="new_pic">
                     <div class="p-6">
                         <div class="flex flex-row justify-between items-center">
                             <div class="text-sm text-gray-700 bg-gray-100 p-2 rounded">
-                                要闻动态
+                                {{ category_text(article.category_id) }}
                             </div>
-                            <span class="text-gray-600 text-right">2026-06-08</span>
+                            <span class="text-gray-600 text-sm text-right">
+                                {{ date_text(article.create_at) }}</span>
                         </div>
-                        <div class="bg-white my-2">水利工程标准化管理暨安全生产工作会议召开</div>
-                    </div>
-                </div>
-
-                <div
-                    class="w-100 bg-white rounded-sm overflow-hidden shadow transition-transform duration-300 hover:-translate-y-2">
-                    <img class="w-full h-60" :src="url_head + 'image/649e4d965d23441cb29123100c2289ef.JPG'"
-                        alt="new_pic">
-                    <div class="p-6">
-                        <div class="flex flex-row justify-between items-center">
-                            <div class="text-sm text-gray-700 bg-gray-100 p-2 rounded">
-                                要闻动态
-                            </div>
-                            <span class="text-gray-600 text-right">2026-06-08</span>
-                        </div>
-                        <div class="bg-white my-2">水利工程标准化管理暨安全生产工作会议召开</div>
+                        <div class="bg-white my-2">{{ article.title }}</div>
                     </div>
                 </div>
             </div>

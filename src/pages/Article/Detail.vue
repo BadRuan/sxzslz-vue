@@ -1,47 +1,37 @@
 <script setup lang="ts">
-import { reactive, computed } from 'vue'
-import MarkdownIt from 'markdown-it'
-import type { ArticleDetail } from '@/types/article'
+import { computed, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
+import MarkdownIt from 'markdown-it';
+import dayjs from 'dayjs';
+import { useArticleStore } from '@/store/article';
 
-const content: string = `## 1、基础资料准备
+const route = useRoute();
+const router = useRouter();
+const slug = route.params.slug;
+const article_store = useArticleStore();
+const { article_detail } = storeToRefs(article_store)
 
-- 薪级表；
-- 13薪（纳入绩效工资总量的基本工资额度）表；
+const error = ref<string | null>(null);
+const loading = ref(true);
 
-## 2、特殊情况
+onMounted(async () => {
+    if (slug == undefined || typeof slug !== 'string') {
+        router.replace({ name: 'Home' });
+        return;
+    }
 
-- 岗位晋升情况（岗位、薪级同时变化，取前后平均数字）；
-- 内杠晋升情况（岗位、薪级同时变化，取前后平均数字）；
-- 新进人员（直接用薪级调整后的岗位薪级数字，实习期用实习期工资）；
+    loading.value = true;
+    error.value = null;
 
-## 3、数字依赖
+    const result = await article_store.getDetail(slug);
+    if (result == undefined) {
+        error.value = '文章不存在或已被删除';
+    }
 
-- 基础性绩效（薪级调整后），工资表，参考数字700+；
-- 奖励性绩效（薪级调整后），工资表的为0.9换算后，取消再换算回来，参考数字2k内；
-- 基础性绩效奖（薪级调整后），工资表，参考数字3k+；
-
-工资申报表中奖励性绩效 = 13薪 + 奖励性绩效
-
-## 4、计算规则
-
-新**社保基数**为以下内容的合计数：
-
-- 岗位工资
-- 薪级工资
-- 基础性绩效
-- 十三月工资
-- 基础绩效奖
-`
-
-const article = reactive<ArticleDetail>({
-    slug: 'string',
-    category: 'string',
-    author: '沈巷镇水利站',
-    title: '鸠江区编办莅临沈巷镇水利站开展防汛备汛专项检查',
-    content: content,
-    created: '2024年07月23日',
-    views: 121221
+    loading.value = false;
 })
+
 
 const md = new MarkdownIt({
     html: true,
@@ -49,8 +39,14 @@ const md = new MarkdownIt({
     typographer: true
 })
 
+
 const renderedHtml = computed(() => {
-    return md.render(article.content)
+    const text: string = ''
+    if (article_detail.value == undefined) {
+        return md.render(text)
+    } else {
+        return md.render(article_detail.value.content)
+    }
 })
 
 </script>
@@ -61,9 +57,9 @@ const renderedHtml = computed(() => {
             <nav class="max-w-6xl mx-auto mb-6 px-4 sm:px-6 lg:px-8" aria-label="Breadcrumb">
                 <ol class="flex items-center gap-2 text-sm text-gray-500">
                     <li>
-                        <a href="#" class="hover:text-primary transition-colors">
+                        <RouterLink :to="{ name: 'Home' }" class="hover:text-primary transition-colors">
                             网站首页
-                        </a>
+                        </RouterLink>
                     </li>
                     <li>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,9 +68,9 @@ const renderedHtml = computed(() => {
                         </svg>
                     </li>
                     <li>
-                        <a href="#" class="hover:text-primary transition-colors">
+                        <RouterLink :to="{ name: 'ArticleList' }" class="hover:text-primary transition-colors">
                             通知公告
-                        </a>
+                        </RouterLink>
                     </li>
                     <li>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,18 +82,43 @@ const renderedHtml = computed(() => {
                 </ol>
             </nav>
 
-            <article class="max-w-6xl mx-auto bg-white rounded-xl shadow-sm border border-border overflow-hidden">
+            <!-- 加载状态 -->
+            <div v-if="loading" class="max-w-6xl mx-auto bg-white rounded-xl shadow-sm border border-border p-12 text-center">
+                <div class="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                <p class="text-gray-500">加载中...</p>
+            </div>
+
+            <!-- 错误状态 -->
+            <div v-else-if="error" class="max-w-6xl mx-auto bg-white rounded-xl shadow-sm border border-border p-12 text-center">
+                <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <h2 class="text-xl font-semibold text-gray-700 mb-2">{{ error }}</h2>
+                <p class="text-gray-500 mb-6">请检查文章链接是否正确，或返回其他页面</p>
+                <div class="flex justify-center gap-4">
+                    <RouterLink :to="{ name: 'ArticleList' }" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                        返回列表
+                    </RouterLink>
+                    <RouterLink :to="{ name: 'Home' }" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                        返回首页
+                    </RouterLink>
+                </div>
+            </div>
+
+            <!-- 正常内容 -->
+            <article v-else class="max-w-6xl mx-auto bg-white rounded-xl shadow-sm border border-border overflow-hidden">
                 <div class="px-6 sm:px-10 pt-10 pb-6 border-b border-border text-center">
                     <h1 class="text-3xl font-bold text-gray-900 leading-tight mb-4">
-                        {{ article.title }}
+                        {{ article_detail?.title }}
                     </h1>
                     <div
                         class="inline-flex items-center justify-center gap-4 text-sm text-gray-500 px-3 py-1 bg-gray-50 rounded-md">
-                        <time datetime="2024-07-23">{{ article.created }}</time>
+                        <time datetime="2024-07-23">{{ dayjs(article_detail?.create_at).format('YYYY年MM月DD日 HH:mm:ss')
+                        }}</time>
                         <span class="hidden sm:inline">|</span>
-                        <span>来源：{{ article.author }}</span>
+                        <span>来源：{{ article_detail?.user_id }}</span>
                         <span class="hidden sm:inline">|</span>
-                        <span>阅读量：{{ article.views }}</span>
+                        <span>阅读量：{{ article_detail?.view_count }}</span>
                     </div>
                 </div>
                 <div class="px-6 sm:px-10 py-8 prose prose-primary prose-lg max-w-none

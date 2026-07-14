@@ -21,10 +21,10 @@
 
             <!-- 操作按钮 -->
             <div class="mt-8 flex gap-4">
-                <a href="#"
+                <RouterLink :to="{ name: 'Home' }"
                     class="rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-dark transition">
                     返回首页
-                </a>
+                </RouterLink>
                 <button onclick="history.back()"
                     class="rounded-md border border-border bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
                     返回上页

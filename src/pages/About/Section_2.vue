@@ -1,14 +1,8 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
-import type { ArticleItem } from '@/types/article'
-import { useStationrStore } from '@/store/station';
+import { pic_prefix } from '@/utils/baseInfo';
 
-const station_store = useStationrStore()
-const { url_head } = storeToRefs(station_store)
-
-
-const default_author = url_head.value + 'image/192878a6502947989a25d49d55f39266.jpg'
-const leader_author = url_head.value + 'image/4cefbb90ab8448e78322cf878423db0e.jpg'
+const default_author = pic_prefix + '192878a6502947989a25d49d55f39266.jpg'
+const leader_author = pic_prefix + '4cefbb90ab8448e78322cf878423db0e.jpg'
 
 </script>
 <template>

@@ -1,17 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
-import { storeToRefs } from 'pinia';
-import type { ArticleItem } from '@/types/article'
-import { useStationrStore } from '@/store/station';
-
-const station_store = useStationrStore()
-const { url_head } = storeToRefs(station_store)
-
+import { pic_prefix } from '@/utils/baseInfo';
 </script>
 
 <template>
     <section class="mx-auto w-7xl h-full">
-        <img class="h-100 w-full" :src="url_head + 'image/b8dc37b949384f73a03e7e515df58038.png'" alt="banner">
+        <img class="h-100 w-full" :src="pic_prefix + 'b8dc37b949384f73a03e7e515df58038.png'" alt="banner">
 
         <div class="text-gray-600 body-font">
             <div class="container px-5 py-24 mx-auto">

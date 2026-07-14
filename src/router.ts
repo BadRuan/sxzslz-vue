@@ -24,13 +24,13 @@ const routes: RouteRecordRaw[] = [
                 component: () => import("@/pages/Station/Index.vue")
             },
             {
-                path: 'list',
+                path: '/list',
                 name: 'ArticleList',
                 component: () => import('@/pages/Article/List.vue'),
                 meta: { title: '文章列表' }
             },
             {
-                path: 'detail',
+                path: '/detail/:slug',
                 name: 'ArticleDetail',
                 component: () => import('@/pages/Article/Detail.vue'),
                 meta: { title: '文章详情' }
@@ -49,25 +49,25 @@ const routes: RouteRecordRaw[] = [
         redirect: '/admin/overview',
         children: [
             {
-                path: 'overview',
+                path: '/overview',
                 name: 'AdminOverview',
                 component: () => import("@/pages/Admin/Overview.vue"),
                 meta : { title: '后台概览' }
             },
             {
-                path: 'category',
+                path: '/category',
                 name: 'AdminCategory',
                 component: () => import("@/pages/Admin/CategoryEdit.vue"),
                 meta: { title: '分类管理' }
             },
             {
-                path: 'list',
+                path: '/list',
                 name: 'AdminArticleList',
                 component: () => import("@/pages/Admin/ArticleList.vue"),
                 meta: { title: '新闻列表' }
             },
             {
-                path: 'photo',
+                path: '/photo',
                 name: 'AdminPhoto',
                 component: () => import('@/pages/Admin/Photo.vue'),
                 meta: { title: '照片管理' }

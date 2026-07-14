@@ -1,75 +1,25 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import type { ArticleSummary } from '@/types/article'
+import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
-import type { ArticleItem } from '@/types/article'
-import { useStationrStore } from '@/store/station';
+import dayjs from 'dayjs';
+import { pic_prefix } from '@/utils/baseInfo';
+import { useCategoryStore } from '@/store/category';
+import { useArticleStore } from '@/store/article';
 
-const station_store = useStationrStore()
-const { url_head } = storeToRefs(station_store)
+const category_store = useCategoryStore()
+const article_store = useArticleStore()
 
-const pic_str = url_head.value + 'image/649e4d965d23441cb29123100c2289ef.JPG'
+const { categories } = storeToRefs(category_store)
+const { latest_article } = storeToRefs(article_store)
 
-const categories = ref<string[]>([
-    '要闻动态',
-    '通知公告',
-    '政策法规',
-    '防汛抗旱',
-    '工程简报',
-    '党建引领',
-    '财务公示',
-    '人事公开'
-])
+const date_text = (date_value: string) => {
+    return dayjs(date_value).format('YYYY-MM-DD')
+}
 
-const article_list = reactive<ArticleSummary[]>([
-    {
-        title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作1鸠江区编办莅鸠江区编办莅临沈巷镇水利站开展防汛检查工作1临沈巷镇水利站开展防汛检查工作1',
-        summary: '1为进一步做好汛期安全防范工作，确保泵站设备正常运行，鸠江区编办一行于今日上午莅临我站开展专项检查...',
-        date: '2025-05-21'
-    },
-    {
-        title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作2',
-        summary: '2为进一步做好汛期安全防范工作，确保泵站设备正常运行，鸠江区编办一行于今日上午莅临我站开展专项检查...',
-        date: '2025-06-23'
-    },
-    {
-        title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作3',
-        summary: '3为进一步做好汛期安全防范工作，确保泵站设备正常运行，鸠江区编办一行于今日上午莅临我站开展专项检查...',
-        date: '2025-07-23'
-    },
-    {
-        title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作3',
-        summary: '3为进一步做好汛期安全防范工作，确保泵站设备正常运行，鸠江区编办一行于今日上午莅临我站开展专项检查...',
-        date: '2025-07-23'
-    }, {
-        title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作3',
-        summary: '3为进一步做好汛期安全防范工作，确保泵站设备正常运行，鸠江区编办一行于今日上午莅临我站开展专项检查...',
-        date: '2025-07-23'
-    },
-    {
-        title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作3',
-        summary: '3为进一步做好汛期安全防范工作，确保泵站设备正常运行，鸠江区编办一行于今日上午莅临我站开展专项检查...',
-        date: '2025-07-23'
-    }, {
-        title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作3',
-        summary: '3为进一步做好汛期安全防范工作，确保泵站设备正常运行，鸠江区编办一行于今日上午莅临我站开展专项检查...',
-        date: '2025-07-23'
-    },
-    {
-        title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作3',
-        summary: '3为进一步做好汛期安全防范工作，确保泵站设备正常运行，鸠江区编办一行于今日上午莅临我站开展专项检查...',
-        date: '2025-07-23'
-    }, {
-        title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作3',
-        summary: '3为进一步做好汛期安全防范工作，确保泵站设备正常运行，鸠江区编办一行于今日上午莅临我站开展专项检查...',
-        date: '2025-07-23'
-    },
-    {
-        title: '鸠江区编办莅临沈巷镇水利站开展防汛检查工作3',
-        summary: '3为进一步做好汛期安全防范工作，确保泵站设备正常运行，鸠江区编办一行于今日上午莅临我站开展专项检查...',
-        date: '2025-07-23'
-    },
-])
+onMounted(() => {
+    category_store.fetchCategories();
+    article_store.getLatest();
+})
 </script>
 
 <template>
@@ -82,11 +32,11 @@ const article_list = reactive<ArticleSummary[]>([
                         <nav class="flex flex-col space-y-1">
                             <!-- 当前选中 -->
                             <a href="#" class="rounded-md bg-primary px-3 py-2 text-sm font-medium text-white">
-                                全部新闻
+                                全部分类
                             </a>
-                            <a v-for="(category, index) in categories" :key="index" href="#"
+                            <a v-for="item in categories" :key="item.id" href="#"
                                 class="rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary">
-                                {{ category }}
+                                {{ item.name }}
                             </a>
                         </nav>
                     </div>
@@ -100,27 +50,29 @@ const article_list = reactive<ArticleSummary[]>([
                     </div>
 
                     <div class="grid grid-cols-3 gap-8">
-                        <article v-for="(article, index) in article_list" :index="index"
+                        <article v-for="(article, index) in latest_article" :index="index"
                             class="flex flex-col overflow-hidden bg-white rounded shadow-xs ring-1 ring-border">
-                            <div class="w-full overflow-hidden">
-                                <img class="w-full h-full" :src="pic_str" alt="news_pic" />
-                            </div>
-                            <div class="p-4 flex flex-col gap-4">
-                                <div>
-                                    <time class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">
-                                        {{ article.date }}
-                                    </time>
+                            <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }">
+                                <div class="w-full overflow-hidden">
+                                    <img class="w-full h-full" :src="pic_prefix + article.cover_img" alt="news_pic" />
                                 </div>
-                                <h2
-                                    class="text-base font-semibold text-gray-800 hover:text-primary h-12 overflow-hidden">
-                                    <RouterLink :to="{ name: 'ArticleDetail' }">{{ article.title }}</RouterLink>
-                                </h2>
-                            </div>
+                                <div class="p-4 flex flex-col gap-4">
+                                    <div>
+                                        <time class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">
+                                            {{ date_text(article.create_at) }}
+                                        </time>
+                                    </div>
+                                    <h2
+                                        class="text-base font-semibold text-gray-800 hover:text-primary h-12 overflow-hidden">
+                                        {{
+                                            article.title }}
+                                    </h2>
+                                </div>
+                            </RouterLink>
                         </article>
-
                     </div>
 
-                    <!-- ========== 分页 ========== -->
+
                     <nav class="m-8 flex items-center justify-between border-t border-border pt-6"
                         aria-label="Pagination">
                         <div class="hidden sm:block">

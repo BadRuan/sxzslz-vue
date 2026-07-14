@@ -1,11 +1,10 @@
 import { defineStore } from 'pinia';
-import { reactive, ref } from 'vue';
+import { reactive } from 'vue';
 import type { StationModel } from "@/types/station";
 
 export const useStationrStore = defineStore('station', () => {
     
-    // const url_head = ref('/pic/');
-    const url_head = ref('http://100.68.9.83:8666/');
+    
     const station_array = reactive<StationModel[]>([
     {
         thumb: 'f4b1736834f24101bf8e57b509af9933.JPG',
@@ -487,5 +486,5 @@ export const useStationrStore = defineStore('station', () => {
     }
 ])
 
-    return { station_array, url_head }
+    return { station_array }
 })

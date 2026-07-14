@@ -1,11 +1,6 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
-import type { ArticleItem } from '@/types/article'
-import { useStationrStore } from '@/store/station';
-
-const station_store = useStationrStore()
-const { url_head } = storeToRefs(station_store)
-const pic_src = url_head.value + 'image/f4b1736834f24101bf8e57b509af9933.JPG'
+import { pic_prefix } from '@/utils/baseInfo';
+const pic_src = pic_prefix + 'f4b1736834f24101bf8e57b509af9933.JPG'
 </script>
 <template>
     <main class="flex-1 overflow-y-auto p-6">

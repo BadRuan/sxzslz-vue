@@ -2,11 +2,11 @@
 import { storeToRefs } from 'pinia';
 import { useStationrStore } from '@/store/station';
 import { useRoute, useRouter } from 'vue-router';
-
+import { pic_prefix } from '@/utils/baseInfo';
 const station_store = useStationrStore();
-const { station_array, url_head } = storeToRefs(station_store);
+const { station_array } = storeToRefs(station_store);
 const route = useRoute();
-const router = useRouter()
+const router = useRouter();
 const indexValue = Number(route.query.index)
 const length = station_array.value.length
 
@@ -297,7 +297,7 @@ if (isNaN(indexValue) || indexValue < 0 || indexValue >= length) {
                             <div class="overflow-hidden ">
                                 <img alt="gallery"
                                     class="w-full h-full object-cover object-center hover:scale-110 ease-in-out transition-all duration-500"
-                                    :src="url_head + 'image/' + item.src">
+                                    :src="pic_prefix + item.src">
                             </div>
                             <div class="flex flex-row items-center justify-between px-8 py-4">
                                 <div>
