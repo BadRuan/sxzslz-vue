@@ -19,13 +19,14 @@
                                 坚持月度安全检制度，筑牢常态化安全防线</h1>
                             <p class="leading-relaxed mb-3">
                                 为确保排涝泵站托管工作安全高效运行，沈巷镇水利站组织技术人员对管辖崩站及防汛物资仓库等开展每月检查，全面强化监管工作，织密安全责任网。</p>
-                            <a class="text-red-700 inline-flex items-center">了解更多<svg class="w-4 h-4 ml-2"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                                    stroke-linecap="round" stroke-linejoin="round">
+                            <RouterLink :to="{ name: 'ArticleDetail', params: { slug: '3fae1fcd32904f40' } }"
+                                class="text-red-700 inline-flex items-center hover:cursor-pointer">了解更多<svg
+                                    class="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                                    fill="none" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M5 12h14"></path>
                                     <path d="M12 5l7 7-7 7"></path>
                                 </svg>
-                            </a>
+                            </RouterLink>
                         </div>
                     </div>
                     <div class="p-4 lg:w-1/3">
@@ -36,13 +37,14 @@
                                 坚持月度安全检制度，筑牢常态化安全防线</h1>
                             <p class="leading-relaxed mb-3">
                                 为确保排涝泵站托管工作安全高效运行，沈巷镇水利站组织技术人员对管辖崩站及防汛物资仓库等开展每月检查，全面强化监管工作，织密安全责任网。</p>
-                            <a class="text-red-700 inline-flex items-center">了解更多<svg class="w-4 h-4 ml-2"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                                    stroke-linecap="round" stroke-linejoin="round">
+                            <RouterLink :to="{ name: 'ArticleDetail', params: { slug: '3fae1fcd32904f40' } }"
+                                class="text-red-700 inline-flex items-center hover:cursor-pointer">了解更多<svg
+                                    class="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                                    fill="none" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M5 12h14"></path>
                                     <path d="M12 5l7 7-7 7"></path>
                                 </svg>
-                            </a>
+                            </RouterLink>
                         </div>
                     </div>
                     <div class="p-4 lg:w-1/3">
@@ -53,13 +55,14 @@
                                 坚持月度安全检制度，筑牢常态化安全防线</h1>
                             <p class="leading-relaxed mb-3">
                                 为确保排涝泵站托管工作安全高效运行，沈巷镇水利站组织技术人员对管辖崩站及防汛物资仓库等开展每月检查，全面强化监管工作，织密安全责任网。</p>
-                            <a class="text-red-700 inline-flex items-center">了解更多<svg class="w-4 h-4 ml-2"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-                                    stroke-linecap="round" stroke-linejoin="round">
+                            <RouterLink :to="{ name: 'ArticleDetail', params: { slug: '3fae1fcd32904f40' } }"
+                                class="text-red-700 inline-flex items-center hover:cursor-pointer">了解更多<svg
+                                    class="w-4 h-4 ml-2" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                                    fill="none" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M5 12h14"></path>
                                     <path d="M12 5l7 7-7 7"></path>
                                 </svg>
-                            </a>
+                            </RouterLink>
                         </div>
                     </div>
                 </div>

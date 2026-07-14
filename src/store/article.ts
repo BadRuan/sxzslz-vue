@@ -17,8 +17,8 @@ export interface ArticleModel {
 }
 
 class ArticleService{
-    public getLatest() {
-        return apiService.get('/article/latest/')
+    public getLatest(category_id: number) {
+        return apiService.get('/article/latest/?category_id=' + category_id)
     }
     public getRecommended() {
         return apiService.get('/article/recommended?limit=3')
@@ -35,9 +35,9 @@ export const useArticleStore = defineStore('article', () => {
   const recommended_article = ref<ArticleModel[]>([])
   const article_detail = ref<ArticleModel>()
 
-  const getLatest = async () => {
+  const getLatest = async (category_id: number) => {
     try {
-      const res = await articleService.getLatest()
+      const res = await articleService.getLatest(category_id)
       latest_article.value = res.data
     } catch (error) {
       console.error('获取最新文章列表失败:', error)

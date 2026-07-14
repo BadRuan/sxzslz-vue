@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia';
 import MarkdownIt from 'markdown-it';
 import dayjs from 'dayjs';
 import { useArticleStore } from '@/store/article';
+import { useCategoryStore } from '@/store/category';
 import { useUserStore } from '@/store/user';
 import { pic_prefix } from '@/utils/baseInfo';
 
@@ -12,9 +13,11 @@ const route = useRoute();
 const router = useRouter();
 const slug = route.params.slug;
 const article_store = useArticleStore();
+const category_store = useCategoryStore();
 const user_store = useUserStore();
 
 const { article_detail } = storeToRefs(article_store);
+const { categories } = storeToRefs(category_store);
 const { users } = storeToRefs(user_store);
 
 const error = ref<string | null>(null);
@@ -38,17 +41,29 @@ onMounted(async () => {
     loading.value = false;
 })
 
+const category_text = (category_id: number | undefined) => {
+    if (!category_id) {
+        return '';
+    } else {
+        for (let item of categories.value) {
+            if (category_id == item.id) {
+                return item.name
+            }
+        }
+        return ''
+    }
+}
+
 const nickname_text = (user_id: number | undefined) => {
-    let text: string = '昵称';
-    if (user_id == undefined) {
-        return text;
+    if (!user_id) {
+        return '';
     } else {
         for (let item of users.value) {
             if (user_id == item.id) {
-                text = item.nickname
+                return item.nickname
             }
         }
-        return text
+        return ''
     }
 }
 
@@ -83,7 +98,7 @@ const renderedHtml = computed(() => {
 <template>
     <main class="bg-background">
         <div class="min-h-screen py-10 px-4">
-            <nav class="max-w-6xl mx-auto mb-6 px-4 sm:px-6 lg:px-8" aria-label="Breadcrumb">
+            <nav class="w-7xl mx-auto mb-6 px-4 sm:px-6 lg:px-8" aria-label="Breadcrumb">
                 <ol class="flex items-center gap-2 text-sm text-gray-500">
                     <li>
                         <RouterLink :to="{ name: 'Home' }" class="hover:text-primary transition-colors">
@@ -97,8 +112,9 @@ const renderedHtml = computed(() => {
                         </svg>
                     </li>
                     <li>
-                        <RouterLink :to="{ name: 'ArticleList' }" class="hover:text-primary transition-colors">
-                            通知公告
+                        <RouterLink :to="{ name: 'ArticleList', query: { category: article_detail?.category_id } }"
+                            class="hover:text-primary transition-colors">
+                            {{ category_text(article_detail?.category_id) }}
                         </RouterLink>
                     </li>
                     <li>
@@ -151,7 +167,7 @@ const renderedHtml = computed(() => {
                     <div
                         class="inline-flex items-center justify-center gap-4 text-sm text-gray-500 px-3 py-1 bg-gray-50 rounded-md">
                         <time datetime="2024-07-23">{{ dayjs(article_detail?.create_at).format('YYYY年MM月DD日 HH:mm:ss')
-                        }}</time>
+                            }}</time>
                         <span class="hidden sm:inline">|</span>
                         <span>来源：{{ nickname_text(article_detail?.user_id) }}</span>
                         <span class="hidden sm:inline">|</span>
