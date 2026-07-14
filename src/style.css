@@ -25,12 +25,12 @@
     /* Footer */
     --color-footer-bg: #1a1a1a;
     --color-footer-text: #a1a1aa;
-
-    /* Admin 侧边栏 */
-    --color-sidebar-bg: #1e293b;
-    --color-sidebar-text: #94a3b8;
-    --color-sidebar-active: #c7000b;
 }
+
+@utility indent-2em {
+    text-indent: 2em;
+}
+
 
 /* 自定义 utility */
 @utility bg-hero-gradient {

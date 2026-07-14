@@ -16,6 +16,16 @@ const date_text = (date_value: string) => {
     return dayjs(date_value).format('YYYY-MM-DD')
 }
 
+const category_text = (category_id: number) => {
+    let text: string = '默认分类'
+    for (let item of categories.value) {
+        if (category_id == item.id) {
+            text = item.name
+        }
+    }
+    return text
+}
+
 onMounted(() => {
     category_store.fetchCategories();
     article_store.getLatest();
@@ -54,13 +64,18 @@ onMounted(() => {
                             class="flex flex-col overflow-hidden bg-white rounded shadow-xs ring-1 ring-border  transition-transform duration-300 hover:-translate-y-2">
                             <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }">
                                 <div class="w-full overflow-hidden">
-                                    <img class="w-full h-full" :src="pic_prefix + article.cover_img" alt="news_pic" />
+                                    <img class="w-full h-52" :src="pic_prefix + article.cover_img" alt="news_pic" />
                                 </div>
                                 <div class="p-4 flex flex-col gap-4">
-                                    <div>
-                                        <time class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">
-                                            {{ date_text(article.create_at) }}
-                                        </time>
+                                    <div class="flex flex-row items-center justify-between">
+                                        <div class="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                                            {{ category_text(article.category_id) }}
+                                        </div>
+                                        <div>
+                                            <time class="text-xs text-gray-600">
+                                                {{ date_text(article.create_at) }}
+                                            </time>
+                                        </div>
                                     </div>
                                     <h2
                                         class="text-base font-semibold text-gray-800 hover:text-primary h-12 overflow-hidden">

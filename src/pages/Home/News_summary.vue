@@ -55,7 +55,7 @@ const category_text = (category_id: number) => {
                     class="w-100 bg-white rounded-sm overflow-hidden shadow transition-transform duration-300 hover:-translate-y-2">
                     <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }">
 
-                        <img class="w-full h-60" :src="pic_prefix + article.cover_img" alt="new_pic">
+                        <img class="w-full h-72" :src="pic_prefix + article.cover_img" alt="new_pic">
                         <div class="p-6">
                             <div class="flex flex-row justify-between items-center">
                                 <div class="text-sm text-gray-700 bg-gray-100 p-2 rounded">
@@ -64,7 +64,7 @@ const category_text = (category_id: number) => {
                                 <span class="text-gray-600 text-sm text-right">
                                     {{ date_text(article.create_at) }}</span>
                             </div>
-                            <div class="bg-white my-2">{{ article.title }}</div>
+                            <div class="bg-white my-2 h-12">{{ article.title }}</div>
                         </div>
                     </RouterLink>
                 </div>

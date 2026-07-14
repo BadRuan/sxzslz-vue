@@ -6,6 +6,7 @@ import MarkdownIt from 'markdown-it';
 import dayjs from 'dayjs';
 import { useArticleStore } from '@/store/article';
 import { useUserStore } from '@/store/user';
+import { pic_prefix } from '@/utils/baseInfo';
 
 const route = useRoute();
 const router = useRouter();
@@ -59,13 +60,23 @@ const md = new MarkdownIt({
 
 
 const renderedHtml = computed(() => {
-    const text: string = ''
-    if (article_detail.value == undefined) {
-        return md.render(text)
+    if (!article_detail.value) {
+        return '';
     } else {
-        return md.render(article_detail.value.content)
+        let content = article_detail.value.content;
+
+        content = content.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, src) => {
+            // 如果是外部链接，直接返回原内容
+            if (src.startsWith('http') || src.startsWith('//')) {
+                return match;
+            }
+            // 拼接前缀，并重新组装成 Markdown 语法
+            return `![${alt}](${pic_prefix}${src})`;
+        });
+        return md.render(content);
     }
 })
+
 
 </script>
 
@@ -140,7 +151,7 @@ const renderedHtml = computed(() => {
                     <div
                         class="inline-flex items-center justify-center gap-4 text-sm text-gray-500 px-3 py-1 bg-gray-50 rounded-md">
                         <time datetime="2024-07-23">{{ dayjs(article_detail?.create_at).format('YYYY年MM月DD日 HH:mm:ss')
-                            }}</time>
+                        }}</time>
                         <span class="hidden sm:inline">|</span>
                         <span>来源：{{ nickname_text(article_detail?.user_id) }}</span>
                         <span class="hidden sm:inline">|</span>
@@ -149,13 +160,14 @@ const renderedHtml = computed(() => {
                 </div>
                 <div class="px-6 sm:px-10 py-8 prose prose-primary prose-lg max-w-none
                         prose-headings:font-bold prose-headings:text-gray-900 prose-headings:mb-4 prose-headings:mt-8
-                        prose-h1:text-2xl prose-h2:text-xl prose-h2:border-l-2 prose-h2:border-primary-light prose-h2:pl-2
-                        prose-p:my-4 prose-p:leading-relaxed
+                        prose-h1:text-2xl prose-h2:text-xl prose-h3:text-base
+                        prose-p:my-4 prose-p:leading-relaxed prose-p:indent-2em
                         prose-strong:text-gray-900 prose-strong:font-semibold
                         prose-blockquote:border-l-primary prose-blockquote:bg-red-50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded
-                        prose-ul:list-disc prose-ul:pl-5 prose-ul:my-4 prose-ul:text-gray-700
-                        prose-ol:list-decimal prose-ol:pl-5 prose-ol:my-4 prose-ol:text-gray-700
+                        prose-ul:list-disc prose-ul:mx-8 prose-ul:my-4 prose-ul:text-gray-700
+                        prose-ol:list-decimal prose-ol:mx-8 prose-ol:my-4 prose-ol:text-gray-700
                         prose-a:text-primary prose-a:underline prose-a:underline-offset-2 hover:prose-a:text-primary/80
+                        prose-img:w-2/3 prose-img:shadow prose-img:my-6 prose-img:mx-auto
                         " v-html="renderedHtml">
 
                 </div>
