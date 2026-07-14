@@ -1,24 +1,30 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref } from 'vue';
+import { defineStore } from 'pinia';
+import apiService from '@/utils/apiService';
+
+export interface UserModel {
+    id: number,
+    nickname: string,
+}
+
+class UserService{
+    public getUserArray() {
+        return apiService.get('/user/')
+    }
+}
+
+const userService = new UserService();
 
 export const useUserStore = defineStore('user', () => {
-    const username = ref('')
-    const nickname = ref('')
-    const user_id = ref('')
+  const users = ref<UserModel[]>([])
 
-    const is_logged_in = computed(() => !!username.value)
-
-    function login(info: { username: string; nickname: string; user_id: string }) {
-        username.value = info.username
-        nickname.value = info.nickname
-        user_id.value = info.user_id
+  const getUsers = async () => {
+    try {
+      const res = await userService.getUserArray()
+      users.value = res.data
+    } catch (error) {
+      console.error('获取用户列表:', error)
     }
-
-    function logout() {
-        username.value = ''
-        nickname.value = ''
-        user_id.value = ''
-    }
-
-    return { username, nickname, user_id, is_logged_in, login, logout }
+  }
+  return { users, getUsers }
 })

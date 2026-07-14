@@ -1,8 +1,8 @@
 import axios, {type AxiosInstance,  type AxiosResponse} from 'axios';
-import { dev_api_url } from '@/utils/baseInfo'
+import { api_prefix } from '@/utils/baseInfo'
 
 const service: AxiosInstance = axios.create({
-    baseURL: dev_api_url,
+    baseURL: api_prefix,
     timeout: 10000,
     headers: { 'Content-Type': 'application/json;charset=UTF-8' }
 });

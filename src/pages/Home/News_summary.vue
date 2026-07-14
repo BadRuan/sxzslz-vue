@@ -10,7 +10,7 @@ const category_store = useCategoryStore()
 const article_store = useArticleStore()
 
 const { categories } = storeToRefs(category_store)
-const { latest_article } = storeToRefs(article_store)
+const { recommended_article } = storeToRefs(article_store)
 
 const date_text = (date_value: string) => {
     return dayjs(date_value).format('YYYY-MM-DD')
@@ -18,7 +18,7 @@ const date_text = (date_value: string) => {
 
 onMounted(() => {
     category_store.fetchCategories();
-    article_store.getLatest();
+    article_store.getRecommended();
 })
 
 const category_text = (category_id: number) => {
@@ -51,19 +51,22 @@ const category_text = (category_id: number) => {
             </div>
 
             <div class="w-7xl flex flex-row items-center justify-around py-4">
-                <div v-for="(article, index) in latest_article" :key="index"
+                <div v-for="(article, index) in recommended_article" :key="index"
                     class="w-100 bg-white rounded-sm overflow-hidden shadow transition-transform duration-300 hover:-translate-y-2">
-                    <img class="w-full h-60" :src="pic_prefix + article.cover_img" alt="new_pic">
-                    <div class="p-6">
-                        <div class="flex flex-row justify-between items-center">
-                            <div class="text-sm text-gray-700 bg-gray-100 p-2 rounded">
-                                {{ category_text(article.category_id) }}
+                    <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }">
+
+                        <img class="w-full h-60" :src="pic_prefix + article.cover_img" alt="new_pic">
+                        <div class="p-6">
+                            <div class="flex flex-row justify-between items-center">
+                                <div class="text-sm text-gray-700 bg-gray-100 p-2 rounded">
+                                    {{ category_text(article.category_id) }}
+                                </div>
+                                <span class="text-gray-600 text-sm text-right">
+                                    {{ date_text(article.create_at) }}</span>
                             </div>
-                            <span class="text-gray-600 text-sm text-right">
-                                {{ date_text(article.create_at) }}</span>
+                            <div class="bg-white my-2">{{ article.title }}</div>
                         </div>
-                        <div class="bg-white my-2">{{ article.title }}</div>
-                    </div>
+                    </RouterLink>
                 </div>
             </div>
 

@@ -51,7 +51,7 @@ onMounted(() => {
 
                     <div class="grid grid-cols-3 gap-8">
                         <article v-for="(article, index) in latest_article" :index="index"
-                            class="flex flex-col overflow-hidden bg-white rounded shadow-xs ring-1 ring-border">
+                            class="flex flex-col overflow-hidden bg-white rounded shadow-xs ring-1 ring-border  transition-transform duration-300 hover:-translate-y-2">
                             <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }">
                                 <div class="w-full overflow-hidden">
                                     <img class="w-full h-full" :src="pic_prefix + article.cover_img" alt="news_pic" />

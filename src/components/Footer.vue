@@ -40,9 +40,6 @@
                             </RouterLink>
                         </li>
                         <li>
-                            <RouterLink :to="{ name: 'Admin' }" class="hover:text-primary transition">后台登录</RouterLink>
-                        </li>
-                        <li>
                             <RouterLink :to="{ name: 'About' }" class="hover:text-primary transition">关于我们</RouterLink>
                         </li>
                         <li><a href="#" class="hover:text-primary transition">工程管理</a></li>
