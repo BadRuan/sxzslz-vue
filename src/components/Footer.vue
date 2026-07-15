@@ -42,8 +42,14 @@
                         <li>
                             <RouterLink :to="{ name: 'About' }" class="hover:text-primary transition">关于我们</RouterLink>
                         </li>
-                        <li><a href="#" class="hover:text-primary transition">工程管理</a></li>
-                        <li><a href="#" class="hover:text-primary transition">通知公告</a></li>
+                        <li>
+                            <RouterLink :to="{ name: 'ArticleList', query: { category: 5 } }"
+                                class="hover:text-primary transition">财务公开</RouterLink>
+                        </li>
+                        <li>
+                            <RouterLink :to="{ name: 'ArticleList', query: { category: 2 } }"
+                                class="hover:text-primary transition">通知公告</RouterLink>
+                        </li>
                         <li><a href="#" class="hover:text-primary transition">政策法规</a></li>
                     </ul>
                 </div>

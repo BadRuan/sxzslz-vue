@@ -151,8 +151,7 @@ const renderedHtml = computed(() => {
             </div>
 
             <!-- 正常内容 -->
-            <article v-else
-                class="max-w-6xl mx-auto bg-white rounded-xl shadow-sm border border-border overflow-hidden">
+            <article v-else class="max-w-6xl mx-auto bg-white rounded shadow-sm border border-border overflow-hidden">
                 <div class="px-6 sm:px-10 pt-10 pb-6 border-b border-border text-center">
                     <h1 class="text-3xl font-bold text-gray-900 leading-tight mb-4">
                         {{ article_detail?.title }}
@@ -160,7 +159,7 @@ const renderedHtml = computed(() => {
                     <div
                         class="inline-flex items-center justify-center gap-4 text-sm text-gray-500 px-3 py-1 bg-gray-50 rounded-md">
                         <time datetime="2024-07-23">{{ dayjs(article_detail?.create_at).format('YYYY年MM月DD日 HH:mm:ss')
-                        }}</time>
+                            }}</time>
                         <span class="hidden sm:inline">|</span>
                         <span>来源：{{ nickname_text(article_detail?.user_id) }}</span>
                         <span class="hidden sm:inline">|</span>

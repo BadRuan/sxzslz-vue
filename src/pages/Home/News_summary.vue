@@ -35,13 +35,13 @@ onMounted(async () => {
 
                 <RouterLink :to="{ name: 'ArticleList', query: { category: 1 } }"
                     class="text-sm m-4 hover:text-red-700">
-                    查看更多 &gt;
+                    More &gt;
                 </RouterLink>
             </div>
 
             <div class="w-7xl flex flex-row items-center justify-around py-4">
                 <div v-for="(article, index) in recommended_article" :key="index"
-                    class="w-72 bg-white rounded-sm overflow-hidden shadow transition-transform duration-300 hover:-translate-y-2">
+                    class="w-72 bg-white group rounded-sm overflow-hidden shadow transition-transform duration-300 hover:-translate-y-2">
                     <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }">
 
                         <img class="w-72 h-48" :src="pic_prefix + article.cover_img" alt="new_pic">
@@ -53,7 +53,7 @@ onMounted(async () => {
                                 <span class="text-gray-600 text-sm text-right">
                                     {{ date_text(article.create_at) }}</span>
                             </div>
-                            <div class="bg-white my-2 h-12">{{ article.title }}</div>
+                            <div class="group-hover:text-primary my-2 h-12">{{ article.title }}</div>
                         </div>
                     </RouterLink>
                 </div>
