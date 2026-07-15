@@ -2,10 +2,10 @@
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import dayjs from 'dayjs';
 import { pic_prefix } from '@/utils/baseInfo';
 import { useCategoryStore } from '@/store/category';
 import { useArticleStore } from '@/store/article';
+import { date_text, category_text } from '@/utils/formatters';
 
 const route = useRoute();
 const category_store = useCategoryStore();
@@ -18,19 +18,6 @@ const { categories } = storeToRefs(category_store);
 const { latest_article } = storeToRefs(article_store);
 
 const loading = ref(true);
-
-const date_text = (date_value: string) => {
-    return dayjs(date_value).format('YYYY-MM-DD')
-};
-
-const category_text = (category_id: number) => {
-    for (let item of categories.value) {
-        if (category_id == item.id) {
-            return item.name
-        }
-    }
-    return ''
-};
 
 const change_category = async (category_id: number) => {
     loading.value = true;
@@ -90,7 +77,7 @@ onMounted(async () => {
                                         <div class="p-4 flex flex-col gap-4">
                                             <div class="flex flex-row items-center justify-between">
                                                 <div class="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">
-                                                    {{ category_text(article.category_id) }}
+                                                    {{ category_text(article.category_id, categories) }}
                                                 </div>
                                                 <div>
                                                     <time class="text-xs text-gray-600">

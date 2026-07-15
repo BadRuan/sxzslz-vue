@@ -3,11 +3,14 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import MarkdownIt from 'markdown-it';
+import DOMPurify from 'dompurify';
 import dayjs from 'dayjs';
 import { useArticleStore } from '@/store/article';
 import { useCategoryStore } from '@/store/category';
 import { useUserStore } from '@/store/user';
 import { pic_prefix } from '@/utils/baseInfo';
+import { category_text } from '@/utils/formatters';
+import 'github-markdown-css/github-markdown.css';
 
 const route = useRoute();
 const router = useRouter();
@@ -36,26 +39,13 @@ onMounted(async () => {
     if (result == undefined) {
         error.value = '文章不存在或已被删除';
     }
-    await user_store.getUsers();
+    await Promise.all([
+        user_store.getUsers(),
+        categories.value.length === 0 ? category_store.fetchCategories() : Promise.resolve()
+    ]);
 
     loading.value = false;
-    if (categories.value.length == 0) {
-        category_store.fetchCategories()
-    }
 })
-
-const category_text = (category_id: number | undefined) => {
-    if (!category_id) {
-        return '';
-    } else {
-        for (let item of categories.value) {
-            if (category_id == item.id) {
-                return item.name
-            }
-        }
-        return ''
-    }
-}
 
 const nickname_text = (user_id: number | undefined) => {
     if (!user_id) {
@@ -71,7 +61,7 @@ const nickname_text = (user_id: number | undefined) => {
 }
 
 const md = new MarkdownIt({
-    html: true,
+    html: false,
     linkify: true,
     typographer: true
 })
@@ -91,7 +81,7 @@ const renderedHtml = computed(() => {
             // 拼接前缀，并重新组装成 Markdown 语法
             return `![${alt}](${pic_prefix}${src})`;
         });
-        return md.render(content);
+        return DOMPurify.sanitize(md.render(content));
     }
 })
 
@@ -117,7 +107,7 @@ const renderedHtml = computed(() => {
                     <li>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: article_detail?.category_id } }"
                             class="hover:text-primary transition-colors">
-                            {{ category_text(article_detail?.category_id) }}
+                            {{ category_text(article_detail?.category_id, categories) }}
                         </RouterLink>
                     </li>
                     <li>

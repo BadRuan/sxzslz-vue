@@ -17,15 +17,19 @@ const categoryService = new CategoryService();
 
 export const useCategoryStore = defineStore('category', () => {
   const categories = ref<CategoryModel[]>([])
+  const loading = ref(false)
 
   const fetchCategories = async () => {
+    loading.value = true
     try {
       const res = await categoryService.getCategoryArray()
       categories.value = res.data
     } catch (error) {
       console.error('获取分类列表失败:', error)
+    } finally {
+      loading.value = false
     }
   }
 
-  return { categories, fetchCategories }
+  return { categories, fetchCategories, loading }
 })

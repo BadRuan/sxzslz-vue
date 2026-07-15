@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import News_summary from './News_summary.vue';
-import Category_news from './category_news.vue';
+import Category_news from './Category_news.vue';
 import Station_info from './Station_info.vue';
 import Station_picture from './Station_picture.vue';
 import Freatres from './Features.vue';

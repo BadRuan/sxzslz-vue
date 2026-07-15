@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { reactive } from 'vue';
 import type { StationModel } from "@/types/station";
 
-export const useStationrStore = defineStore('station', () => {
+export const useStationStore = defineStore('station', () => {
     
     
     const station_array = reactive<StationModel[]>([

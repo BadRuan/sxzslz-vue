@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
-import dayjs from 'dayjs';
 import { useArticleStore } from '@/store/article';
+import { date_text } from '@/utils/formatters';
 
 const article_store = useArticleStore();
-const { notice_article, metting_article, finance_article } = storeToRefs(article_store);
-const date_text = (date_value: string) => {
-    return dayjs(date_value).format('YYYY-MM-DD')
-};
+const { notice_article, meeting_article, finance_article } = storeToRefs(article_store);
 
 onMounted(() => {
     article_store.getCategoryArticle();
@@ -57,7 +54,7 @@ onMounted(() => {
                         </RouterLink>
                     </div>
                     <ul class="flex flex-col gap-4 justify-around">
-                        <RouterLink v-for="item in metting_article" :key="item.id"
+                        <RouterLink v-for="item in meeting_article" :key="item.id"
                             :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
                             <li class="rounded mx-2 py-2 transition-transform duration-300 hover:-translate-y-2">
                                 <div class="text-gray-700 text-sm py-2 px-4">{{ item.title }}</div>

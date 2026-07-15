@@ -2,9 +2,9 @@
 import { pic_prefix } from '@/utils/baseInfo';
 import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
-import dayjs from 'dayjs';
 import { useCategoryStore } from '@/store/category';
 import { useArticleStore } from '@/store/article';
+import { date_text, category_text } from '@/utils/formatters';
 
 const category_store = useCategoryStore()
 const article_store = useArticleStore()
@@ -12,24 +12,12 @@ const article_store = useArticleStore()
 const { categories } = storeToRefs(category_store)
 const { recommended_article } = storeToRefs(article_store)
 
-const date_text = (date_value: string) => {
-    return dayjs(date_value).format('YYYY-MM-DD')
-}
-
-onMounted(() => {
-    category_store.fetchCategories();
-    article_store.getRecommended();
+onMounted(async () => {
+    await Promise.all([
+        category_store.fetchCategories(),
+        article_store.getRecommended()
+    ]);
 })
-
-const category_text = (category_id: number) => {
-    let text: string = '默认分类'
-    for (let item of categories.value) {
-        if (category_id == item.id) {
-            text = item.name
-        }
-    }
-    return text
-}
 
 </script>
 
@@ -60,7 +48,7 @@ const category_text = (category_id: number) => {
                         <div class="p-4">
                             <div class="flex flex-row justify-between items-center">
                                 <div class="text-sm text-gray-700 bg-gray-100 p-2 rounded">
-                                    {{ category_text(article.category_id) }}
+                                    {{ category_text(article.category_id, categories) }}
                                 </div>
                                 <span class="text-gray-600 text-sm text-right">
                                     {{ date_text(article.create_at) }}</span>

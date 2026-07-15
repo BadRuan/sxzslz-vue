@@ -50,3 +50,7 @@ export const router = createRouter({
         return { top: 0 }
     }
 })
+
+router.afterEach((to) => {
+    document.title = to.meta.title ? `${to.meta.title} - 沈巷镇水利站` : '沈巷镇水利站'
+})

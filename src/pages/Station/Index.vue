@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { useStationrStore } from '@/store/station';
+import { useStationStore } from '@/store/station';
 import { useRoute, useRouter } from 'vue-router';
 import { pic_prefix } from '@/utils/baseInfo';
-const station_store = useStationrStore();
+const station_store = useStationStore();
 const { station_array } = storeToRefs(station_store);
 const route = useRoute();
 const router = useRouter();
