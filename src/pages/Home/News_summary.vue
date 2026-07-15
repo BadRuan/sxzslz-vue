@@ -45,18 +45,19 @@ const category_text = (category_id: number) => {
                     </div>
                 </div>
 
-                <RouterLink :to="{ name: 'ArticleList' }" class="text-sm m-4 hover:text-red-700">
+                <RouterLink :to="{ name: 'ArticleList', query: { category: 1 } }"
+                    class="text-sm m-4 hover:text-red-700">
                     查看更多 &gt;
                 </RouterLink>
             </div>
 
             <div class="w-7xl flex flex-row items-center justify-around py-4">
                 <div v-for="(article, index) in recommended_article" :key="index"
-                    class="w-100 bg-white rounded-sm overflow-hidden shadow transition-transform duration-300 hover:-translate-y-2">
+                    class="w-72 bg-white rounded-sm overflow-hidden shadow transition-transform duration-300 hover:-translate-y-2">
                     <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }">
 
-                        <img class="w-full h-72" :src="pic_prefix + article.cover_img" alt="new_pic">
-                        <div class="p-6">
+                        <img class="w-72 h-48" :src="pic_prefix + article.cover_img" alt="new_pic">
+                        <div class="p-4">
                             <div class="flex flex-row justify-between items-center">
                                 <div class="text-sm text-gray-700 bg-gray-100 p-2 rounded">
                                     {{ category_text(article.category_id) }}

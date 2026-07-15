@@ -39,6 +39,9 @@ onMounted(async () => {
     await user_store.getUsers();
 
     loading.value = false;
+    if (categories.value.length == 0) {
+        category_store.fetchCategories()
+    }
 })
 
 const category_text = (category_id: number | undefined) => {
@@ -167,7 +170,7 @@ const renderedHtml = computed(() => {
                     <div
                         class="inline-flex items-center justify-center gap-4 text-sm text-gray-500 px-3 py-1 bg-gray-50 rounded-md">
                         <time datetime="2024-07-23">{{ dayjs(article_detail?.create_at).format('YYYY年MM月DD日 HH:mm:ss')
-                            }}</time>
+                        }}</time>
                         <span class="hidden sm:inline">|</span>
                         <span>来源：{{ nickname_text(article_detail?.user_id) }}</span>
                         <span class="hidden sm:inline">|</span>
