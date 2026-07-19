@@ -40,8 +40,8 @@ onMounted(async () => {
         error.value = '文章不存在或已被删除';
     }
     await Promise.all([
-        user_store.getUsers(),
-        categories.value.length === 0 ? category_store.fetchCategories() : Promise.resolve()
+        user_store.checkUser(),
+        categories.value.length === 0 ? category_store.checkCategory() : Promise.resolve()
     ]);
 
     loading.value = false;
@@ -163,7 +163,7 @@ const renderedHtml = computed(() => {
                         <span class="hidden sm:inline">|</span>
                         <span>来源：{{ nickname_text(article_detail?.user_id) }}</span>
                         <span class="hidden sm:inline">|</span>
-                        <span>阅读量：{{ article_detail?.view_count }}</span>
+                        <span>阅读：{{ article_detail?.view_count }}次</span>
                     </div>
                 </div>
                 <div class="px-6 sm:px-10 py-8 prose prose-primary prose-lg max-w-none

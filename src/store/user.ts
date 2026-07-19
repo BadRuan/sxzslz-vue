@@ -30,5 +30,11 @@ export const useUserStore = defineStore('user', () => {
       loading.value = false
     }
   }
-  return { users, getUsers, loading }
+  
+  const checkUser = async () => {
+    if(users.value.length == 0) {
+      await getUsers()
+    }
+  }
+  return { users, loading, checkUser }
 })

@@ -14,7 +14,7 @@ const { recommended_article } = storeToRefs(article_store)
 
 onMounted(async () => {
     await Promise.all([
-        category_store.fetchCategories(),
+        category_store.checkCategory(),
         article_store.getRecommended()
     ]);
 })
@@ -35,7 +35,7 @@ onMounted(async () => {
 
                 <RouterLink :to="{ name: 'ArticleList', query: { category: 1 } }"
                     class="text-sm m-4 hover:text-red-700">
-                    More &gt;
+                    查看更多 &gt;
                 </RouterLink>
             </div>
 
@@ -53,7 +53,8 @@ onMounted(async () => {
                                 <span class="text-gray-600 text-sm text-right">
                                     {{ date_text(article.create_at) }}</span>
                             </div>
-                            <div class="group-hover:text-primary my-2 h-12">{{ article.title }}</div>
+                            <div class="group-hover:text-primary my-4 h-12 overflow-hidden">{{ article.title }}
+                            </div>
                         </div>
                     </RouterLink>
                 </div>

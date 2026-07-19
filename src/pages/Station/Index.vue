@@ -18,8 +18,8 @@ if (isNaN(indexValue) || indexValue < 0 || indexValue >= length) {
 
 <template>
     <section class="bg-background py-8">
-        <div class="w-7xl m-auto bg-white shadow rounded">
-            <h1 class="py-8 font-bold text-center text-2xl text-primary">{{
+        <div class="w-7xl m-auto bg-white shadow rounded pb-8">
+            <h1 class="py-8 font-bold text-center text-2xl text-primary border-b border-border">{{
                 station_array[indexValue]?.station_name }}</h1>
 
             <div class="flex items-center px-16 py-4">

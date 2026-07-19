@@ -5,7 +5,9 @@
 
                 <div class="flex items-center gap-2">
                     <img src="/icon/water-logo.svg" class="h-8 w-8" alt="logo" />
-                    <img src="/icon/logo-text.svg" class="h-6" alt="logo-text" />
+                    <RouterLink :to="{ name: 'Home' }">
+                        <img src="/icon/logo-text.svg" class="h-6" alt="logo-text" />
+                    </RouterLink>
                 </div>
 
                 <nav class="hidden sm:flex items-center gap-1">

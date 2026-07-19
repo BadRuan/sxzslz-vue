@@ -29,7 +29,7 @@ const change_category = async (category_id: number) => {
 onMounted(async () => {
     loading.value = true;
     await Promise.all([
-        category_store.fetchCategories(),
+        category_store.checkCategory(),
         article_store.getLatest(category_id)
     ]);
     loading.value = false;

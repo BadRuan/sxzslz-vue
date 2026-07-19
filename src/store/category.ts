@@ -30,6 +30,12 @@ export const useCategoryStore = defineStore('category', () => {
       loading.value = false
     }
   }
+  
+  const checkCategory = async () => {
+    if (categories.value.length == 0){
+      await fetchCategories();
+    }
+  }
 
-  return { categories, fetchCategories, loading }
+  return { categories, checkCategory, loading }
 })

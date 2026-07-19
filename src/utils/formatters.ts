@@ -8,6 +8,10 @@ export const date_text = (date_value: string): string => {
     return dayjs(date_value).format('YYYY-MM-DD')
 };
 
+export const easy_date_text = (date_value: string): string => {
+    return dayjs(date_value).format('MM/DD')
+};
+
 /**
  * 根据分类ID获取分类名称
  */

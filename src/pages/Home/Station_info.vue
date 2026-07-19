@@ -2,8 +2,8 @@
 import { storeToRefs } from 'pinia';
 import { useStationStore } from '@/store/station';
 import { pic_prefix } from '@/utils/baseInfo';
-const station_store = useStationStore()
-const { station_array } = storeToRefs(station_store)
+const station_store = useStationStore();
+const { station_array } = storeToRefs(station_store);
 </script>
 
 <template>
