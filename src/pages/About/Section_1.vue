@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { pic_prefix } from '@/utils/baseInfo';
+import { url_prefix } from '@/utils/baseInfo';
+import TitleComponent from '@/components/TitleComponent.vue';
 </script>
 
 <template>
     <section class="mx-auto w-7xl h-full">
-        <img class="h-100 w-full" :src="pic_prefix + 'b8dc37b949384f73a03e7e515df58038.png'" alt="banner">
+        <img class="h-100 w-full" :src="url_prefix.pic_prefix + 'b8dc37b949384f73a03e7e515df58038.png'" alt="banner">
 
         <div class="text-gray-600 body-font">
-            <div class="container px-5 py-24 mx-auto">
-                <div class="text-center mb-20">
-                    <h1 class="sm:text-3xl text-2xl font-medium text-center title-font text-gray-900 mb-4">机构职能</h1>
-                    <p class="text-base leading-relaxed xl:w-2/4 lg:w-3/4 mx-auto">Organizational Functions</p>
-                </div>
+            <div class="container px-5 py-12 mx-auto">
+                <TitleComponent>
+                    <template #first>机构职能</template>
+                    <template #second>Organizational Functions</template>
+                </TitleComponent>
+
                 <div class="flex flex-wrap lg:w-4/5 sm:mx-auto sm:mb-2 -mx-2">
                     <div class="p-2 sm:w-1/2 w-full">
                         <div class="bg-gray-100 rounded flex p-4 h-full items-center">

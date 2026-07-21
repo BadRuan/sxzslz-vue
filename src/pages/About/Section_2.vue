@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { pic_prefix } from '@/utils/baseInfo';
-
-const default_author = pic_prefix + '192878a6502947989a25d49d55f39266.jpg'
-const leader_author = pic_prefix + '4cefbb90ab8448e78322cf878423db0e.jpg'
+import { url_prefix } from '@/utils/baseInfo';
+import TitleComponent from '@/components/TitleComponent.vue';
+const default_author = url_prefix.pic_prefix + '192878a6502947989a25d49d55f39266.jpg'
+const leader_author = url_prefix.pic_prefix + '4cefbb90ab8448e78322cf878423db0e.jpg'
 
 </script>
 <template>
     <section class="m-auto w-7xl">
         <div class="text-gray-600 body-font">
-            <div class="container px-5 py-24 mx-auto">
-                <div class="text-center mb-20">
-                    <h1 class="sm:text-3xl text-2xl font-medium text-center title-font text-gray-900 mb-4">管理团队</h1>
-                    <p class="text-base leading-relaxed xl:w-2/4 lg:w-3/4 mx-auto">Leader Team</p>
-                </div>
+            <div class="container px-5 py-8 mx-auto">
+                <TitleComponent>
+                    <template #first>管理团队</template>
+                    <template #second>Leader Team</template>
+                </TitleComponent>
 
-                <div class="flex flex-wrap -m-4">
+                <div class="flex  -m-4 py-8">
                     <div class="p-4 lg:w-1/3">
                         <div
                             class="h-full flex sm:flex-row flex-col items-center sm:justify-start justify-center text-center sm:text-left">
@@ -57,13 +57,12 @@ const leader_author = pic_prefix + '4cefbb90ab8448e78322cf878423db0e.jpg'
                     </div>
                 </div>
 
-                <div class="text-center m-20">
-                    <h1 class="text-2xl font-medium text-center title-font text-gray-900 mb-4">分站负责人</h1>
-                    <p class="text-base leading-relaxed mx-auto">Station Leader</p>
-                </div>
+                <TitleComponent>
+                    <template #first>分站负责人</template>
+                    <template #second>Station Leader</template>
+                </TitleComponent>
 
-
-                <div class="flex flex-wrap -m-2">
+                <div class="flex flex-wrap -m-2 py-8">
                     <div class="p-2 lg:w-1/3 md:w-1/2 w-full">
                         <div class="h-full flex items-center border-gray-200 border p-4 rounded-lg">
                             <img alt="team"

@@ -23,16 +23,22 @@ const routes: RouteRecordRaw[] = [
                 component: () => import("@/pages/Station/Index.vue")
             },
             {
-                path: '/list/',
-                name: 'ArticleList',
-                component: () => import('@/pages/Article/List.vue'),
-                meta: { title: '文章列表' }
-            },
-            {
-                path: '/detail/:slug',
-                name: 'ArticleDetail',
-                component: () => import('@/pages/Article/Detail.vue'),
-                meta: { title: '文章详情' }
+                path: '/article',
+                name: 'Article',
+                children: [
+                    {
+                        path: 'list',
+                        name: 'ArticleList',
+                        component: () => import('@/pages/Article/List.vue'),
+                        meta: { title: '文章列表' }
+                    },
+                    {
+                        path: 'detail/:slug',
+                        name: 'ArticleDetail',
+                        component: () => import('@/pages/Article/Detail.vue'),
+                        meta: { title: '文章详情' }
+                    }
+                ]
             }
         ]
     },

@@ -3,12 +3,13 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import MarkdownIt from 'markdown-it';
+import linkAttributes from 'markdown-it-link-attributes';
 import DOMPurify from 'dompurify';
 import dayjs from 'dayjs';
 import { useArticleStore } from '@/store/article';
 import { useCategoryStore } from '@/store/category';
 import { useUserStore } from '@/store/user';
-import { pic_prefix } from '@/utils/baseInfo';
+import { url_prefix } from '@/utils/baseInfo';
 import { category_text } from '@/utils/formatters';
 import 'github-markdown-css/github-markdown.css';
 
@@ -64,8 +65,12 @@ const md = new MarkdownIt({
     html: false,
     linkify: true,
     typographer: true
+}).use(linkAttributes, {
+    attrs: {
+        target: '_blank',
+        rel: 'noopener noreferrer'
+    }
 })
-
 
 const renderedHtml = computed(() => {
     if (!article_detail.value) {
@@ -74,14 +79,24 @@ const renderedHtml = computed(() => {
         let content = article_detail.value.content;
 
         content = content.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, src) => {
-            // 如果是外部链接，直接返回原内容
             if (src.startsWith('http') || src.startsWith('//')) {
                 return match;
             }
-            // 拼接前缀，并重新组装成 Markdown 语法
-            return `![${alt}](${pic_prefix}${src})`;
+            return `![${alt}](${url_prefix.pic_prefix}${src})`;
         });
-        return DOMPurify.sanitize(md.render(content));
+
+        content = content.replace(/(?<!!)\[([^\]]+)\]\(([^)]+)\)/g, (match, text, href) => {
+            // 如果是绝对地址或协议相对地址，直接返回原内容
+            if (href.startsWith('http') || href.startsWith('//')) {
+                return match;
+            }
+            // 如果是相对地址，自动添加 document_prefix 前缀
+            return `[${text}](${url_prefix.document_prefix}${href})`;
+        });
+
+        return DOMPurify.sanitize(md.render(content), {
+            ADD_ATTR: ['target']
+        });
     }
 })
 
@@ -122,7 +137,7 @@ const renderedHtml = computed(() => {
 
             <!-- 加载状态 -->
             <div v-if="loading"
-                class="max-w-6xl mx-auto bg-white rounded-xl shadow-sm border border-border p-12 text-center">
+                class="max-w-7xl mx-auto bg-white rounded-xl shadow-sm border border-border p-12 text-center">
                 <div
                     class="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4">
                 </div>
@@ -131,7 +146,7 @@ const renderedHtml = computed(() => {
 
             <!-- 错误状态 -->
             <div v-else-if="error"
-                class="max-w-6xl mx-auto bg-white rounded-xl shadow-sm border border-border p-12 text-center">
+                class="max-w-7xl mx-auto bg-white rounded-xl shadow-sm border border-border p-12 text-center">
                 <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
@@ -151,7 +166,7 @@ const renderedHtml = computed(() => {
             </div>
 
             <!-- 正常内容 -->
-            <article v-else class="max-w-6xl mx-auto bg-white rounded shadow-sm border border-border overflow-hidden">
+            <article v-else class="max-w-7xl mx-auto bg-white rounded shadow-sm border border-border overflow-hidden">
                 <div class="px-6 sm:px-10 pt-10 pb-6 border-b border-border text-center">
                     <h1 class="text-3xl font-bold text-gray-900 leading-tight mb-4">
                         {{ article_detail?.title }}
@@ -159,7 +174,7 @@ const renderedHtml = computed(() => {
                     <div
                         class="inline-flex items-center justify-center gap-4 text-sm text-gray-500 px-3 py-1 bg-gray-50 rounded-md">
                         <time datetime="2024-07-23">{{ dayjs(article_detail?.create_at).format('YYYY年MM月DD日 HH:mm:ss')
-                            }}</time>
+                        }}</time>
                         <span class="hidden sm:inline">|</span>
                         <span>来源：{{ nickname_text(article_detail?.user_id) }}</span>
                         <span class="hidden sm:inline">|</span>
@@ -175,7 +190,7 @@ const renderedHtml = computed(() => {
                         prose-ul:list-disc prose-ul:mx-8 prose-ul:my-4 prose-ul:text-gray-700
                         prose-ol:list-decimal prose-ol:mx-8 prose-ol:my-4 prose-ol:text-gray-700
                         prose-a:text-primary prose-a:underline prose-a:underline-offset-2 hover:prose-a:text-primary/80
-                        prose-img:w-2/3 prose-img:shadow prose-img:my-6 prose-img:mx-auto
+                        prose-img:w-2/3 prose-img:shadow prose-img:rounded-sm prose-img:my-6 prose-img:mx-auto
                         " v-html="renderedHtml">
 
                 </div>

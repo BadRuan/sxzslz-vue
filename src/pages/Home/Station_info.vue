@@ -1,26 +1,24 @@
 <script setup lang="ts">
+import TitleComponent from '@/components/TitleComponent.vue';
 import { storeToRefs } from 'pinia';
 import { useStationStore } from '@/store/station';
-import { pic_prefix } from '@/utils/baseInfo';
+import { url_prefix } from '@/utils/baseInfo';
 const station_store = useStationStore();
 const { station_array } = storeToRefs(station_store);
 </script>
 
 <template>
     <div class="mx-auto my-4 w-7xl">
-        <div class="flex items-center py-4">
-            <span class="h-5 w-1 rounded bg-primary mr-3"></span>
-            <div>
-                <p class="text-xs text-gray-500">Station Info</p>
-                <h2 class="text-lg font-semibold text-gray-900">泵站信息</h2>
-            </div>
-        </div>
+        <TitleComponent>
+            <template #first>泵站信息</template>
+            <template #second>Station Info</template>
+        </TitleComponent>
 
         <div class=" grid grid-cols-4 gap-4">
             <div v-for="(station, index) in station_array" :key="index"
                 class="bg-white rounded shadow-xs shadow-slate-200 ring-1 ring-border group flex flex-col overflow-hidden transition-transform duration-300 hover:-translate-y-2">
                 <div class="overflow-hidden h-52">
-                    <img class="w-full h-full" :src="pic_prefix + station.thumb" alt="pic">
+                    <img class="w-full h-full" :src="url_prefix.pic_prefix + station.thumb" alt="pic">
                 </div>
                 <div class="p-4 flex flex-col gap-2">
                     <div class="flex items-center">

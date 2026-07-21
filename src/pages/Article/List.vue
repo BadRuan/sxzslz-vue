@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import { pic_prefix } from '@/utils/baseInfo';
+import { url_prefix } from '@/utils/baseInfo';
 import { useCategoryStore } from '@/store/category';
 import { useArticleStore } from '@/store/article';
 import { date_text, category_text } from '@/utils/formatters';
@@ -71,7 +71,7 @@ onMounted(async () => {
                                     class="flex flex-col overflow-hidden bg-white rounded shadow-xs ring-1 ring-border transition-transform duration-300 hover:-translate-y-2">
                                     <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }">
                                         <div class="w-full overflow-hidden">
-                                            <img class="w-full h-52" :src="pic_prefix + article.cover_img"
+                                            <img class="w-full h-52" :src="url_prefix.pic_prefix + article.cover_img"
                                                 alt="news_pic" />
                                         </div>
                                         <div class="p-4 flex flex-col gap-4">

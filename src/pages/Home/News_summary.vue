@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { pic_prefix } from '@/utils/baseInfo';
+import TitleComponent from '@/components/TitleComponent.vue';
+import { url_prefix } from '@/utils/baseInfo';
 import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useCategoryStore } from '@/store/category';
@@ -22,16 +23,13 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="bg-neutral-100 py-4">
+    <div class="bg-neutral-100">
         <section class="mx-auto w-7xl h-full">
             <div class="flex justify-between items-end">
-                <div class="flex items-center py-4">
-                    <span class="h-5 w-1 rounded bg-primary mr-4"></span>
-                    <div>
-                        <p class="text-xs text-gray-500">Station News</p>
-                        <h2 class="text-lg font-semibold text-gray-900">水利站动态</h2>
-                    </div>
-                </div>
+                <TitleComponent>
+                    <template #first>水利站动态</template>
+                    <template #second>Station News</template>
+                </TitleComponent>
 
                 <RouterLink :to="{ name: 'ArticleList', query: { category: 1 } }"
                     class="text-sm m-4 hover:text-red-700">
@@ -39,12 +37,12 @@ onMounted(async () => {
                 </RouterLink>
             </div>
 
-            <div class="w-7xl flex flex-row items-center justify-around py-4">
+            <div class="w-7xl flex flex-row items-center justify-around ">
                 <div v-for="(article, index) in recommended_article" :key="index"
                     class="w-72 bg-white group rounded-sm overflow-hidden shadow transition-transform duration-300 hover:-translate-y-2">
                     <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }">
 
-                        <img class="w-72 h-48" :src="pic_prefix + article.cover_img" alt="new_pic">
+                        <img class="w-72 h-48" :src="url_prefix.pic_prefix + article.cover_img" alt="new_pic">
                         <div class="p-4">
                             <div class="flex flex-row justify-between items-center">
                                 <div class="text-sm text-gray-700 bg-gray-100 p-2 rounded">

@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import { pic_prefix } from '@/utils/baseInfo';
+import { url_prefix } from '@/utils/baseInfo';
+import TitleComponent from '@/components/TitleComponent.vue';
 </script>
 
 <template>
     <section class="mx-auto w-7xl">
-        <div class="flex items-center py-4">
-            <span class="h-5 w-1 rounded bg-primary mr-3"></span>
-            <div>
-                <p class="text-xs text-gray-500">Station Features</p>
-                <h2 class="text-lg font-semibold text-gray-900">泵站特色</h2>
-            </div>
-        </div>
+        <TitleComponent>
+            <template #first>泵站特色</template>
+            <template #second>Station Features</template>
+        </TitleComponent>
 
         <div class="text-gray-600 body-font mb-8">
             <div class="container px-5 py-4 mx-auto">
@@ -18,7 +16,7 @@ import { pic_prefix } from '@/utils/baseInfo';
                     <div class="p-4 lg:w-1/3">
                         <div
                             class="h-full bg-white bg-opacity-75 rounded-lg overflow-hidden text-center relative shadow transition-transform duration-300 hover:-translate-y-2">
-                            <img :src="pic_prefix + 'b4c701117a514224988b936e51aa8867.jpg'" alt="">
+                            <img :src="url_prefix.pic_prefix + 'b4c701117a514224988b936e51aa8867.jpg'" alt="">
                             <div class="m-8">
                                 <h2 class="tracking-widest text-sm title-font font-medium text-gray-400 my-4 ">
                                     运管养护</h2>
@@ -40,7 +38,7 @@ import { pic_prefix } from '@/utils/baseInfo';
                     <div class="p-4 lg:w-1/3">
                         <div
                             class="h-full bg-white bg-opacity-75 rounded-lg overflow-hidden text-center relative shadow transition-transform duration-300 hover:-translate-y-2">
-                            <img :src="pic_prefix + '5a0605d992e944eab6c8b623e6465337.png'" alt="">
+                            <img :src="url_prefix.pic_prefix + '5a0605d992e944eab6c8b623e6465337.png'" alt="">
                             <div class="m-8">
                                 <h2 class="tracking-widest text-sm title-font font-medium text-gray-400 my-4 ">
                                     安全生产</h2>
@@ -62,7 +60,7 @@ import { pic_prefix } from '@/utils/baseInfo';
                     <div class="p-4 lg:w-1/3">
                         <div
                             class="h-full bg-white bg-opacity-75 rounded-lg overflow-hidden text-center relative shadow transition-transform duration-300 hover:-translate-y-2">
-                            <img :src="pic_prefix + '52491d5c35d04dfc91157c59da600639.JPG'" alt="">
+                            <img :src="url_prefix.pic_prefix + '52491d5c35d04dfc91157c59da600639.JPG'" alt="">
                             <div class="m-8">
                                 <h2 class="tracking-widest text-sm title-font font-medium text-gray-400 my-4 ">
                                     标准化运行</h2>

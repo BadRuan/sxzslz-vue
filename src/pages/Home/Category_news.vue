@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TitleComponent from '@/components/TitleComponent.vue';
 import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useArticleStore } from '@/store/article';
@@ -14,17 +15,12 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="bg-neutral-100 py-8">
+    <div class="bg-neutral-100 py-4">
         <section class="mx-auto w-7xl h-full">
-            <div class="flex justify-between items-end">
-                <div class="flex items-center py-4">
-                    <span class="h-5 w-1 rounded bg-primary mr-4"></span>
-                    <div>
-                        <p class="text-xs text-gray-500">Category News</p>
-                        <h2 class="text-lg font-semibold text-gray-900">分类资讯</h2>
-                    </div>
-                </div>
-            </div>
+            <TitleComponent>
+                <template #first>分类资讯</template>
+                <template #second>Category News</template>
+            </TitleComponent>
 
             <div class="flex flex-row justify-around">
                 <div class="bg-white w-100 p-4 shadow rounded">
@@ -35,7 +31,7 @@ onMounted(() => {
                             查看更多 &gt;
                         </RouterLink>
                     </div>
-                    <ul class="flex flex-col gap-4 justify-around divide-y divide-gray-200">
+                    <ul class="flex flex-col gap-4 justify-around divide-y divide-dashed divide-gray-200">
                         <RouterLink v-for="item in notice_article" :key="item.id"
                             :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
                             <li
@@ -49,7 +45,7 @@ onMounted(() => {
                                     </svg>
 
                                     <div class="text-gray-900 group-hover:text-primary text-sm py-2 px-2">{{ item.title
-                                        }}</div>
+                                    }}</div>
                                 </div>
                                 <div class="text-gray-400 text-right text-sm px-4">{{ easy_date_text(item.create_at) }}
                                 </div>
@@ -66,7 +62,7 @@ onMounted(() => {
                             查看更多 &gt;
                         </RouterLink>
                     </div>
-                    <ul class="flex flex-col gap-4 justify-around divide-y divide-gray-200">
+                    <ul class="flex flex-col gap-4 justify-around divide-y divide-dashed divide-gray-200">
                         <RouterLink v-for="item in meeting_article" :key="item.id"
                             :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
                             <li
@@ -80,7 +76,7 @@ onMounted(() => {
                                     </svg>
 
                                     <div class="text-gray-900 group-hover:text-primary text-sm py-2 px-2">{{ item.title
-                                        }}</div>
+                                    }}</div>
                                 </div>
                                 <div class="text-gray-400 text-right text-sm px-4">{{ easy_date_text(item.create_at) }}
                                 </div>
@@ -98,7 +94,7 @@ onMounted(() => {
                             查看更多 &gt;
                         </RouterLink>
                     </div>
-                    <ul class="flex flex-col gap-4 justify-around divide-y divide-gray-200">
+                    <ul class="flex flex-col gap-4 justify-around divide-y divide-dashed divide-gray-200">
                         <RouterLink v-for="item in finance_article" :key="item.id"
                             :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
                             <li
@@ -112,7 +108,7 @@ onMounted(() => {
                                     </svg>
 
                                     <div class="text-gray-900 group-hover:text-primary text-sm py-2 px-2">{{ item.title
-                                    }}</div>
+                                        }}</div>
                                 </div>
                                 <div class="text-gray-400 text-right text-sm px-4">{{ easy_date_text(item.create_at) }}
                                 </div>
