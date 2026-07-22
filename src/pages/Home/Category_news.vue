@@ -26,7 +26,7 @@ onMounted(() => {
                 <div class="bg-white w-100 p-4 shadow rounded">
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-sm font-bold my-2">通知公告</div>
-                        <RouterLink :to="{ name: 'ArticleList', query: { category: 2 } }"
+                        <RouterLink :to="{ name: 'ArticleList', query: { category: 4 } }"
                             class="text-sm m-4 hover:text-red-700">
                             查看更多 &gt;
                         </RouterLink>
@@ -45,7 +45,7 @@ onMounted(() => {
                                     </svg>
 
                                     <div class="text-gray-900 group-hover:text-primary text-sm py-2 px-2">{{ item.title
-                                    }}</div>
+                                        }}</div>
                                 </div>
                                 <div class="text-gray-400 text-right text-sm px-4">{{ easy_date_text(item.create_at) }}
                                 </div>
@@ -57,7 +57,7 @@ onMounted(() => {
                 <div class="bg-white w-100 p-4 shadow rounded">
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-sm font-bold my-2">会议公开</div>
-                        <RouterLink :to="{ name: 'ArticleList', query: { category: 4 } }"
+                        <RouterLink :to="{ name: 'ArticleList', query: { category: 5 } }"
                             class="text-sm m-4 hover:text-red-700">
                             查看更多 &gt;
                         </RouterLink>
@@ -76,7 +76,7 @@ onMounted(() => {
                                     </svg>
 
                                     <div class="text-gray-900 group-hover:text-primary text-sm py-2 px-2">{{ item.title
-                                    }}</div>
+                                        }}</div>
                                 </div>
                                 <div class="text-gray-400 text-right text-sm px-4">{{ easy_date_text(item.create_at) }}
                                 </div>
@@ -89,7 +89,7 @@ onMounted(() => {
                 <div class="bg-white w-100 p-4 shadow rounded">
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-sm font-bold my-2">财务信息</div>
-                        <RouterLink :to="{ name: 'ArticleList', query: { category: 5 } }"
+                        <RouterLink :to="{ name: 'ArticleList', query: { category: 8 } }"
                             class="text-sm m-4 hover:text-red-700">
                             查看更多 &gt;
                         </RouterLink>
@@ -108,7 +108,7 @@ onMounted(() => {
                                     </svg>
 
                                     <div class="text-gray-900 group-hover:text-primary text-sm py-2 px-2">{{ item.title
-                                        }}</div>
+                                    }}</div>
                                 </div>
                                 <div class="text-gray-400 text-right text-sm px-4">{{ easy_date_text(item.create_at) }}
                                 </div>

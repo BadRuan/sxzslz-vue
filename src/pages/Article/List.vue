@@ -11,7 +11,7 @@ const route = useRoute();
 const category_store = useCategoryStore();
 const article_store = useArticleStore();
 
-let category_id: number = 1;
+let category_id: number = 3;
 category_id = Number(route.query.category);
 let active_category: number = category_id;
 const { categories } = storeToRefs(category_store);

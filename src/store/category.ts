@@ -9,7 +9,7 @@ export interface CategoryModel {
 
 class CategoryService{
     public getCategoryArray() {
-        return apiService.get('/category/')
+        return apiService.get('/category')
     }
 }
 

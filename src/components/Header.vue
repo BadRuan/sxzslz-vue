@@ -17,7 +17,7 @@
                         网站首页
                     </RouterLink>
 
-                    <RouterLink :to="{ name: 'ArticleList', query: { category: 1 } }"
+                    <RouterLink :to="{ name: 'ArticleList', query: { category: 3 } }"
                         active-class="!bg-gray-100 !text-primary !font-semibold rounded-md"
                         class="rounded-md px-3 py-2 font-medium text-gray-700 hover:bg-gray-50 hover:text-primary">
                         新闻列表

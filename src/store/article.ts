@@ -54,11 +54,11 @@ export const useArticleStore = defineStore('article', () => {
   const getCategoryArticle = async () =>{
     loading.value = true
     try {
-      const res1 = await articleService.getArticleByCategoryId(2, 4)
+      const res1 = await articleService.getArticleByCategoryId(4, 4)
       notice_article.value = res1.data
-      const res2 = await articleService.getArticleByCategoryId(4, 4)
+      const res2 = await articleService.getArticleByCategoryId(5, 4)
       meeting_article.value = res2.data
-      const res3 = await articleService.getArticleByCategoryId(5, 4)
+      const res3 = await articleService.getArticleByCategoryId(8, 4)
       finance_article.value = res3.data
     } catch (error) {
       console.error('获取最新文章列表失败:', error)

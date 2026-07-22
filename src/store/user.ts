@@ -9,7 +9,7 @@ export interface UserModel {
 
 class UserService{
     public getUserArray() {
-        return apiService.get('/user/')
+        return apiService.get('/user')
     }
 }
 
