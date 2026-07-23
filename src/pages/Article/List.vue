@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, watch, computed, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router'; // 引入 useRouter
 import { storeToRefs } from 'pinia';
 import { url_prefix } from '@/utils/baseInfo';
 import { useCategoryStore } from '@/store/category';
@@ -8,49 +8,71 @@ import { useArticleStore } from '@/store/article';
 import { date_text, category_text } from '@/utils/formatters';
 
 const route = useRoute();
+const router = useRouter(); // 实例化 router
 const category_store = useCategoryStore();
 const article_store = useArticleStore();
 
-let category_id: number = 3;
-category_id = Number(route.query.category);
-let active_category: number = category_id;
 const { categories } = storeToRefs(category_store);
-const { latest_article } = storeToRefs(article_store);
+const { article_list } = storeToRefs(article_store);
 
 const loading = ref(true);
 
-const change_category = async (category_id: number) => {
-    loading.value = true;
-    active_category = category_id;
-    await article_store.getLatest(category_id);
-    loading.value = false;
-};
+// 【修复 1】使用计算属性动态获取当前分类 ID，保证高亮状态始终与 URL 同步
+const active_category = computed(() => Number(route.query.category) || 3);
+
+// 【修复 2】监听路由 query 变化，自动拉取数据
+watch(
+    () => route.query.category,
+    (newCategory) => {
+        // 只要 query 发生变化，就重新请求数据
+        const categoryId = typeof newCategory === 'string' ? Number(newCategory) : NaN;
+        const safeCategoryId = !isNaN(categoryId) ? categoryId : 3;
+        article_store.getArticleList(safeCategoryId);
+    },
+    { immediate: true } // 首次进入页面时也会立即执行
+);
 
 onMounted(async () => {
     loading.value = true;
     await Promise.all([
         category_store.checkCategory(),
-        article_store.getLatest(category_id)
+        // 初始加载使用计算属性获取的 ID
+        article_store.getArticleList(active_category.value)
     ]);
     loading.value = false;
 });
+
+// 【修复 3】处理侧边栏点击，解决点击当前分类不触发路由更新的问题
+const handleCategoryClick = (categoryId: number) => {
+    // 如果点击的是当前已激活的分类，强制重新 push 当前路由
+    // 这样会触发上方的 watch，从而刷新列表数据
+    if (active_category.value === categoryId) {
+        router.push({
+            name: 'ArticleList',
+            query: { category: categoryId }
+        });
+    }
+};
 </script>
 
 <template>
     <main class="bg-background">
         <div class="min-h-screen py-10 px-4">
-
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col gap-8 lg:flex-row">
                     <aside class="lg:w-64 shrink-0">
                         <div class="rounded-lg bg-white p-4 shadow-xs ring-1 ring-border">
                             <h3 class="text-sm font-semibold text-gray-900 mb-3">新闻分类</h3>
                             <nav class="flex flex-col space-y-1">
-                                <a v-for="item in categories" @click="change_category(item.id)" :key="item.id" href="#"
-                                    :class="[active_category == item.id ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-50 hover:text-primary']"
-                                    class="rounded-md px-3 py-2 text-sm">
+                                <RouterLink v-for="item in categories" :key="item.id"
+                                    :to="{ name: 'ArticleList', query: { category: item.id } }" :class="[
+                                        active_category === item.id
+                                            ? 'bg-primary text-white'
+                                            : 'text-gray-700 hover:bg-gray-50 hover:text-primary'
+                                    ]" class="rounded-md px-3 py-2 text-sm"
+                                    @click.prevent="handleCategoryClick(item.id)">
                                     {{ item.name }}
-                                </a>
+                                </RouterLink>
                             </nav>
                         </div>
                     </aside>
@@ -67,7 +89,7 @@ onMounted(async () => {
                         <!-- 正常内容 -->
                         <template v-else>
                             <div class="grid grid-cols-3 gap-8">
-                                <article v-for="(article, index) in latest_article" :index="index"
+                                <article v-for="(article, index) in article_list" :key="index"
                                     class="flex flex-col overflow-hidden bg-white rounded shadow-xs ring-1 ring-border transition-transform duration-300 hover:-translate-y-2">
                                     <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }">
                                         <div class="w-full overflow-hidden">
@@ -98,7 +120,7 @@ onMounted(async () => {
                                 aria-label="Pagination">
                                 <div class="hidden sm:block">
                                     <p class="text-sm text-gray-700">
-                                        共 <span class="font-medium">{{ latest_article.length }}</span> 条，
+                                        共 <span class="font-medium">{{ article_list.length }}</span> 条，
                                         第 <span class="font-medium">1</span> 页 / 共 <span class="font-medium">1</span> 页
                                     </p>
                                 </div>

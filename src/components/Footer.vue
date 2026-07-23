@@ -43,11 +43,11 @@
                             <RouterLink :to="{ name: 'About' }" class="hover:text-primary transition">关于我们</RouterLink>
                         </li>
                         <li>
-                            <RouterLink :to="{ name: 'ArticleList', query: { category: 5 } }"
+                            <RouterLink :to="{ name: 'ArticleList', query: { category: 8 } }"
                                 class="hover:text-primary transition">财务公开</RouterLink>
                         </li>
                         <li>
-                            <RouterLink :to="{ name: 'ArticleList', query: { category: 2 } }"
+                            <RouterLink :to="{ name: 'ArticleList', query: { category: 4 } }"
                                 class="hover:text-primary transition">通知公告</RouterLink>
                         </li>
                         <li><a href="#" class="hover:text-primary transition">政策法规</a></li>

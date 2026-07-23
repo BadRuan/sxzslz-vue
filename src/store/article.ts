@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 import { defineStore } from 'pinia';
 import apiService from '@/utils/apiService';
 
@@ -31,19 +31,57 @@ class ArticleService{
 const articleService = new ArticleService();
 
 export const useArticleStore = defineStore('article', () => {
-  const latest_article = ref<ArticleModel[]>([]);
+  const loading = ref(false);
+
   const recommended_article = ref<ArticleModel[]>([]);
   const notice_article = ref<ArticleModel[]>([]);
   const meeting_article = ref<ArticleModel[]>([]);
   const finance_article = ref<ArticleModel[]>([]);
-  const article_detail = ref<ArticleModel>();
-  const loading = ref(false);
+  const hr_job = ref<ArticleModel[]>([]);
+  const article_obj = reactive({
+    recommended: recommended_article, // 首页封面图
+    notice: notice_article, // 通知公告
+    metting: meeting_article, // 会议公开
+    finance: finance_article, // 财务信息
+    hr_job: hr_job // 人事动态
+  })
+  const checkHomeArticle = async () =>{
+    loading.value = true
+    try {
+      if (recommended_article.value.length == 0) {
+        const res = await articleService.getRecommended(6)
+        recommended_article.value = res.data
+      };
+      if (notice_article.value.length == 0){
+        const res = await articleService.getArticleByCategoryId(4, 6);
+        notice_article.value = res.data;
+      };
+      if (meeting_article.value.length == 0) {
+        const res = await articleService.getArticleByCategoryId(5, 4)
+        meeting_article.value = res.data;
+      };
+      if (finance_article.value.length == 0) {
+        const res = await articleService.getArticleByCategoryId(8, 4)
+        finance_article.value = res.data;
+      };
+      if (hr_job.value.length == 0) {
+        const res = await articleService.getArticleByCategoryId(7, 4)
+        hr_job.value = res.data;
+      }
+    } catch (error) {
+      console.error('获取最新文章列表失败:', error)
+    } finally {
+      loading.value = false
+    }
+  }
 
-  const getLatest = async (category_id: number) => {
+
+const article_list = ref<ArticleModel[]>([]);
+const getArticleList = async (category_id: number) => {
     loading.value = true
     try {
       const res = await articleService.getArticleByCategoryId(category_id, 30)
-      latest_article.value = res.data
+      article_list.value = res.data
     } catch (error) {
       console.error('获取最新文章列表失败:', error)
     } finally {
@@ -51,34 +89,7 @@ export const useArticleStore = defineStore('article', () => {
     }
   }
 
-  const getCategoryArticle = async () =>{
-    loading.value = true
-    try {
-      const res1 = await articleService.getArticleByCategoryId(4, 4)
-      notice_article.value = res1.data
-      const res2 = await articleService.getArticleByCategoryId(5, 4)
-      meeting_article.value = res2.data
-      const res3 = await articleService.getArticleByCategoryId(8, 4)
-      finance_article.value = res3.data
-    } catch (error) {
-      console.error('获取最新文章列表失败:', error)
-    } finally {
-      loading.value = false
-    }
-  }
-
-  const getRecommended = async () => {
-    loading.value = true
-    try {
-      const res = await articleService.getRecommended(4)
-      recommended_article.value = res.data
-    } catch (error) {
-      console.error('获取推荐文章列表失败:', error)
-    } finally {
-      loading.value = false
-    }
-  }
-
+  const article_detail = ref<ArticleModel>();
   const getDetail = async (slug: string) => {
     loading.value = true
     try {
@@ -91,5 +102,5 @@ export const useArticleStore = defineStore('article', () => {
     }
   }
 
-  return { latest_article, notice_article, meeting_article, finance_article, getLatest, recommended_article, getRecommended, getCategoryArticle, article_detail, getDetail, loading }
+  return { article_obj, checkHomeArticle, article_list, getArticleList, article_detail, getDetail, loading }
 })

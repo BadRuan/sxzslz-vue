@@ -3,7 +3,7 @@ import { url_prefix } from '@/utils/baseInfo';
 import TitleComponent from '@/components/TitleComponent.vue';
 </script>
 <template>
-    <div class="bg-neutral-100 py-4">
+    <div class="bg-background py-4">
         <section class="mx-auto w-7xl">
             <TitleComponent>
                 <template #first>泵站风光</template>
