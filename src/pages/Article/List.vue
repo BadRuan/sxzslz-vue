@@ -98,8 +98,9 @@ const handleCategoryClick = (categoryId: number) => {
                                         </div>
                                         <div class="p-4 flex flex-col gap-4">
                                             <div class="flex flex-row items-center justify-between">
-                                                <div class="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">
-                                                    {{ category_text(article.category_id, categories) }}
+                                                <div class="text-sm text-gray-700 py-1 rounded">
+                                                    <span class="text-primary">|</span> {{
+                                                        category_text(article.category_id, categories) }}
                                                 </div>
                                                 <div>
                                                     <time class="text-xs text-gray-600">

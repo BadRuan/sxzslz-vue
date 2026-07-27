@@ -55,11 +55,11 @@ onMounted(async () => {
 
             <div v-else class="w-7xl flex flex-row gap-8 items-center justify-around ">
 
-                <Splide :options="options" aria-label="首页新闻轮播" class="overflow-hidden shadow w-200 h-120">
+                <Splide :options="options" aria-label="首页新闻轮播" class="overflow-hidden shadow rounded w-180 h-120">
                     <SplideSlide v-for="(article, index) in article_obj.recommended" :key="index">
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
                             class="relative bg-cover bg-center">
-                            <img class="w-200 h-120" :src="url_prefix.pic_prefix + article.cover_img" alt="new_pic">
+                            <img class="w-180 h-120" :src="url_prefix.pic_prefix + article.cover_img" alt="new_pic">
                             <div
                                 class="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none">
                             </div>
@@ -75,7 +75,7 @@ onMounted(async () => {
                     </SplideSlide>
                 </Splide>
 
-                <div class="bg-white w-100 p-4 shadow rounded">
+                <div class="bg-white w-140 p-4 shadow rounded">
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-sm font-bold my-2">通知公告</div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: 4 } }"

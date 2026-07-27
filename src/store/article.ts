@@ -53,7 +53,7 @@ export const useArticleStore = defineStore('article', () => {
         recommended_article.value = res.data
       };
       if (notice_article.value.length == 0){
-        const res = await articleService.getArticleByCategoryId(4, 6);
+        const res = await articleService.getArticleByCategoryId(4, 8);
         notice_article.value = res.data;
       };
       if (meeting_article.value.length == 0) {
