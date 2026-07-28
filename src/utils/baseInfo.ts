@@ -4,18 +4,18 @@ interface URL_Prefix {
     api_prefix: string
 }
 
-const dev_url_prefix: URL_Prefix = {
-    pic_prefix: 'http://100.68.9.83:8666/' + 'image/',
-    document_prefix: 'http://100.68.9.83:8666/' + 'document/',
-    api_prefix: 'http://100.68.9.83:8088/'
+const server1 = 'http://100.68.9.83:8088/'
+const server2 = '/api/'
+
+const dist_url_prefix = (url_server: string) => {
+    return {
+        pic_prefix: url_server + 'image/',
+        document_prefix: url_server + 'document/',
+        api_prefix: url_server
+    }
 }
 
-const dist_url_prefix: URL_Prefix = {
-    pic_prefix: '/resources/' + 'image/',
-    document_prefix: '/resources/' + 'document/',
-    api_prefix: '/api/'
-}
 
-const url_prefix = dist_url_prefix
+const url_prefix: URL_Prefix = dist_url_prefix(server2)
 
 export { url_prefix }

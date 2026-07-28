@@ -39,6 +39,11 @@ const routes: RouteRecordRaw[] = [
                         meta: { title: '文章详情' }
                     }
                 ]
+            },
+            {
+                path: '/document',
+                name: 'Document',
+                component: () => import("@/pages/Document/Index.vue")
             }
         ]
     },
