@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import type { CategoryModel } from '@/store/category';
+import type { CategoryModel } from '@/store/base';
 
 /**
  * 格式化日期为 YYYY-MM-DD 格式

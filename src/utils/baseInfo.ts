@@ -4,7 +4,7 @@ interface URL_Prefix {
     api_prefix: string
 }
 
-const server1 = 'http://100.68.9.83:8088/'
+const server1 = 'http://100.68.9.83:8089/'
 const server2 = '/api/'
 
 const dist_url_prefix = (url_server: string) => {
@@ -16,6 +16,6 @@ const dist_url_prefix = (url_server: string) => {
 }
 
 
-const url_prefix: URL_Prefix = dist_url_prefix(server2)
+const url_prefix: URL_Prefix = dist_url_prefix(server1)
 
 export { url_prefix }

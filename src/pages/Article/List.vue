@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router'; // 引入 useRouter
+import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { url_prefix } from '@/utils/baseInfo';
-import { useCategoryStore } from '@/store/category';
+import { useBaseinfoStore } from '@/store/base';
 import { useArticleStore } from '@/store/article';
 import { date_text, category_text } from '@/utils/formatters';
 
 const route = useRoute();
-const router = useRouter(); // 实例化 router
-const category_store = useCategoryStore();
+const router = useRouter();
+const baseinfo_store = useBaseinfoStore();
 const article_store = useArticleStore();
 
-const { categories } = storeToRefs(category_store);
+const { categories } = storeToRefs(baseinfo_store);
 const { article_list } = storeToRefs(article_store);
 
 const loading = ref(true);
@@ -27,7 +27,7 @@ watch(
         // 只要 query 发生变化，就重新请求数据
         const categoryId = typeof newCategory === 'string' ? Number(newCategory) : NaN;
         const safeCategoryId = !isNaN(categoryId) ? categoryId : 3;
-        article_store.getArticleList(safeCategoryId);
+        article_store.getArticleList(safeCategoryId, 1, 30);
     },
     { immediate: true } // 首次进入页面时也会立即执行
 );
@@ -35,9 +35,9 @@ watch(
 onMounted(async () => {
     loading.value = true;
     await Promise.all([
-        category_store.checkCategory(),
+        baseinfo_store.checkBaseinfo(),
         // 初始加载使用计算属性获取的 ID
-        article_store.getArticleList(active_category.value)
+        article_store.getArticleList(active_category.value, 1, 30)
     ]);
     loading.value = false;
 });

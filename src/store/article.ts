@@ -17,8 +17,8 @@ export interface ArticleModel {
 }
 
 class ArticleService{
-    public getArticleByCategoryId(category_id: number = 1, page_size: number = 4) {
-        return apiService.get('/article/latest/', { category_id, page_size })
+    public getArticleByCategoryId(category_id: number = 1, page: number = 1, page_size: number = 30) {
+        return apiService.get('/article/latest/', { category_id, page, page_size })
     }
     public getRecommended(limit: number) {
         return apiService.get('/article/recommended', { limit })
@@ -32,7 +32,7 @@ const articleService = new ArticleService();
 
 export const useArticleStore = defineStore('article', () => {
   const loading = ref(false);
-
+  const page_number = ref<number>(1);
   const recommended_article = ref<ArticleModel[]>([]);
   const notice_article = ref<ArticleModel[]>([]);
   const meeting_article = ref<ArticleModel[]>([]);
@@ -50,7 +50,7 @@ export const useArticleStore = defineStore('article', () => {
     try {
       if (recommended_article.value.length == 0) {
         const res = await articleService.getRecommended(6)
-        recommended_article.value = res.data
+        recommended_article.value = res
       };
       if (notice_article.value.length == 0){
         const res = await articleService.getArticleByCategoryId(4, 8);
@@ -77,13 +77,13 @@ export const useArticleStore = defineStore('article', () => {
 
 
 const article_list = ref<ArticleModel[]>([]);
-const getArticleList = async (category_id: number) => {
+const getArticleList = async (category_id: number, page: number, page_size: number) => {
     loading.value = true
     try {
-      const res = await articleService.getArticleByCategoryId(category_id, 30)
+      const res = await articleService.getArticleByCategoryId(category_id, page, page_size)
       article_list.value = res.data
     } catch (error) {
-      console.error('获取最新文章列表失败:', error)
+      console.error('获取文章分类列表失败:', error)
     } finally {
       loading.value = false
     }
@@ -102,5 +102,5 @@ const getArticleList = async (category_id: number) => {
     }
   }
 
-  return { article_obj, checkHomeArticle, article_list, getArticleList, article_detail, getDetail, loading }
+  return { article_obj, checkHomeArticle, article_list, page_number, getArticleList, article_detail, getDetail, loading }
 })

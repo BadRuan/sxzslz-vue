@@ -7,8 +7,7 @@ import linkAttributes from 'markdown-it-link-attributes';
 import DOMPurify from 'dompurify';
 import dayjs from 'dayjs';
 import { useArticleStore } from '@/store/article';
-import { useCategoryStore } from '@/store/category';
-import { useUserStore } from '@/store/user';
+import { useBaseinfoStore } from '@/store/base';
 import { url_prefix } from '@/utils/baseInfo';
 import { category_text } from '@/utils/formatters';
 import 'github-markdown-css/github-markdown.css';
@@ -17,12 +16,10 @@ const route = useRoute();
 const router = useRouter();
 const slug = route.params.slug;
 const article_store = useArticleStore();
-const category_store = useCategoryStore();
-const user_store = useUserStore();
+const baseinfo_store = useBaseinfoStore();
 
 const { article_detail } = storeToRefs(article_store);
-const { categories } = storeToRefs(category_store);
-const { users } = storeToRefs(user_store);
+const { categories, users } = storeToRefs(baseinfo_store);
 
 const error = ref<string | null>(null);
 const loading = ref(true);
@@ -41,8 +38,7 @@ onMounted(async () => {
         error.value = '文章不存在或已被删除';
     }
     await Promise.all([
-        user_store.checkUser(),
-        categories.value.length === 0 ? category_store.checkCategory() : Promise.resolve()
+        baseinfo_store.checkBaseinfo(),
     ]);
 
     loading.value = false;

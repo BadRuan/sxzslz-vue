@@ -6,15 +6,15 @@ import { url_prefix } from '@/utils/baseInfo';
 import { easy_date_text } from '@/utils/formatters';
 import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useCategoryStore } from '@/store/category';
+import { useBaseinfoStore } from '@/store/base';
 import { useArticleStore } from '@/store/article';
 import { category_text } from '@/utils/formatters';
 
-const category_store = useCategoryStore()
-const article_store = useArticleStore()
+const baseinfo_store = useBaseinfoStore();
+const article_store = useArticleStore();
 
-const { categories } = storeToRefs(category_store)
-const { article_obj, loading } = storeToRefs(article_store)
+const { categories } = storeToRefs(baseinfo_store);
+const { article_obj, loading } = storeToRefs(article_store);
 
 const options = {
     type: 'loop',        // 无缝循环播放
@@ -28,7 +28,7 @@ const options = {
 
 onMounted(async () => {
     await Promise.all([
-        category_store.checkCategory(),
+        baseinfo_store.checkBaseinfo(),
         article_store.checkHomeArticle()
     ]);
 })
@@ -97,7 +97,7 @@ onMounted(async () => {
                                     </svg>
 
                                     <div class="text-gray-900 group-hover:text-primary text-sm py-2 px-2">{{ item.title
-                                        }}</div>
+                                    }}</div>
                                 </div>
                                 <div class="text-gray-400 text-right text-sm px-4">{{ easy_date_text(item.create_at) }}
                                 </div>
