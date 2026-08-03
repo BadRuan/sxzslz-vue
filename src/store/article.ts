@@ -53,19 +53,19 @@ export const useArticleStore = defineStore('article', () => {
         recommended_article.value = res
       };
       if (notice_article.value.length == 0){
-        const res = await articleService.getArticleByCategoryId(4, 8);
+        const res = await articleService.getArticleByCategoryId(4, 1, 8);
         notice_article.value = res.data;
       };
       if (meeting_article.value.length == 0) {
-        const res = await articleService.getArticleByCategoryId(5, 4)
+        const res = await articleService.getArticleByCategoryId(5, 1, 4)
         meeting_article.value = res.data;
       };
       if (finance_article.value.length == 0) {
-        const res = await articleService.getArticleByCategoryId(8, 4)
+        const res = await articleService.getArticleByCategoryId(8, 1, 4)
         finance_article.value = res.data;
       };
       if (hr_job.value.length == 0) {
-        const res = await articleService.getArticleByCategoryId(7, 4)
+        const res = await articleService.getArticleByCategoryId(7, 1, 4)
         hr_job.value = res.data;
       }
     } catch (error) {
@@ -77,11 +77,18 @@ export const useArticleStore = defineStore('article', () => {
 
 
 const article_list = ref<ArticleModel[]>([]);
+const article_total = ref<number>(0);
+const article_page = ref<number>(1);
+const article_has_next = ref<boolean>(false);
+
 const getArticleList = async (category_id: number, page: number, page_size: number) => {
     loading.value = true
     try {
       const res = await articleService.getArticleByCategoryId(category_id, page, page_size)
       article_list.value = res.data
+      article_total.value = res.total
+      article_page.value = res.page
+      article_has_next.value = res.has_next
     } catch (error) {
       console.error('获取文章分类列表失败:', error)
     } finally {
@@ -102,5 +109,5 @@ const getArticleList = async (category_id: number, page: number, page_size: numb
     }
   }
 
-  return { article_obj, checkHomeArticle, article_list, page_number, getArticleList, article_detail, getDetail, loading }
+  return { article_obj, checkHomeArticle, article_list, article_total, article_page, article_has_next, page_number, getArticleList, article_detail, getDetail, loading }
 })

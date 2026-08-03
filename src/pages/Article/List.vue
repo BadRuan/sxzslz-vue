@@ -13,36 +13,44 @@ const baseinfo_store = useBaseinfoStore();
 const article_store = useArticleStore();
 
 const { categories } = storeToRefs(baseinfo_store);
-const { article_list } = storeToRefs(article_store);
+const { article_list, article_total, article_page, article_has_next } = storeToRefs(article_store);
 
 const loading = ref(true);
 
-// 【修复 1】使用计算属性动态获取当前分类 ID，保证高亮状态始终与 URL 同步
 const active_category = computed(() => Number(route.query.category) || 3);
 
-// 【修复 2】监听路由 query 变化，自动拉取数据
 watch(
-    () => route.query.category,
-    (newCategory) => {
-        // 只要 query 发生变化，就重新请求数据
-        const categoryId = typeof newCategory === 'string' ? Number(newCategory) : NaN;
-        const safeCategoryId = !isNaN(categoryId) ? categoryId : 3;
-        article_store.getArticleList(safeCategoryId, 1, 30);
+    () => route.query,
+    (newQuery, oldQuery) => {
+        const categoryId = Number(newQuery.category) || 3;
+        const pageNum = Number(newQuery.page) || 1;
+
+        // 首次加载（oldQuery 不存在）或页码变化
+        if (!oldQuery || newQuery.category === oldQuery.category) {
+            article_store.getArticleList(categoryId, pageNum, 30);
+        } else {
+            // 分类变化时重置页码为 1
+            article_store.getArticleList(categoryId, 1, 30);
+            // 如果页码不是 1，需要同步更新路由
+            if (pageNum !== 1) {
+                router.replace({
+                    name: 'ArticleList',
+                    query: { category: categoryId, page: 1 }
+                });
+            }
+        }
     },
-    { immediate: true } // 首次进入页面时也会立即执行
+    { immediate: true }
 );
 
 onMounted(async () => {
     loading.value = true;
     await Promise.all([
         baseinfo_store.checkBaseinfo(),
-        // 初始加载使用计算属性获取的 ID
-        article_store.getArticleList(active_category.value, 1, 30)
     ]);
     loading.value = false;
 });
 
-// 【修复 3】处理侧边栏点击，解决点击当前分类不触发路由更新的问题
 const handleCategoryClick = (categoryId: number) => {
     // 如果点击的是当前已激活的分类，强制重新 push 当前路由
     // 这样会触发上方的 watch，从而刷新列表数据
@@ -51,6 +59,26 @@ const handleCategoryClick = (categoryId: number) => {
             name: 'ArticleList',
             query: { category: categoryId }
         });
+    }
+};
+
+// 【功能】翻页功能
+const goToPage = (page: number) => {
+    router.push({
+        name: 'ArticleList',
+        query: { category: active_category.value, page }
+    });
+};
+
+const goToPrevPage = () => {
+    if (article_page.value > 1) {
+        goToPage(article_page.value - 1);
+    }
+};
+
+const goToNextPage = () => {
+    if (article_has_next.value) {
+        goToPage(article_page.value + 1);
     }
 };
 </script>
@@ -121,15 +149,29 @@ const handleCategoryClick = (categoryId: number) => {
                                 aria-label="Pagination">
                                 <div class="hidden sm:block">
                                     <p class="text-sm text-gray-700">
-                                        共 <span class="font-medium">{{ article_list.length }}</span> 条，
-                                        第 <span class="font-medium">1</span> 页 / 共 <span class="font-medium">1</span> 页
+                                        共 <span class="font-medium">{{ article_total }}</span> 条，
+                                        第 <span class="font-medium">{{ article_page }}</span> 页
                                     </p>
                                 </div>
                                 <div class="flex flex-1 justify-between sm:justify-end gap-2">
-                                    <a href="#"
-                                        class="relative inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">上一页</a>
-                                    <a href="#"
-                                        class="relative inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-dark">下一页</a>
+                                    <button @click="goToPrevPage" :disabled="article_page <= 1"
+                                        :class="[
+                                            article_page <= 1
+                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                : 'bg-white text-gray-900 hover:bg-gray-50'
+                                        ]"
+                                        class="relative inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold ring-1 ring-inset ring-gray-300">
+                                        上一页
+                                    </button>
+                                    <button @click="goToNextPage" :disabled="!article_has_next"
+                                        :class="[
+                                            !article_has_next
+                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                : 'bg-primary text-white hover:bg-primary-dark'
+                                        ]"
+                                        class="relative inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold">
+                                        下一页
+                                    </button>
                                 </div>
                             </nav>
                         </template>
