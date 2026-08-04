@@ -161,7 +161,7 @@ if (isNaN(indexValue) || indexValue < 0 || indexValue >= length) {
                     </div>
                     <div class="flex flex-col">
                         <div class="h-12 flex flex-row">
-                            <div class="mr-4 text-gray-600">收益范围</div>
+                            <div class="mr-4 text-gray-600">受益范围</div>
                             <div class="font-bold">{{
                                 station_array[indexValue]?.shouyimianji }} km<sup>2</sup></div>
                         </div>
@@ -227,7 +227,7 @@ if (isNaN(indexValue) || indexValue < 0 || indexValue >= length) {
                     </div>
                     <div class="flex flex-col">
                         <div class="h-12 flex flex-row">
-                            <div class="mr-4 text-gray-600">收益面积</div>
+                            <div class="mr-4 text-gray-600">受益面积</div>
                             <div class="font-bold">{{
                                 station_array[indexValue]?.shouyimianji }} 万亩</div>
                         </div>
@@ -305,7 +305,7 @@ if (isNaN(indexValue) || indexValue < 0 || indexValue >= length) {
                                     <div class="text-gray-500 text-sm">2025年08月04日 09:05:10</div>
                                 </div>
                                 <div class="font-medium text-gray-800">{{ item.title
-                                    }}
+                                }}
                                 </div>
                             </div>
                         </div>

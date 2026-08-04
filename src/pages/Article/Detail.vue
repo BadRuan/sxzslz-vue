@@ -103,14 +103,14 @@ const renderedHtml = computed(() => {
     <main class="bg-background">
         <div class="min-h-screen py-10 px-4">
             <nav class="w-7xl mx-auto mb-6 px-4 sm:px-6 lg:px-8" aria-label="Breadcrumb">
-                <ol class="flex items-center gap-2 text-sm text-gray-500">
+                <ol class="flex items-center gap-2 text-base text-gray-500">
                     <li>
                         <RouterLink :to="{ name: 'Home' }" class="hover:text-primary transition-colors">
                             网站首页
                         </RouterLink>
                     </li>
                     <li>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
                             </path>
                         </svg>
@@ -122,7 +122,7 @@ const renderedHtml = computed(() => {
                         </RouterLink>
                     </li>
                     <li>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
                             </path>
                         </svg>
@@ -132,8 +132,7 @@ const renderedHtml = computed(() => {
             </nav>
 
             <!-- 加载状态 -->
-            <div v-if="loading"
-                class="max-w-7xl mx-auto bg-white rounded-xl shadow-sm border border-border p-12 text-center">
+            <div v-if="loading" class="max-w-7xl mx-auto bg-white rounded-xl shadow-sm p-12 text-center">
                 <div
                     class="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4">
                 </div>
@@ -141,8 +140,7 @@ const renderedHtml = computed(() => {
             </div>
 
             <!-- 错误状态 -->
-            <div v-else-if="error"
-                class="max-w-7xl mx-auto bg-white rounded-xl shadow-sm border border-border p-12 text-center">
+            <div v-else-if="error" class="max-w-7xl mx-auto bg-white rounded-xl shadow-sm p-12 text-center">
                 <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
@@ -162,18 +160,18 @@ const renderedHtml = computed(() => {
             </div>
 
             <!-- 正常内容 -->
-            <article v-else class="max-w-7xl mx-auto bg-white rounded shadow-sm border border-border overflow-hidden">
+            <article v-else class="max-w-7xl mx-auto min-h-screen bg-white rounded shadow-sm overflow-hidden">
                 <div class="px-6 sm:px-10 pt-10 pb-6 border-b border-border text-center">
-                    <h1 class="text-3xl font-bold text-gray-900 leading-tight mb-4">
+                    <h1 class="text-3xl font-bold text-accent leading-tight mb-4">
                         {{ article_detail?.title }}
                     </h1>
                     <div
-                        class="inline-flex items-center justify-center gap-4 text-sm text-gray-500 px-3 py-1 bg-gray-50 rounded-md">
+                        class="inline-flex items-center justify-center gap-4 text-sm text-gray-600 px-3 py-1 bg-gray-100 rounded-md">
                         <time datetime="2024-07-23">{{ dayjs(article_detail?.create_at).format('YYYY年MM月DD日 HH:mm:ss')
-                            }}</time>
-                        <span class="hidden sm:inline">|</span>
+                        }}</time>
+                        <span class="hidden sm:inline text-secondary">|</span>
                         <span>来源：{{ nickname_text(article_detail?.user_id) }}</span>
-                        <span class="hidden sm:inline">|</span>
+                        <span class="hidden sm:inline text-secondary">|</span>
                         <span>阅读：{{ article_detail?.view_count }} 次</span>
                     </div>
                 </div>
@@ -185,7 +183,7 @@ const renderedHtml = computed(() => {
                         prose-blockquote:border-l-primary prose-blockquote:bg-red-50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded
                         prose-ul:list-disc prose-ul:mx-8 prose-ul:my-4 prose-ul:text-gray-700
                         prose-ol:list-decimal prose-ol:mx-8 prose-ol:my-4 prose-ol:text-gray-700
-                        prose-a:text-primary prose-a:underline prose-a:underline-offset-2 hover:prose-a:text-primary/80
+                        prose-a:text-secondary prose-a:underline prose-a:underline-offset-2 prose-a:font-bold
                         prose-img:w-2/3 prose-img:shadow prose-img:rounded-sm prose-img:my-6 prose-img:mx-auto
                         " v-html="renderedHtml">
 

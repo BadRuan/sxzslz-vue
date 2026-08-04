@@ -48,6 +48,38 @@ const routes: RouteRecordRaw[] = [
         ]
     },
     {
+        path: '/admin',
+        name: 'Admin',
+        component: () => import("@/pages/Admin/Layout.vue"),
+        redirect: '/admin/overview',
+        children: [
+            {
+                path: 'overview',
+                name: 'AdminOverview',
+                component: () => import("@/pages/Admin/Overview.vue"),
+                meta : { title: '后台概览' }
+            },
+            {
+                path: 'category',
+                name: 'AdminCategory',
+                component: () => import("@/pages/Admin/CategoryEdit.vue"),
+                meta: { title: '分类管理' }
+            },
+            {
+                path: 'list',
+                name: 'AdminArticleList',
+                component: () => import("@/pages/Admin/ArticleList.vue"),
+                meta: { title: '新闻列表' }
+            },
+            {
+                path: 'photo',
+                name: 'AdminPhoto',
+                component: () => import('@/pages/Admin/Photo.vue'),
+                meta: { title: '照片管理' }
+            }
+        ]
+    },
+    {
         path: '/:pathMatch(.*)*',
         name: 'NotFound',
         component: () => import('@/pages/NotFound.vue')

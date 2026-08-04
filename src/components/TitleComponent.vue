@@ -5,7 +5,7 @@
             <p class="text-xs text-gray-500">
                 <slot name="second"></slot>
             </p>
-            <h2 class="text-lg font-semibold text-gray-900">
+            <h2 class="text-lg font-semibold text-foreground">
                 <slot name="first"></slot>
             </h2>
         </div>

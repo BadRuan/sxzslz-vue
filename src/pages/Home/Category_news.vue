@@ -15,7 +15,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="bg-background py-4">
+    <div class="py-4">
         <section class="mx-auto w-7xl h-full">
             <TitleComponent>
                 <template #first>分类资讯</template>
@@ -24,15 +24,15 @@ onMounted(() => {
 
             <div class="flex flex-row justify-around">
 
-                <div class="bg-white w-100 p-4 shadow rounded">
+                <div class="bg-white w-100 p-4 shadow rounded divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
-                        <div class="text-gray-600 text-sm font-bold my-2">会议公开</div>
+                        <div class="text-gray-600 text-base font-bold my-2">会议公开</div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: 5 } }"
-                            class="text-sm m-4 hover:text-red-700">
+                            class="text-sm m-4 hover:text-primary">
                             查看更多 &gt;
                         </RouterLink>
                     </div>
-                    <ul class="flex flex-col gap-4 justify-around divide-y divide-dashed divide-gray-200">
+                    <ul class="flex flex-col gap-4 justify-around divide-y divide-dashed divide-border">
                         <RouterLink v-for="item in article_obj.metting" :key="item.id"
                             :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
                             <li
@@ -55,15 +55,15 @@ onMounted(() => {
                     </ul>
                 </div>
 
-                <div class="bg-white w-100 p-4 shadow rounded">
+                <div class="bg-white w-100 p-4 shadow rounded divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
-                        <div class="text-gray-600 text-sm font-bold my-2">人事动态</div>
+                        <div class="text-gray-600 text-base font-bold my-2">人事动态</div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: 7 } }"
-                            class="text-sm m-4 hover:text-red-700">
+                            class="text-sm m-4 hover:text-primary">
                             查看更多 &gt;
                         </RouterLink>
                     </div>
-                    <ul class="flex flex-col gap-4 justify-around divide-y divide-dashed divide-gray-200">
+                    <ul class="flex flex-col gap-4 justify-around divide-y divide-dashed divide-border">
                         <RouterLink v-for="item in article_obj.hr_job" :key="item.id"
                             :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
                             <li
@@ -89,7 +89,7 @@ onMounted(() => {
 
 
 
-                <div class="bg-white w-100 p-4 shadow rounded">
+                <div class="bg-white w-100 p-4 shadow rounded divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-sm font-bold my-2">财务信息</div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: 8 } }"
@@ -97,7 +97,7 @@ onMounted(() => {
                             查看更多 &gt;
                         </RouterLink>
                     </div>
-                    <ul class="flex flex-col gap-4 justify-around divide-y divide-dashed divide-gray-200">
+                    <ul class="flex flex-col gap-4 justify-around divide-y divide-dashed divide-border">
                         <RouterLink v-for="item in article_obj.finance" :key="item.id"
                             :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
                             <li

@@ -36,7 +36,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="bg-background">
+    <div class="">
         <section class="mx-auto w-7xl h-full">
             <div class="flex justify-between items-end">
                 <TitleComponent>
@@ -48,7 +48,7 @@ onMounted(async () => {
             <div v-if="loading"
                 class="max-w-7xl mx-auto bg-white rounded-xl shadow-sm border border-border p-12 text-center">
                 <div
-                    class="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4">
+                    class="animate-spin w-8 h-8 border-4 border-secondary border-t-transparent rounded-full mx-auto mb-4">
                 </div>
                 <p class="text-gray-500">加载中...</p>
             </div>
@@ -75,15 +75,15 @@ onMounted(async () => {
                     </SplideSlide>
                 </Splide>
 
-                <div class="bg-white w-140 p-4 shadow rounded">
+                <div class="bg-white w-140 p-4 shadow rounded divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
-                        <div class="text-gray-600 text-sm font-bold my-2">通知公告</div>
+                        <div class="text-gray-600 text-base font-bold my-2">通知公告</div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: 4 } }"
-                            class="text-sm m-4 hover:text-red-700">
+                            class="text-sm m-4 hover:text-primary">
                             查看更多 &gt;
                         </RouterLink>
                     </div>
-                    <ul class="flex flex-col gap-4 justify-around divide-y divide-dashed divide-gray-200">
+                    <ul class="flex flex-col gap-4 justify-around divide-y divide-dashed divide-border">
                         <RouterLink v-for="item in article_obj.notice" :key="item.id"
                             :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
                             <li
@@ -96,7 +96,8 @@ onMounted(async () => {
                                             clip-rule="evenodd"></path>
                                     </svg>
 
-                                    <div class="text-gray-900 group-hover:text-primary text-sm py-2 px-2">{{ item.title
+                                    <div class="text-gray-900 group-hover:text-primary text-sm py-2 px-2">{{
+                                        item.title
                                     }}</div>
                                 </div>
                                 <div class="text-gray-400 text-right text-sm px-4">{{ easy_date_text(item.create_at) }}

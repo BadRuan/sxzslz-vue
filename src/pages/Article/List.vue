@@ -89,14 +89,14 @@ const goToNextPage = () => {
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col gap-8 lg:flex-row">
                     <aside class="lg:w-64 shrink-0">
-                        <div class="rounded-lg bg-white p-4 shadow-xs ring-1 ring-border">
+                        <div class="rounded-lg bg-white p-4 shadow-xs">
                             <h3 class="text-sm font-semibold text-gray-900 mb-3">新闻分类</h3>
                             <nav class="flex flex-col space-y-1">
                                 <RouterLink v-for="item in categories" :key="item.id"
                                     :to="{ name: 'ArticleList', query: { category: item.id } }" :class="[
                                         active_category === item.id
-                                            ? 'bg-primary text-white'
-                                            : 'text-gray-700 hover:bg-gray-50 hover:text-primary'
+                                            ? 'bg-primary text-white font-bold'
+                                            : 'text-gray-700 hover:bg-gray-50 hover:font-bold hover:text-primary'
                                     ]" class="rounded-md px-3 py-2 text-sm"
                                     @click.prevent="handleCategoryClick(item.id)">
                                     {{ item.name }}
@@ -107,7 +107,7 @@ const goToNextPage = () => {
 
                     <div class="flex-1 min-w-0">
                         <!-- 加载状态 -->
-                        <div v-if="loading" class="bg-white rounded-xl shadow-sm border border-border p-12 text-center">
+                        <div v-if="loading" class="bg-white rounded-xl shadow-sm p-12 text-center">
                             <div
                                 class="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4">
                             </div>
@@ -118,16 +118,16 @@ const goToNextPage = () => {
                         <template v-else>
                             <div class="grid grid-cols-3 gap-8">
                                 <article v-for="(article, index) in article_list" :key="index"
-                                    class="flex flex-col overflow-hidden bg-white rounded shadow-xs ring-1 ring-border transition-transform duration-300 hover:-translate-y-2">
+                                    class="flex flex-col overflow-hidden bg-white rounded shadow-xs transition-transform duration-300 hover:-translate-y-2">
                                     <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }">
                                         <div class="w-full overflow-hidden">
                                             <img class="w-full h-52" :src="url_prefix.pic_prefix + article.cover_img"
                                                 alt="news_pic" />
                                         </div>
-                                        <div class="p-4 flex flex-col gap-4">
+                                        <div class="p-4 flex flex-col gap-4 divide-y  divide-gray-100">
                                             <div class="flex flex-row items-center justify-between">
                                                 <div class="text-sm text-gray-700 py-1 rounded">
-                                                    <span class="text-primary">|</span> {{
+                                                    <span class="text-secondary font-bold">|</span> {{
                                                         category_text(article.category_id, categories) }}
                                                 </div>
                                                 <div>
@@ -154,21 +154,19 @@ const goToNextPage = () => {
                                     </p>
                                 </div>
                                 <div class="flex flex-1 justify-between sm:justify-end gap-2">
-                                    <button @click="goToPrevPage" :disabled="article_page <= 1"
-                                        :class="[
-                                            article_page <= 1
-                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                : 'bg-white text-gray-900 hover:bg-gray-50'
-                                        ]"
+                                    <button @click="goToPrevPage" :disabled="article_page <= 1" :class="[
+                                        article_page <= 1
+                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                            : 'bg-white text-gray-900 hover:bg-gray-50'
+                                    ]"
                                         class="relative inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold ring-1 ring-inset ring-gray-300">
                                         上一页
                                     </button>
-                                    <button @click="goToNextPage" :disabled="!article_has_next"
-                                        :class="[
-                                            !article_has_next
-                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                : 'bg-primary text-white hover:bg-primary-dark'
-                                        ]"
+                                    <button @click="goToNextPage" :disabled="!article_has_next" :class="[
+                                        !article_has_next
+                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                            : 'bg-primary text-white hover:bg-primary-dark'
+                                    ]"
                                         class="relative inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold">
                                         下一页
                                     </button>
