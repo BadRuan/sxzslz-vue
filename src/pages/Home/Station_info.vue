@@ -22,14 +22,12 @@ const { station_array } = storeToRefs(station_store);
                     <img class="w-full h-full" :src="url_prefix.pic_prefix + station.thumb" alt="pic">
                 </div>
                 <div class="p-4 flex flex-col gap-2">
-                    <div class="flex flex-row justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="h-4 w-1 bg-secondary mr-3 rounded"></div>
-                            <div class="font-bold text-foreground">{{
-                                station.station_name }}
-                            </div>
+
+                    <div class="flex items-center">
+                        <span class="text-primary font-bold pr-4">|</span>
+                        <div class="font-bold text-foreground">{{
+                            station.station_name }}
                         </div>
-                        <div class="text-gray-500 pr-4">{{ station.suozailiuyu }}</div>
                     </div>
 
                     <div class="flex flex-row justify-around my-4">

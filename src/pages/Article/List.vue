@@ -96,7 +96,7 @@ const goToNextPage = () => {
                                     :to="{ name: 'ArticleList', query: { category: item.id } }" :class="[
                                         active_category === item.id
                                             ? 'bg-primary text-white font-bold'
-                                            : 'text-gray-700 hover:bg-gray-50 hover:font-bold hover:text-primary'
+                                            : 'text-gray-700 hover:bg-gray-100 hover:font-bold hover:text-primary'
                                     ]" class="rounded-md px-3 py-2 text-sm"
                                     @click.prevent="handleCategoryClick(item.id)">
                                     {{ item.name }}
@@ -127,7 +127,7 @@ const goToNextPage = () => {
                                         <div class="p-4 flex flex-col gap-4 divide-y  divide-gray-100">
                                             <div class="flex flex-row items-center justify-between">
                                                 <div class="text-sm text-gray-700 py-1 rounded">
-                                                    <span class="text-secondary font-bold">|</span> {{
+                                                    <span class="text-primary font-bold">|</span> {{
                                                         category_text(article.category_id, categories) }}
                                                 </div>
                                                 <div>

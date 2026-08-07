@@ -79,7 +79,7 @@ onMounted(async () => {
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-base font-bold my-2">通知公告</div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: 4 } }"
-                            class="text-sm m-4 hover:text-primary">
+                            class="text-sm mr-4 px-3 py-1 border border-border hover:border-foreground rounded-4xl transition-transform duration-300 hover:translate-x-1">
                             查看更多 &gt;
                         </RouterLink>
                     </div>
@@ -98,7 +98,7 @@ onMounted(async () => {
 
                                     <div class="text-gray-900 group-hover:text-primary text-sm py-2 px-2">{{
                                         item.title
-                                    }}</div>
+                                        }}</div>
                                 </div>
                                 <div class="text-gray-400 text-right text-sm px-4">{{ easy_date_text(item.create_at) }}
                                 </div>
