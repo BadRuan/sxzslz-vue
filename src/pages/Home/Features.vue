@@ -21,7 +21,7 @@ import TitleComponent from '@/components/TitleComponent.vue';
                                 <div class="m-8">
                                     <h2 class="tracking-widest text-base title-font font-medium text-gray-400 my-4 ">
                                         运管养护</h2>
-                                    <h1 class="title-font sm:text-2xl text-xl font-medium text-gray-900 mb-3">
+                                    <h1 class="title-font sm:text-2xl text-xl font-medium text-gray-700 mb-3">
                                         坚持月度安全检制度，筑牢常态化安全防线</h1>
                                     <p class="leading-relaxed mb-3">
                                         为确保排涝泵站托管工作安全高效运行，沈巷镇水利站组织技术人员对管辖崩站及防汛物资仓库等开展每月检查，全面强化监管工作，织密安全责任网。</p>
@@ -44,7 +44,7 @@ import TitleComponent from '@/components/TitleComponent.vue';
                                 <div class="m-8">
                                     <h2 class="tracking-widest text-base title-font font-medium text-gray-400 my-4 ">
                                         安全生产</h2>
-                                    <h1 class="title-font sm:text-2xl text-xl font-medium text-gray-900 mb-3">
+                                    <h1 class="title-font sm:text-2xl text-xl font-medium text-gray-700 mb-3">
                                         泵站电气设备操作“五防”：筑牢水利枢纽的安全防线</h1>
                                     <p class="leading-relaxed mb-3">
                                         在泵站的日常运行与维护中，电气设备的安全操作是保障整个水利枢纽平稳运行的核心环节。泵站内高压开关柜、变压器等电气设备密集，操作环境复杂</p>
@@ -67,7 +67,7 @@ import TitleComponent from '@/components/TitleComponent.vue';
                                 <div class="m-8">
                                     <h2 class="tracking-widest text-base title-font font-medium text-gray-400 my-4 ">
                                         标准化运行</h2>
-                                    <h1 class="title-font sm:text-2xl text-xl font-medium text-gray-900 mb-3">
+                                    <h1 class="title-font sm:text-2xl text-xl font-medium text-gray-700 mb-3">
                                         泵站运行管理：从传统值守迈向智慧运维的新跨越</h1>
                                     <p class="leading-relaxed mb-3">
                                         泵站作为水利枢纽与城市供水、排涝系统的“心脏”，其运行管理水平直接关系到防洪安全、供水保障以及生态环境的持续改善。

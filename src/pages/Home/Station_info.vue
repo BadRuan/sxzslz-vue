@@ -25,7 +25,7 @@ const { station_array } = storeToRefs(station_store);
 
                     <div class="flex items-center">
                         <span class="text-primary-400 font-bold pr-4">|</span>
-                        <div class="font-bold text-foreground">{{
+                        <div class="font-bold text-gray-700">{{
                             station.station_name }}
                         </div>
                     </div>

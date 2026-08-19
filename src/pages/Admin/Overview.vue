@@ -1,24 +1,63 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
+import apiService from '@/utils/apiService';
 import { storeToRefs } from 'pinia';
-import { useAdminStore } from '@/store/admin';
 import { useBaseinfoStore } from '@/store/base';
 import { date_text } from '@/utils/formatters';
 import { category_text } from '@/utils/formatters';
+import { type ArticleModel } from '@/store/article';
 
-const admin_store = useAdminStore();
+export interface CountModel {
+    total_article: number,
+    month_article: number,
+    image_count: number,
+    attachment_count: number,
+    user_count: number,
+    article_view: number,
+    image_view: number,
+    download_count: number
+};
+
+const count_info = ref<CountModel>({
+    total_article: 0,
+    month_article: 0,
+    image_count: 0,
+    attachment_count: 0,
+    user_count: 0,
+    article_view: 0,
+    image_view: 0,
+    download_count: 0
+});
+const latest_article = ref<ArticleModel[]>();
+
+const fetchCountInfo = async () => {
+    try {
+        const res = await apiService.get('/admin/');
+        count_info.value = res;
+    } catch (error) {
+        console.error('获取管理后台统计信息失败:', error)
+    }
+}
+
+const getAdminLatestArticle = async () => {
+    try {
+        const res = await apiService.get('/admin/latest/', { limit: 10 });
+        latest_article.value = res;
+    } catch (error) {
+        console.error('获取管理后台最新文章失败:', error)
+    }
+}
+
 const baseinfo_store = useBaseinfoStore();
-
-const { categories, users } = storeToRefs(baseinfo_store);
-const { count_info, latest_article } = storeToRefs(admin_store);
+const { categories } = storeToRefs(baseinfo_store);
 
 onMounted(
     async () => {
-        admin_store.fetchCountInfo();
-        admin_store.getAdminLatestArticle();
+        fetchCountInfo();
+        getAdminLatestArticle();
         baseinfo_store.checkBaseinfo();
     }
-)
+);
 </script>
 
 <template>
@@ -74,7 +113,7 @@ onMounted(
             </div>
             <div class="bg-white rounded-lg shadow-xs ring-1 ring-border p-5 flex items-center gap-4">
                 <div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center shrink-0">
-                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                     </svg>
@@ -152,7 +191,7 @@ onMounted(
                 <li v-for="(article, index) in latest_article" :key="index"
                     class="px-5 py-3 flex items-center justify-between">
                     <div class="flex flex-row items-center">
-                        <div class="bg-gray-200 px-4 py-2 mr-4 text-sm rounded-2xl text-foreground">{{
+                        <div class="bg-gray-200 px-4 py-2 mr-4 text-sm rounded-2xl text-gray-700">{{
                             category_text(article.category_id, categories) }}</div>
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
                             class="text-base text-gray-500 hover:text-primary-400 truncate">

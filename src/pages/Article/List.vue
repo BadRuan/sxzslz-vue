@@ -137,7 +137,7 @@ const goToNextPage = () => {
                                                 </div>
                                             </div>
                                             <h2
-                                                class="text-base font-semibold text-gray-800 hover:text-primary h-12 overflow-hidden">
+                                                class="text-base font-semibold text-gray-600 hover:text-primary h-12 overflow-hidden">
                                                 {{ article.title }}
                                             </h2>
                                         </div>

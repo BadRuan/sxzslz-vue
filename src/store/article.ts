@@ -49,7 +49,7 @@ export const useArticleStore = defineStore('article', () => {
     loading.value = true
     try {
       if (recommended_article.value.length == 0) {
-        const res = await articleService.getRecommended(6)
+        const res = await articleService.getRecommended(8)
         recommended_article.value = res
       };
       if (notice_article.value.length == 0){

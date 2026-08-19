@@ -11,7 +11,7 @@ const link_active_class = 'text-white bg-primary-500 font-bold';
 
         <nav class="flex-1 px-4 py-8 space-y-2">
             <RouterLink :to="{ name: 'AdminOverview' }" :active-class="link_active_class" :class="link_default_class">
-                仪表盘
+                数据概览
             </RouterLink>
             <RouterLink :to="{ name: 'AdminArticleList' }" :active-class="link_active_class"
                 :class="link_default_class">

@@ -1,15 +1,30 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useAdminStore } from '@/store/admin';
+import { onMounted, ref } from 'vue';
+import apiService from '@/utils/apiService';
 import { url_prefix } from '@/utils/baseInfo';
 
-const admin_store = useAdminStore();
-const { image_list } = storeToRefs(admin_store);
+export interface ImageModel {
+    id: number,
+    size: number,
+    view: number,
+    slug: string,
+    mime_type: string,
+    raw_filename: string,
+    upload_at: string
+};
+const image_list = ref<ImageModel[]>([]);
 
+const getImageList = async () => {
+    try {
+        const res = await apiService.get('/image/');
+        image_list.value = res['data'];
+    } catch (error) {
+        console.error('获取管理后台图片列表失败:', error)
+    }
+}
 onMounted(
     async () => {
-        admin_store.getImageList();
+        getImageList();
     }
 )
 </script>
