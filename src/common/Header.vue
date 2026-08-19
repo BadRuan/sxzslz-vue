@@ -1,3 +1,8 @@
+<script setup lang="ts">
+const default_class = 'rounded-md px-3 py-2 font-medium text-gray-500 hover:bg-gray-50 hover:text-primary-400 hover:font-bold'
+const active_class = '!bg-gray-100 !text-primary-500 !font-semibold rounded-md'
+</script>
+
 <template>
     <header class="bg-white">
         <div class="mx-auto max-w-7xl">
@@ -11,21 +16,16 @@
                 </div>
 
                 <nav class="hidden sm:flex items-center gap-1">
-                    <RouterLink :to="{ name: 'Home' }"
-                        active-class="!bg-gray-100 !text-primary !font-semibold rounded-md"
-                        class="rounded-md px-3 py-2 font-medium text-gray-700 hover:bg-gray-50 hover:text-primary">
+                    <RouterLink :to="{ name: 'Home' }" :active-class="active_class" :class="default_class">
                         网站首页
                     </RouterLink>
 
                     <RouterLink :to="{ name: 'ArticleList', query: { category: 3, page: 1 } }"
-                        active-class="!bg-gray-100 !text-primary !font-semibold rounded-md"
-                        class="rounded-md px-3 py-2 font-medium text-gray-700 hover:bg-gray-50 hover:text-primary">
+                        :active-class="active_class" :class="default_class">
                         新闻列表
                     </RouterLink>
 
-                    <RouterLink :to="{ name: 'About' }"
-                        active-class="!bg-gray-100 !text-primary !font-semibold rounded-md"
-                        class="rounded-md px-3 py-2 font-medium text-gray-700 hover:bg-gray-50 hover:text-primary">
+                    <RouterLink :to="{ name: 'About' }" :active-class="active_class" :class="default_class">
                         关于我们
                     </RouterLink>
 

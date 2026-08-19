@@ -95,8 +95,8 @@ const goToNextPage = () => {
                                 <RouterLink v-for="item in categories" :key="item.id"
                                     :to="{ name: 'ArticleList', query: { category: item.id } }" :class="[
                                         active_category === item.id
-                                            ? 'bg-primary text-white font-bold'
-                                            : 'text-gray-700 hover:bg-gray-100 hover:font-bold hover:text-primary'
+                                            ? 'bg-primary-600 text-white font-bold'
+                                            : 'text-gray-700 hover:bg-gray-100 hover:font-bold hover:text-primary-400'
                                     ]" class="rounded-md px-3 py-2 text-sm"
                                     @click.prevent="handleCategoryClick(item.id)">
                                     {{ item.name }}
@@ -109,7 +109,7 @@ const goToNextPage = () => {
                         <!-- 加载状态 -->
                         <div v-if="loading" class="bg-white rounded-xl shadow-sm p-12 text-center">
                             <div
-                                class="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4">
+                                class="animate-spin w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full mx-auto mb-4">
                             </div>
                             <p class="text-gray-500">加载中...</p>
                         </div>
@@ -127,7 +127,7 @@ const goToNextPage = () => {
                                         <div class="p-4 flex flex-col gap-4 divide-y  divide-gray-100">
                                             <div class="flex flex-row items-center justify-between">
                                                 <div class="text-sm text-gray-700 py-1 rounded">
-                                                    <span class="text-primary font-bold">|</span> {{
+                                                    <span class="text-primary-400 font-bold">|</span> {{
                                                         category_text(article.category_id, categories) }}
                                                 </div>
                                                 <div>

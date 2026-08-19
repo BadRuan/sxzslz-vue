@@ -155,7 +155,7 @@ onMounted(
                         <div class="bg-gray-200 px-4 py-2 mr-4 text-sm rounded-2xl text-foreground">{{
                             category_text(article.category_id, categories) }}</div>
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
-                            class="text-base text-gray-700 hover:text-primary truncate">
+                            class="text-base text-gray-500 hover:text-primary-400 truncate">
                             <span class="font-bold">{{ article.title }}</span>
                         </RouterLink>
                     </div>

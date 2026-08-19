@@ -105,7 +105,7 @@ const renderedHtml = computed(() => {
             <nav class="w-7xl mx-auto mb-6 px-4 sm:px-6 lg:px-8" aria-label="Breadcrumb">
                 <ol class="flex items-center gap-2 text-base text-gray-500">
                     <li>
-                        <RouterLink :to="{ name: 'Home' }" class="hover:text-primary transition-colors">
+                        <RouterLink :to="{ name: 'Home' }" class="hover:text-primary-400 transition-colors">
                             网站首页
                         </RouterLink>
                     </li>
@@ -117,7 +117,7 @@ const renderedHtml = computed(() => {
                     </li>
                     <li>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: article_detail?.category_id } }"
-                            class="hover:text-primary transition-colors">
+                            class="hover:text-primary-400 transition-colors">
                             {{ category_text(article_detail?.category_id, categories) }}
                         </RouterLink>
                     </li>
@@ -127,7 +127,7 @@ const renderedHtml = computed(() => {
                             </path>
                         </svg>
                     </li>
-                    <li class="text-gray-700 font-medium">正文</li>
+                    <li class="text-gray-700">正文</li>
                 </ol>
             </nav>
 
@@ -149,7 +149,7 @@ const renderedHtml = computed(() => {
                 <p class="text-gray-500 mb-6">请检查文章链接是否正确，或返回其他页面</p>
                 <div class="flex justify-center gap-4">
                     <RouterLink :to="{ name: 'ArticleList' }"
-                        class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                        class="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-500 transition-colors">
                         返回列表
                     </RouterLink>
                     <RouterLink :to="{ name: 'Home' }"
@@ -168,22 +168,22 @@ const renderedHtml = computed(() => {
                     <div
                         class="inline-flex items-center justify-center gap-4 text-sm text-gray-600 px-3 py-1 bg-gray-100 rounded-md">
                         <time datetime="2024-07-23">{{ dayjs(article_detail?.create_at).format('YYYY年MM月DD日 HH:mm:ss')
-                        }}</time>
-                        <span class="hidden sm:inline text-secondary">|</span>
+                            }}</time>
+                        <span class="hidden sm:inline text-primary-600">|</span>
                         <span>来源：{{ nickname_text(article_detail?.user_id) }}</span>
-                        <span class="hidden sm:inline text-secondary">|</span>
-                        <span>阅读：{{ article_detail?.view_count }} 次</span>
+                        <span class="hidden sm:inline text-primary-600">|</span>
+                        <span>浏览次数：{{ article_detail?.view_count }}</span>
                     </div>
                 </div>
-                <div class="px-6 sm:px-10 py-8 prose prose-primary prose-lg max-w-none
-                        prose-headings:font-bold prose-headings:text-gray-900 prose-headings:mb-4 prose-headings:mt-8
+                <div class="px-6 sm:px-10 py-8 prose prose-primary-500 prose-lg max-w-none
+                        prose-headings:font-bold prose-headings:text-gray-800 prose-headings:mb-4 prose-headings:mt-8
                         prose-h1:text-2xl prose-h2:text-xl prose-h3:text-base
                         prose-p:my-4 prose-p:leading-relaxed prose-p:indent-2em
-                        prose-strong:text-gray-900 prose-strong:font-semibold
-                        prose-blockquote:border-l-primary prose-blockquote:bg-red-50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded
+                        prose-strong:text-gray-700 prose-strong:font-semibold
+                        prose-blockquote:border-l-primary-600 prose-blockquote:bg-red-50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded
                         prose-ul:list-disc prose-ul:mx-8 prose-ul:my-4 prose-ul:text-gray-700
                         prose-ol:list-decimal prose-ol:mx-8 prose-ol:my-4 prose-ol:text-gray-700
-                        prose-a:text-secondary prose-a:underline prose-a:underline-offset-2 prose-a:font-bold
+                        prose-a:text-primary-600 prose-a:underline prose-a:underline-offset-2 prose-a:font-bold
                         prose-img:w-2/3 prose-img:shadow prose-img:rounded-sm prose-img:my-6 prose-img:mx-auto
                         " v-html="renderedHtml">
 

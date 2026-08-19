@@ -1,3 +1,7 @@
+<script setup lang="ts">
+const link_default_class = 'flex items-center px-4 py-2 rounded hover:bg-primary-300 hover:text-white hover:font-bold';
+const link_active_class = 'text-white bg-primary-500 font-bold';
+</script>
 <template>
     <aside class="w-48 h-full bg-background flex flex-col">
         <div class="h-16 flex items-center px-4">
@@ -6,20 +10,17 @@
         </div>
 
         <nav class="flex-1 px-4 py-8 space-y-2">
-            <RouterLink :to="{ name: 'AdminOverview' }" active-class="text-white bg-primary font-bold"
-                class="flex items-center px-4 py-2 rounded hover:bg-primary hover:text-white hover:font-bold">
+            <RouterLink :to="{ name: 'AdminOverview' }" :active-class="link_active_class" :class="link_default_class">
                 仪表盘
             </RouterLink>
-            <RouterLink :to="{ name: 'AdminArticleList' }" active-class="text-white bg-primary font-bold"
-                class="flex items-center px-4 py-2 rounded hover:bg-primary hover:text-white hover:font-bold">
+            <RouterLink :to="{ name: 'AdminArticleList' }" :active-class="link_active_class"
+                :class="link_default_class">
                 文章管理
             </RouterLink>
-            <RouterLink :to="{ name: 'AdminCategory' }" active-class="text-white bg-primary font-bold"
-                class="flex items-center px-4 py-2 rounded hover:bg-primary hover:text-white hover:font-bold">
+            <RouterLink :to="{ name: 'AdminCategory' }" :active-class="link_active_class" :class="link_default_class">
                 分类管理
             </RouterLink>
-            <RouterLink :to="{ name: 'AdminPhoto' }" active-class="text-white bg-primary font-bold"
-                class="flex items-center px-4 py-2 rounded hover:bg-primary hover:text-white hover:font-bold">
+            <RouterLink :to="{ name: 'AdminPhoto' }" :active-class="link_active_class" :class="link_default_class">
                 照片管理
             </RouterLink>
         </nav>

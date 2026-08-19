@@ -57,15 +57,15 @@ export const useArticleStore = defineStore('article', () => {
         notice_article.value = res.data;
       };
       if (meeting_article.value.length == 0) {
-        const res = await articleService.getArticleByCategoryId(5, 1, 4)
+        const res = await articleService.getArticleByCategoryId(5, 1, 6)
         meeting_article.value = res.data;
       };
       if (finance_article.value.length == 0) {
-        const res = await articleService.getArticleByCategoryId(8, 1, 4)
+        const res = await articleService.getArticleByCategoryId(8, 1, 6)
         finance_article.value = res.data;
       };
       if (hr_job.value.length == 0) {
-        const res = await articleService.getArticleByCategoryId(7, 1, 4)
+        const res = await articleService.getArticleByCategoryId(7, 1, 6)
         hr_job.value = res.data;
       }
     } catch (error) {

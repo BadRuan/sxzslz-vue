@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia';
 import { useStationStore } from '@/store/station';
 import { useRoute, useRouter } from 'vue-router';
 import { url_prefix } from '@/utils/baseInfo';
+import TitleComponent from '@/components/TitleComponent.vue';
 const station_store = useStationStore();
 const { station_array } = storeToRefs(station_store);
 const route = useRoute();
@@ -19,16 +20,13 @@ if (isNaN(indexValue) || indexValue < 0 || indexValue >= length) {
 <template>
     <section class="bg-background py-8">
         <div class="w-7xl m-auto bg-white shadow rounded pb-8">
-            <h1 class="py-8 font-bold text-center text-2xl text-primary border-b border-border">{{
+            <h1 class="py-8 font-bold text-center text-2xl text-primary-600 border-b border-border">{{
                 station_array[indexValue]?.station_name }}</h1>
 
-            <div class="flex items-center px-16 py-4">
-                <span class="h-5 w-1 rounded bg-primary mr-4"></span>
-                <div>
-                    <p class="text-xs text-gray-500">Base Infomation</p>
-                    <h2 class="text-lg font-semibold text-gray-900">基本情况</h2>
-                </div>
-            </div>
+            <TitleComponent class="px-16 py-8">
+                <template #first>基本情况</template>
+                <template #second>Base Infomation</template>
+            </TitleComponent>
 
             <div class="flex flex-row justify-around">
                 <div class="flex flex-col justify-center">
@@ -62,13 +60,11 @@ if (isNaN(indexValue) || indexValue < 0 || indexValue >= length) {
             </div>
 
 
-            <div class="flex items-center px-16 py-4">
-                <span class="h-5 w-1 rounded bg-primary mr-4"></span>
-                <div>
-                    <p class="text-xs text-gray-500">Station Information</p>
-                    <h2 class="text-lg font-semibold text-gray-900">工程情况</h2>
-                </div>
-            </div>
+            <TitleComponent class="px-16 py-8">
+                <template #first>工程情况</template>
+                <template #second>Station Information</template>
+            </TitleComponent>
+
 
             <div class="flex flex-row items-start justify-around">
                 <div class="flex flex-col justify-center">
@@ -280,13 +276,10 @@ if (isNaN(indexValue) || indexValue < 0 || indexValue >= length) {
             </div>
 
 
-            <div class="flex items-center px-16 py-4">
-                <span class="h-5 w-1 rounded bg-primary mr-4"></span>
-                <div>
-                    <p class="text-xs text-gray-500">Station Pictures</p>
-                    <h2 class="text-lg font-semibold text-gray-900">泵站面貌</h2>
-                </div>
-            </div>
+            <TitleComponent class="px-16 py-8">
+                <template #first>泵站面貌</template>
+                <template #second>Station Pictures</template>
+            </TitleComponent>
 
 
             <div class="w-6xl mx-auto">
@@ -305,7 +298,7 @@ if (isNaN(indexValue) || indexValue < 0 || indexValue >= length) {
                                     <div class="text-gray-500 text-sm">2025年08月04日 09:05:10</div>
                                 </div>
                                 <div class="font-medium text-gray-800">{{ item.title
-                                }}
+                                    }}
                                 </div>
                             </div>
                         </div>

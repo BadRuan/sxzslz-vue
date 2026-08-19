@@ -55,7 +55,7 @@ onMounted(async () => {
 
             <div v-else class="w-7xl flex flex-row gap-8 items-center justify-around ">
 
-                <Splide :options="options" aria-label="首页新闻轮播" class="overflow-hidden shadow rounded w-180 h-120">
+                <Splide :options="options" class="overflow-hidden shadow rounded w-180 h-120">
                     <SplideSlide v-for="(article, index) in article_obj.recommended" :key="index">
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
                             class="relative bg-cover bg-center">
@@ -79,25 +79,25 @@ onMounted(async () => {
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-base font-bold my-2">通知公告</div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: 4 } }"
-                            class="text-sm mr-4 px-3 py-1 border border-border hover:border-foreground rounded-4xl transition-transform duration-300 hover:translate-x-1">
-                            查看更多 &gt;
+                            class="text-sm mr-4 px-3 py-1 hover:text-primary-500 hover:font-bold transition-transform duration-300 hover:translate-x-1">
+                            更多 &gt;
                         </RouterLink>
                     </div>
                     <ul class="flex flex-col gap-4 justify-around divide-y divide-dashed divide-border">
                         <RouterLink v-for="item in article_obj.notice" :key="item.id"
                             :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
-                            <li
-                                class="flex items-center justify-between group transition-transform duration-300 hover:-translate-y-2">
+                            <li class="flex items-center justify-between">
                                 <div class="flex flex-row items-center">
-                                    <svg class="text-primary -rotate-90" width="10" height="10" viewBox="0 0 24 24"
+                                    <svg class="text-primary-400 -rotate-90" width="10" height="10" viewBox="0 0 24 24"
                                         fill="currentColor">
                                         <path fill-rule="evenodd"
                                             d="M13.792 20.319c-.781 1.406-2.803 1.406-3.584 0L2.418 6.296c-.76-1.367.228-3.046 1.791-3.046h15.582c1.563 0 2.55 1.68 1.791 3.046l-7.79 14.023Z"
                                             clip-rule="evenodd"></path>
                                     </svg>
 
-                                    <div class="text-gray-900 group-hover:text-primary text-sm py-2 px-2">{{
-                                        item.title
+                                    <div class="text-gray-900 hover:text-primary-500 hover:font-bold text-sm py-2 px-2">
+                                        {{
+                                            item.title
                                         }}</div>
                                 </div>
                                 <div class="text-gray-400 text-right text-sm px-4">{{ easy_date_text(item.create_at) }}

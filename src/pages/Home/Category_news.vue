@@ -12,6 +12,9 @@ onMounted(() => {
     article_store.checkHomeArticle();
 });
 
+const more_link_class = 'text-sm mr-4 px-3 py-1 hover:text-primary-500 hover:font-bold transition-transform duration-300 hover:translate-x-1';
+const svg_class = 'text-primary-400 -rotate-90';
+const item_title_class = 'text-gray-900 hover:text-primary-500 hover:font-bold text-sm py-2 px-2';
 </script>
 
 <template>
@@ -27,26 +30,23 @@ onMounted(() => {
                 <div class="bg-white w-100 p-4 shadow rounded divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-base font-bold my-2">会议公开</div>
-                        <RouterLink :to="{ name: 'ArticleList', query: { category: 5 } }"
-                            class="text-sm mr-4 px-3 py-1 border border-border hover:border-foreground rounded-4xl transition-transform duration-300 hover:translate-x-1">
+                        <RouterLink :to="{ name: 'ArticleList', query: { category: 5 } }" :class="more_link_class">
                             更多 &gt;
                         </RouterLink>
                     </div>
                     <ul class="flex flex-col gap-4 justify-around divide-y divide-dashed divide-border">
                         <RouterLink v-for="item in article_obj.metting" :key="item.id"
                             :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
-                            <li
-                                class="flex items-center justify-between group transition-transform duration-300 hover:-translate-y-2">
+                            <li class="flex items-center justify-between">
                                 <div class="flex flex-row items-center">
-                                    <svg class="text-primary -rotate-90" width="10" height="10" viewBox="0 0 24 24"
+                                    <svg :class="svg_class" width="10" height="10" viewBox="0 0 24 24"
                                         fill="currentColor">
                                         <path fill-rule="evenodd"
                                             d="M13.792 20.319c-.781 1.406-2.803 1.406-3.584 0L2.418 6.296c-.76-1.367.228-3.046 1.791-3.046h15.582c1.563 0 2.55 1.68 1.791 3.046l-7.79 14.023Z"
                                             clip-rule="evenodd"></path>
                                     </svg>
 
-                                    <div class="text-gray-900 group-hover:text-primary text-sm py-2 px-2">{{ item.title
-                                        }}</div>
+                                    <div :class="item_title_class">{{ item.title }}</div>
                                 </div>
                                 <div class="text-gray-400 text-right text-sm px-4">{{ easy_date_text(item.create_at) }}
                                 </div>
@@ -58,26 +58,23 @@ onMounted(() => {
                 <div class="bg-white w-100 p-4 shadow rounded divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-base font-bold my-2">人事动态</div>
-                        <RouterLink :to="{ name: 'ArticleList', query: { category: 7 } }"
-                            class="text-sm mr-4 px-3 py-1 border border-border hover:border-foreground rounded-4xl transition-transform duration-300 hover:translate-x-1">
+                        <RouterLink :to="{ name: 'ArticleList', query: { category: 7 } }" :class="more_link_class">
                             更多 &gt;
                         </RouterLink>
                     </div>
                     <ul class="flex flex-col gap-4 justify-around divide-y divide-dashed divide-border">
                         <RouterLink v-for="item in article_obj.hr_job" :key="item.id"
                             :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
-                            <li
-                                class="flex items-center justify-between group transition-transform duration-300 hover:-translate-y-2">
+                            <li class="flex items-center justify-between">
                                 <div class="flex flex-row items-center">
-                                    <svg class="text-primary -rotate-90" width="10" height="10" viewBox="0 0 24 24"
+                                    <svg :class="svg_class" width="10" height="10" viewBox="0 0 24 24"
                                         fill="currentColor">
                                         <path fill-rule="evenodd"
                                             d="M13.792 20.319c-.781 1.406-2.803 1.406-3.584 0L2.418 6.296c-.76-1.367.228-3.046 1.791-3.046h15.582c1.563 0 2.55 1.68 1.791 3.046l-7.79 14.023Z"
                                             clip-rule="evenodd"></path>
                                     </svg>
 
-                                    <div class="text-gray-900 group-hover:text-primary text-sm py-2 px-2">{{ item.title
-                                    }}</div>
+                                    <div :class="item_title_class">{{ item.title }}</div>
                                 </div>
                                 <div class="text-gray-400 text-right text-sm px-4">{{ easy_date_text(item.create_at) }}
                                 </div>
@@ -92,26 +89,23 @@ onMounted(() => {
                 <div class="bg-white w-100 p-4 shadow rounded divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-base font-bold my-2">财务信息</div>
-                        <RouterLink :to="{ name: 'ArticleList', query: { category: 8 } }"
-                            class="text-sm mr-4 px-3 py-1 border border-border hover:border-foreground rounded-4xl transition-transform duration-300 hover:translate-x-1">
+                        <RouterLink :to="{ name: 'ArticleList', query: { category: 8 } }" :class="more_link_class">
                             更多 &gt;
                         </RouterLink>
                     </div>
                     <ul class="flex flex-col gap-4 justify-around divide-y divide-dashed divide-border">
                         <RouterLink v-for="item in article_obj.finance" :key="item.id"
                             :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
-                            <li
-                                class="flex items-center justify-between group transition-transform duration-300 hover:-translate-y-2">
+                            <li class="flex items-center justify-between">
                                 <div class="flex flex-row items-center">
-                                    <svg class="text-primary -rotate-90" width="10" height="10" viewBox="0 0 24 24"
+                                    <svg :class="svg_class" width="10" height="10" viewBox="0 0 24 24"
                                         fill="currentColor">
                                         <path fill-rule="evenodd"
                                             d="M13.792 20.319c-.781 1.406-2.803 1.406-3.584 0L2.418 6.296c-.76-1.367.228-3.046 1.791-3.046h15.582c1.563 0 2.55 1.68 1.791 3.046l-7.79 14.023Z"
                                             clip-rule="evenodd"></path>
                                     </svg>
 
-                                    <div class="text-gray-900 group-hover:text-primary text-sm py-2 px-2">{{ item.title
-                                        }}</div>
+                                    <div :class="item_title_class">{{ item.title }}</div>
                                 </div>
                                 <div class="text-gray-400 text-right text-sm px-4">{{ easy_date_text(item.create_at) }}
                                 </div>
