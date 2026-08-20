@@ -3,11 +3,10 @@ import { onMounted, ref } from 'vue';
 import apiService from '@/utils/apiService';
 import { storeToRefs } from 'pinia';
 import { useBaseinfoStore } from '@/store/base';
-import { date_text } from '@/utils/formatters';
-import { category_text } from '@/utils/formatters';
+import { date_text, category_text } from '@/utils/formatters';
 import { type ArticleModel } from '@/store/article';
 
-export interface CountModel {
+interface CountModel {
     total_article: number,
     month_article: number,
     image_count: number,

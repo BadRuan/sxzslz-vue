@@ -19,7 +19,7 @@ if (isNaN(indexValue) || indexValue < 0 || indexValue >= length) {
 
 <template>
     <section class="bg-background py-8">
-        <div class="w-7xl m-auto bg-white shadow rounded pb-8">
+        <div class="w-7xl m-auto bg-white shadow rounded px-8 pb-12">
             <h1 class="py-8 font-bold text-center text-2xl text-primary-600 border-b border-border">{{
                 station_array[indexValue]?.station_name }}</h1>
 
@@ -285,7 +285,7 @@ if (isNaN(indexValue) || indexValue < 0 || indexValue >= length) {
             <div class="w-6xl mx-auto">
                 <div class="flex flex-col items-center">
                     <div v-for="(item, index) in station_array[indexValue]?.station_pic_list" :key="index"
-                        class="w-2/3 shadow-lg my-4 bg-white">
+                        class="w-2/3 shadow my-4 bg-white">
                         <div class="flex flex-col">
                             <div class="overflow-hidden ">
                                 <img alt="gallery"
@@ -297,8 +297,8 @@ if (isNaN(indexValue) || indexValue < 0 || indexValue >= length) {
                                     <div class="text-sm font-bold">{{ station_array[indexValue]?.station_name }}</div>
                                     <div class="text-gray-500 text-sm">2025年08月04日 09:05:10</div>
                                 </div>
-                                <div class="font-medium text-gray-800">{{ item.title
-                                    }}
+                                <div class="font-medium text-gray-600">{{ item.title
+                                }}
                                 </div>
                             </div>
                         </div>

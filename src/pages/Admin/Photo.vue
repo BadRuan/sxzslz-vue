@@ -33,23 +33,11 @@ onMounted(
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-xl font-bold text-gray-900">照片管理</h2>
             <button id="uploadBtn"
-                class="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark transition">
+                class="rounded-md bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-400 transition">
                 + 上传照片
             </button>
         </div>
 
-        <!-- 筛选栏 -->
-        <div class="flex items-center gap-3 mb-4">
-            <select
-                class="rounded-md border border-border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40">
-                <option value="">全部分组</option>
-                <option value="station">站点照片</option>
-                <option value="work">工作风采</option>
-                <option value="activity">活动记录</option>
-                <option value="other">其他</option>
-            </select>
-            <span class="text-sm text-gray-500">共 4 张照片</span>
-        </div>
 
         <!-- 照片网格 -->
         <div class="grid grid-cols-6 gap-6">
