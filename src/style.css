@@ -12,16 +12,16 @@
 @theme {
     --font-sans: "GoogleSansCode", "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif;
 
-    --color-primary-100: #cce4f3;
-    --color-primary-200: #99c9e7;
-    --color-primary-300: #66adda;
-    --color-primary-400: #3392ce;
-    /* 基准色 primary-500 */
-    --color-primary-500: #0077c2;
-    --color-primary-600: #005f9b;
-    --color-primary-700: #004774;
-    --color-primary-800: #00304e;
-    --color-primary-900: #001827;
+    --color-primary-100: #fcdecd;
+    --color-primary-200: #fabc9c;
+    --color-primary-300: #f79b6a;
+    --color-primary-400: #f57939;
+    --color-primary-500: #f25807;
+    --color-primary-600: #c24606;
+    --color-primary-700: #913504;
+    --color-primary-800: #612303;
+    --color-primary-900: #301201;
+
 
     --color-background: #f4f6f9;
     --color-foreground: #101118;

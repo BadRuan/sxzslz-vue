@@ -59,6 +59,7 @@ const nickname_text = (user_id: number | undefined) => {
 
 const md = new MarkdownIt({
     html: false,
+    breaks: true,
     linkify: true,
     typographer: true
 }).use(linkAttributes, {
@@ -105,28 +106,19 @@ const renderedHtml = computed(() => {
             <nav class="w-7xl mx-auto mb-6 px-4 sm:px-6 lg:px-8" aria-label="Breadcrumb">
                 <ol class="flex items-center gap-2 text-base text-gray-500">
                     <li>
-                        <RouterLink :to="{ name: 'Home' }" class="hover:text-primary-400 transition-colors">
+                        <RouterLink :to="{ name: 'Home' }"
+                            class="hover:text-primary-400  hover:font-bold transition-colors">
                             网站首页
                         </RouterLink>
                     </li>
-                    <li>
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
-                            </path>
-                        </svg>
-                    </li>
+                    <span class="text-primary-500">/</span>
                     <li>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: article_detail?.category_id } }"
-                            class="hover:text-primary-400 transition-colors">
+                            class="hover:text-primary-400 transition-colors hover:font-bold">
                             {{ category_text(article_detail?.category_id, categories) }}
                         </RouterLink>
                     </li>
-                    <li>
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
-                            </path>
-                        </svg>
-                    </li>
+                    <span class="text-primary-500">/</span>
                     <li class="text-gray-700">正文</li>
                 </ol>
             </nav>
@@ -134,9 +126,9 @@ const renderedHtml = computed(() => {
             <!-- 加载状态 -->
             <div v-if="loading" class="max-w-7xl mx-auto bg-white rounded-xl shadow-sm p-12 text-center">
                 <div
-                    class="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4">
+                    class="animate-spin w-8 h-8 border-4 border-primary-400 border-t-transparent rounded-full mx-auto mb-4">
                 </div>
-                <p class="text-gray-500">加载中...</p>
+                <p class="text-primary-500">加载中...</p>
             </div>
 
             <!-- 错误状态 -->
@@ -160,30 +152,66 @@ const renderedHtml = computed(() => {
             </div>
 
             <!-- 正常内容 -->
-            <article v-else class="max-w-7xl mx-auto min-h-screen bg-white rounded shadow-sm overflow-hidden">
-                <div class="px-6 sm:px-10 pt-10 pb-6 border-b border-border text-center">
-                    <h1 class="text-3xl font-bold text-accent leading-tight mb-4">
+            <article v-else class="max-w-7xl mx-auto min-h-120 px-4 bg-white rounded shadow-sm overflow-hidden">
+                <div class="px-6 sm:px-10 pt-10 border-b border-border text-center">
+                    <h1 class="text-3xl font-bold text-gray-700 leading-tight mb-4">
                         {{ article_detail?.title }}
                     </h1>
-                    <div
-                        class="inline-flex items-center justify-center gap-4 text-sm text-gray-600 px-3 py-1 bg-gray-100 rounded-md">
-                        <time datetime="2024-07-23">{{ dayjs(article_detail?.create_at).format('YYYY年MM月DD日 HH:mm:ss')
-                            }}</time>
-                        <span class="hidden sm:inline text-primary-600">|</span>
-                        <span>来源：{{ nickname_text(article_detail?.user_id) }}</span>
-                        <span class="hidden sm:inline text-primary-600">|</span>
-                        <span>浏览次数：{{ article_detail?.view_count }}</span>
+
+                    <div class="inline-flex items-center justify-center gap-12 text-sm text-gray-500">
+                        <div class="flex flex-row items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="text-gray-500 mr-2" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="7" r="5" stroke="currentColor" stroke-width="1"
+                                    stroke-linejoin="bevel"></circle>
+                                <path stroke="currentColor" stroke-width="1" stroke-linejoin="bevel"
+                                    d="M22 22C22 16.4772 17.5228 12 12 12C6.47715 12 2 16.4772 2 22"></path>
+                            </svg>
+                            <RouterLink :to="{ name: 'Profile', params: { id: article_detail?.user_id } }"
+                                class="text-base text-gray-500 hover:text-primary-500 hover:font-bold truncate">
+                                <span>{{ nickname_text(article_detail?.user_id) }}</span>
+                            </RouterLink>
+                        </div>
+                        <div class="flex flex-row items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" class="text-gray-500 mr-2">
+                                <path d="M2 3.5L22 3.5L22 22.5L2 22.5L2 3.5Z" stroke="currentColor" stroke-width="1"
+                                    stroke-linejoin="round"></path>
+                                <path stroke="currentColor" stroke-width="1" d="M6 5L6 2"></path>
+                                <path stroke="currentColor" stroke-width="1" d="M18 5L18 2"></path>
+                                <path stroke="currentColor" stroke-width="1" d="M22 7.5L2 7.5"></path>
+                                <circle cx="12.5" cy="15" r="5" stroke="currentColor" stroke-width="1"
+                                    stroke-linejoin="round"></circle>
+                                <path stroke="currentColor" stroke-width="1" stroke-linejoin="round"
+                                    d="M12 12.5L12 15.5L15 15.5"></path>
+                            </svg>
+                            <time datetime="2024-07-23">
+                                {{ dayjs(article_detail?.create_at).format('YYYY-MM-DD HH:mm')
+                                }}</time>
+                        </div>
+                        <div class="flex flex-row items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" class="text-gray-500 mr-2">
+                                <path stroke="currentColor" stroke-width="1" stroke-linejoin="round"
+                                    d="M2 2L2 22L22 22"></path>
+                                <path d="M20.6107 10.8462L20.6877 6.33992L16.4984 8.00208L20.6107 10.8462Z"
+                                    stroke="currentColor" stroke-width="1" stroke-linejoin="round"></path>
+                                <path stroke="currentColor" stroke-width="1" stroke-linejoin="round"
+                                    d="M18.5 9.5L14 16L9.5 13L5 18"></path>
+                            </svg>
+                            <span>阅读量: {{ article_detail?.view_count }}</span>
+                        </div>
                     </div>
                 </div>
                 <div class="px-6 sm:px-10 py-8 prose prose-primary-500 prose-lg max-w-none
                         prose-headings:font-bold prose-headings:text-gray-800 prose-headings:mb-4 prose-headings:mt-8
-                        prose-h1:text-2xl prose-h2:text-xl prose-h3:text-base
+                        prose-h1:text-2xl prose-h2:text-xl prose-h3:text-l prose-p:text-l
                         prose-p:my-4 prose-p:leading-relaxed prose-p:indent-2em
                         prose-strong:text-gray-700 prose-strong:font-semibold
-                        prose-blockquote:border-l-primary-600 prose-blockquote:bg-red-50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded
+                        prose-blockquote:border-l-primary-500 prose-blockquote:bg-red-50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded
                         prose-ul:list-disc prose-ul:mx-8 prose-ul:my-4 prose-ul:text-gray-700
                         prose-ol:list-decimal prose-ol:mx-8 prose-ol:my-4 prose-ol:text-gray-700
-                        prose-a:text-primary-600 prose-a:underline prose-a:underline-offset-2 prose-a:font-bold
+                        prose-a:text-primary-500 prose-a:underline prose-a:underline-offset-2 prose-a:font-bold
                         prose-img:w-2/3 prose-img:shadow prose-img:rounded-sm prose-img:my-6 prose-img:mx-auto
                         " v-html="renderedHtml">
 

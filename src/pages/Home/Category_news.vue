@@ -13,7 +13,6 @@ onMounted(() => {
 });
 
 const more_link_class = 'text-sm mr-4 px-3 py-1 hover:text-primary-500 hover:font-bold transition-transform duration-300 hover:translate-x-1';
-const svg_class = 'text-primary-400 -rotate-90';
 const item_title_class = 'text-gray-900 hover:text-primary-500 hover:font-bold text-sm py-2 px-2';
 </script>
 
@@ -39,12 +38,7 @@ const item_title_class = 'text-gray-900 hover:text-primary-500 hover:font-bold t
                             :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
                             <li class="flex items-center justify-between">
                                 <div class="flex flex-row items-center">
-                                    <svg :class="svg_class" width="10" height="10" viewBox="0 0 24 24"
-                                        fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M13.792 20.319c-.781 1.406-2.803 1.406-3.584 0L2.418 6.296c-.76-1.367.228-3.046 1.791-3.046h15.582c1.563 0 2.55 1.68 1.791 3.046l-7.79 14.023Z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
+                                    <div class="bg-gray-400 w-1 h-1 rounded-xl"></div>
 
                                     <div :class="item_title_class">{{ item.title }}</div>
                                 </div>
@@ -67,12 +61,7 @@ const item_title_class = 'text-gray-900 hover:text-primary-500 hover:font-bold t
                             :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
                             <li class="flex items-center justify-between">
                                 <div class="flex flex-row items-center">
-                                    <svg :class="svg_class" width="10" height="10" viewBox="0 0 24 24"
-                                        fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M13.792 20.319c-.781 1.406-2.803 1.406-3.584 0L2.418 6.296c-.76-1.367.228-3.046 1.791-3.046h15.582c1.563 0 2.55 1.68 1.791 3.046l-7.79 14.023Z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
+                                    <div class="bg-gray-400 w-1 h-1 rounded-xl"></div>
 
                                     <div :class="item_title_class">{{ item.title }}</div>
                                 </div>
@@ -98,12 +87,7 @@ const item_title_class = 'text-gray-900 hover:text-primary-500 hover:font-bold t
                             :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
                             <li class="flex items-center justify-between">
                                 <div class="flex flex-row items-center">
-                                    <svg :class="svg_class" width="10" height="10" viewBox="0 0 24 24"
-                                        fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M13.792 20.319c-.781 1.406-2.803 1.406-3.584 0L2.418 6.296c-.76-1.367.228-3.046 1.791-3.046h15.582c1.563 0 2.55 1.68 1.791 3.046l-7.79 14.023Z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
+                                    <div class="bg-gray-400 w-1 h-1 rounded-xl"></div>
 
                                     <div :class="item_title_class">{{ item.title }}</div>
                                 </div>

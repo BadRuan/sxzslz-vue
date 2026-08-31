@@ -41,9 +41,9 @@ const routes: RouteRecordRaw[] = [
                 ]
             },
             {
-                path: '/document',
-                name: 'Document',
-                component: () => import("@/pages/Document/Index.vue")
+                path: '/profile/:id',
+                name: 'Profile',
+                component: () => import("@/pages/Profile/Index.vue"),
             }
         ]
     },

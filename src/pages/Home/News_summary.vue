@@ -48,9 +48,9 @@ onMounted(async () => {
             <div v-if="loading"
                 class="max-w-7xl mx-auto bg-white rounded-xl shadow-sm border border-border p-12 text-center">
                 <div
-                    class="animate-spin w-8 h-8 border-4 border-secondary border-t-transparent rounded-full mx-auto mb-4">
+                    class="animate-spin w-8 h-8 border-4 border-primary-400 border-t-transparent rounded-full mx-auto mb-4">
                 </div>
-                <p class="text-gray-500">加载中...</p>
+                <p class="text-primary-500">加载中...</p>
             </div>
 
             <div v-else class="w-7xl flex flex-row gap-8 items-center justify-around ">
@@ -66,7 +66,7 @@ onMounted(async () => {
 
                             <div class="absolute bottom-0 left-0 p-6 text-white max-w-2xl">
                                 <span
-                                    class="inline-block px-3 py-1 mb-3 text-xs font-semibold tracking-wider text-white uppercase bg-primary rounded-full">
+                                    class="inline-block px-3 py-1 mb-3 text-xs font-semibold tracking-wider text-white uppercase bg-primary-500 rounded-full">
                                     {{ category_text(article.category_id, categories) }}
                                 </span>
                                 <h2 class="mb-2 font-bold leading-tight">{{ article.title }}</h2>
@@ -88,12 +88,7 @@ onMounted(async () => {
                             :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
                             <li class="flex items-center justify-between">
                                 <div class="flex flex-row items-center">
-                                    <svg class="text-primary-400 -rotate-90" width="10" height="10" viewBox="0 0 24 24"
-                                        fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M13.792 20.319c-.781 1.406-2.803 1.406-3.584 0L2.418 6.296c-.76-1.367.228-3.046 1.791-3.046h15.582c1.563 0 2.55 1.68 1.791 3.046l-7.79 14.023Z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
+                                    <div class="bg-gray-400 w-1 h-1 rounded-xl"></div>
 
                                     <div class="text-gray-900 hover:text-primary-500 hover:font-bold text-sm py-2 px-2">
                                         {{
