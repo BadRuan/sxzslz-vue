@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import MarkdownIt from 'markdown-it';
 import linkAttributes from 'markdown-it-link-attributes';
+import mark from 'markdown-it-mark';
 import DOMPurify from 'dompurify';
 import dayjs from 'dayjs';
 import { useArticleStore } from '@/store/article';
@@ -67,7 +68,7 @@ const md = new MarkdownIt({
         target: '_blank',
         rel: 'noopener noreferrer'
     }
-})
+}).use(mark);
 
 const renderedHtml = computed(() => {
     if (!article_detail.value) {
@@ -205,8 +206,8 @@ const renderedHtml = computed(() => {
                 </div>
                 <div class="px-6 sm:px-10 py-8 prose prose-primary-500 prose-lg max-w-none
                         prose-headings:font-bold prose-headings:text-gray-800 prose-headings:mb-4 prose-headings:mt-8
-                        prose-h1:text-2xl prose-h2:text-xl prose-h3:text-l prose-p:text-l
-                        prose-p:my-4 prose-p:leading-relaxed prose-p:indent-2em
+                        prose-h1:text-2xl prose-h2:text-2xl prose-h3:text-base prose-p:text-base
+                        prose-p:leading-relaxed prose-p:indent-2em
                         prose-strong:text-gray-700 prose-strong:font-semibold
                         prose-blockquote:border-l-primary-500 prose-blockquote:bg-red-50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded
                         prose-ul:list-disc prose-ul:mx-8 prose-ul:my-4 prose-ul:text-gray-700
@@ -221,3 +222,13 @@ const renderedHtml = computed(() => {
         </div>
     </main>
 </template>
+
+<style scoped>
+:deep(.prose mark) {
+    background-color: #fce852;
+    color: #1b1b1b;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    border-radius: 0.125rem;
+}
+</style>

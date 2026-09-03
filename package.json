@@ -19,6 +19,7 @@
     "gsap": "^3.15.0",
     "markdown-it": "^14.2.0",
     "markdown-it-link-attributes": "^4.0.1",
+    "markdown-it-mark": "^4.0.0",
     "pinia": "^3.0.4",
     "vue": "^3.5.32",
     "vue-router": "^5.1.0"

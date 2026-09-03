@@ -16,6 +16,6 @@ const dist_url_prefix = (url_server: string) => {
 }
 
 
-const url_prefix: URL_Prefix = dist_url_prefix(server1)
+const url_prefix: URL_Prefix = dist_url_prefix(server2)
 
 export { url_prefix }

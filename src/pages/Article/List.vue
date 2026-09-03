@@ -30,7 +30,7 @@ watch(
             article_store.getArticleList(categoryId, pageNum, 30);
         } else {
             // 分类变化时重置页码为 1
-            article_store.getArticleList(categoryId, 1, 30);
+            article_store.getArticleList(categoryId, 1, 45);
             // 如果页码不是 1，需要同步更新路由
             if (pageNum !== 1) {
                 router.replace({
