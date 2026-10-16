@@ -1,3 +1,16 @@
+<script setup lang="ts">
+import { computed } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useBaseinfoStore } from '@/store/base';
+import { slug_category_id } from '@/utils/category';
+import { CATEGORY_SLUGS } from '@/utils/categoryConfig';
+
+const baseinfo_store = useBaseinfoStore();
+const { categories } = storeToRefs(baseinfo_store);
+const finance_category_id = computed(() => slug_category_id(categories.value, CATEGORY_SLUGS.finance));
+const notice_category_id = computed(() => slug_category_id(categories.value, CATEGORY_SLUGS.notice));
+</script>
+
 <template>
     <footer class="bg-footer-bg text-footer-text">
         <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -43,11 +56,11 @@
                             <RouterLink :to="{ name: 'About' }" class="hover:text-primary transition">关于我们</RouterLink>
                         </li>
                         <li>
-                            <RouterLink :to="{ name: 'ArticleList', query: { category: 8 } }"
+                            <RouterLink :to="{ name: 'ArticleList', query: { category: finance_category_id } }"
                                 class="hover:text-primary transition">财务公开</RouterLink>
                         </li>
                         <li>
-                            <RouterLink :to="{ name: 'ArticleList', query: { category: 4 } }"
+                            <RouterLink :to="{ name: 'ArticleList', query: { category: notice_category_id } }"
                                 class="hover:text-primary transition">通知公告</RouterLink>
                         </li>
                         <li><a href="#" class="hover:text-primary transition">政策法规</a></li>

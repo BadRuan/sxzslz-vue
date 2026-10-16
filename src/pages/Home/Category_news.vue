@@ -1,15 +1,27 @@
 <script setup lang="ts">
 import TitleComponent from '@/components/TitleComponent.vue';
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useArticleStore } from '@/store/article';
+import { useBaseinfoStore } from '@/store/base';
 import { easy_date_text } from '@/utils/formatters';
+import { slug_category_id } from '@/utils/category';
+import { CATEGORY_SLUGS } from '@/utils/categoryConfig';
 
 const article_store = useArticleStore();
+const baseinfo_store = useBaseinfoStore();
 const { article_obj } = storeToRefs(article_store);
+const { categories } = storeToRefs(baseinfo_store);
+
+const meeting_category_id = computed(() => slug_category_id(categories.value, CATEGORY_SLUGS.meeting));
+const hr_category_id = computed(() => slug_category_id(categories.value, CATEGORY_SLUGS.hr));
+const finance_category_id = computed(() => slug_category_id(categories.value, CATEGORY_SLUGS.finance));
 
 onMounted(() => {
-    article_store.checkHomeArticle();
+    Promise.all([
+        article_store.checkHomeArticle(),
+        baseinfo_store.checkBaseinfo(),
+    ]);
 });
 
 const more_link_class = 'text-sm mr-4 px-3 py-1 hover:text-primary-500 hover:font-bold transition-transform duration-300 hover:translate-x-1';
@@ -29,7 +41,7 @@ const item_title_class = 'text-gray-900 hover:text-primary-500 hover:font-bold t
                 <div class="bg-white w-100 p-4 shadow rounded divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-base font-bold my-2">会议公开</div>
-                        <RouterLink :to="{ name: 'ArticleList', query: { category: 5 } }" :class="more_link_class">
+                        <RouterLink :to="{ name: 'ArticleList', query: { category: meeting_category_id } }" :class="more_link_class">
                             更多 &gt;
                         </RouterLink>
                     </div>
@@ -52,7 +64,7 @@ const item_title_class = 'text-gray-900 hover:text-primary-500 hover:font-bold t
                 <div class="bg-white w-100 p-4 shadow rounded divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-base font-bold my-2">人事动态</div>
-                        <RouterLink :to="{ name: 'ArticleList', query: { category: 7 } }" :class="more_link_class">
+                        <RouterLink :to="{ name: 'ArticleList', query: { category: hr_category_id } }" :class="more_link_class">
                             更多 &gt;
                         </RouterLink>
                     </div>
@@ -78,7 +90,7 @@ const item_title_class = 'text-gray-900 hover:text-primary-500 hover:font-bold t
                 <div class="bg-white w-100 p-4 shadow rounded divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-base font-bold my-2">财务信息</div>
-                        <RouterLink :to="{ name: 'ArticleList', query: { category: 8 } }" :class="more_link_class">
+                        <RouterLink :to="{ name: 'ArticleList', query: { category: finance_category_id } }" :class="more_link_class">
                             更多 &gt;
                         </RouterLink>
                     </div>

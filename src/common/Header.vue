@@ -1,6 +1,21 @@
 <script setup lang="ts">
+import { computed, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useBaseinfoStore } from '@/store/base';
+import { slug_category_id } from '@/utils/category';
+import { CATEGORY_SLUGS } from '@/utils/categoryConfig';
+
 const default_class = 'rounded-md px-3 py-2 font-medium text-gray-500 hover:bg-gray-100 hover:text-primary-400 hover:font-bold flex flex-row items-center'
 const active_class = '!bg-gray-100 !text-primary-500 !font-semibold rounded-md'
+
+const baseinfo_store = useBaseinfoStore();
+const { categories } = storeToRefs(baseinfo_store);
+const news_category_id = computed(() => slug_category_id(categories.value, CATEGORY_SLUGS.news));
+
+onMounted(() => {
+    // 导航栏在所有前台页面常驻，由此统一拉取分类树（store 内部有空缓存判断，不会重复请求）
+    baseinfo_store.checkBaseinfo();
+});
 </script>
 
 <template>
@@ -26,7 +41,7 @@ const active_class = '!bg-gray-100 !text-primary-500 !font-semibold rounded-md'
                         网站首页
                     </RouterLink>
 
-                    <RouterLink :to="{ name: 'ArticleList', query: { category: 3, page: 1 } }"
+                    <RouterLink :to="{ name: 'ArticleList', query: { category: news_category_id, page: 1 } }"
                         :active-class="active_class" :class="default_class">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                             class="mr-1">

@@ -8,19 +8,15 @@ import mark from 'markdown-it-mark';
 import DOMPurify from 'dompurify';
 import dayjs from 'dayjs';
 import { useArticleStore } from '@/store/article';
-import { useBaseinfoStore } from '@/store/base';
 import { url_prefix } from '@/utils/baseInfo';
-import { category_text } from '@/utils/formatters';
 import 'github-markdown-css/github-markdown.css';
 
 const route = useRoute();
 const router = useRouter();
 const slug = route.params.slug;
 const article_store = useArticleStore();
-const baseinfo_store = useBaseinfoStore();
 
 const { article_detail } = storeToRefs(article_store);
-const { categories, users } = storeToRefs(baseinfo_store);
 
 const error = ref<string | null>(null);
 const loading = ref(true);
@@ -38,25 +34,9 @@ onMounted(async () => {
     if (result == undefined) {
         error.value = '文章不存在或已被删除';
     }
-    await Promise.all([
-        baseinfo_store.checkBaseinfo(),
-    ]);
 
     loading.value = false;
 })
-
-const nickname_text = (user_id: number | undefined) => {
-    if (!user_id) {
-        return '';
-    } else {
-        for (let item of users.value) {
-            if (user_id == item.id) {
-                return item.nickname
-            }
-        }
-        return ''
-    }
-}
 
 const md = new MarkdownIt({
     html: false,
@@ -74,7 +54,7 @@ const renderedHtml = computed(() => {
     if (!article_detail.value) {
         return '';
     } else {
-        let content = article_detail.value.content;
+        let content = article_detail.value.content ?? '';
 
         content = content.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, src) => {
             if (src.startsWith('http') || src.startsWith('//')) {
@@ -114,9 +94,9 @@ const renderedHtml = computed(() => {
                     </li>
                     <span class="text-primary-500">/</span>
                     <li>
-                        <RouterLink :to="{ name: 'ArticleList', query: { category: article_detail?.category_id } }"
+                        <RouterLink :to="{ name: 'ArticleList', query: { category: article_detail?.categories[0]?.id } }"
                             class="hover:text-primary-400 transition-colors hover:font-bold">
-                            {{ category_text(article_detail?.category_id, categories) }}
+                            {{ article_detail?.categories[0]?.name }}
                         </RouterLink>
                     </li>
                     <span class="text-primary-500">/</span>
@@ -168,9 +148,9 @@ const renderedHtml = computed(() => {
                                 <path stroke="currentColor" stroke-width="1" stroke-linejoin="bevel"
                                     d="M22 22C22 16.4772 17.5228 12 12 12C6.47715 12 2 16.4772 2 22"></path>
                             </svg>
-                            <RouterLink :to="{ name: 'Profile', params: { id: article_detail?.user_id } }"
+                            <RouterLink :to="{ name: 'Profile', params: { id: article_detail?.user?.id } }"
                                 class="text-base text-gray-500 hover:text-primary-500 hover:font-bold truncate">
-                                <span>{{ nickname_text(article_detail?.user_id) }}</span>
+                                <span>{{ article_detail?.user?.nickname }}</span>
                             </RouterLink>
                         </div>
                         <div class="flex flex-row items-center">

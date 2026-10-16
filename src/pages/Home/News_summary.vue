@@ -4,17 +4,20 @@ import { Splide, SplideSlide } from '@splidejs/vue-splide';
 import '@splidejs/splide/css';
 import { url_prefix } from '@/utils/baseInfo';
 import { easy_date_text } from '@/utils/formatters';
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useBaseinfoStore } from '@/store/base';
 import { useArticleStore } from '@/store/article';
-import { category_text } from '@/utils/formatters';
+import { slug_category_id } from '@/utils/category';
+import { CATEGORY_SLUGS } from '@/utils/categoryConfig';
 
 const baseinfo_store = useBaseinfoStore();
 const article_store = useArticleStore();
 
 const { categories } = storeToRefs(baseinfo_store);
 const { article_obj, loading } = storeToRefs(article_store);
+
+const notice_category_id = computed(() => slug_category_id(categories.value, CATEGORY_SLUGS.notice));
 
 const options = {
     type: 'loop',        // 无缝循环播放
@@ -59,7 +62,9 @@ onMounted(async () => {
                     <SplideSlide v-for="(article, index) in article_obj.recommended" :key="index">
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
                             class="relative bg-cover bg-center">
-                            <img class="w-180 h-120" :src="url_prefix.pic_prefix + article.cover_img" alt="new_pic">
+                            <img v-if="article.cover_img_slug" class="w-180 h-120"
+                                :src="url_prefix.pic_prefix + article.cover_img_slug" alt="new_pic">
+                            <div v-else class="w-180 h-120 bg-gray-200"></div>
                             <div
                                 class="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none">
                             </div>
@@ -67,7 +72,7 @@ onMounted(async () => {
                             <div class="absolute bottom-0 left-0 p-6 text-white max-w-2xl">
                                 <span
                                     class="inline-block px-3 py-1 mb-3 text-xs font-semibold tracking-wider text-white uppercase bg-primary-500 rounded-full">
-                                    {{ category_text(article.category_id, categories) }}
+                                    {{ article.categories[0]?.name }}
                                 </span>
                                 <h2 class="mb-2 font-bold leading-tight">{{ article.title }}</h2>
                             </div>
@@ -78,7 +83,7 @@ onMounted(async () => {
                 <div class="bg-white w-140 p-4 shadow rounded divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-base font-bold my-2">通知公告</div>
-                        <RouterLink :to="{ name: 'ArticleList', query: { category: 4 } }"
+                        <RouterLink :to="{ name: 'ArticleList', query: { category: notice_category_id } }"
                             class="text-sm mr-4 px-3 py-1 hover:text-primary-500 hover:font-bold transition-transform duration-300 hover:translate-x-1">
                             更多 &gt;
                         </RouterLink>
