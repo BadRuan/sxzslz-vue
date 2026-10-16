@@ -6,6 +6,11 @@ import apiService from '@/utils/apiService';
 export interface CategoryModel {
     id: number,
     name: string,
+    slug: string,
+    path: string,
+    level: number,
+    sort: number,
+    children: CategoryModel[],
 }
 
 export interface UserModel {

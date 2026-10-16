@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import type { CategoryModel } from '@/store/base';
+import { find_category } from '@/utils/category';
 
 /**
  * 格式化日期为 YYYY-MM-DD 格式
@@ -19,7 +20,5 @@ export const category_text = (category_id: number | undefined, categories: Categ
     if (!category_id) {
         return '';
     }
-    // 使用宽松比较处理可能的类型不匹配（string vs number）
-    const category = categories.find(item => item.id == category_id);
-    return category ? category.name : '';
+    return find_category(categories, category_id)?.name ?? '';
 };
