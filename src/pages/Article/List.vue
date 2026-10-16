@@ -5,7 +5,9 @@ import { storeToRefs } from 'pinia';
 import { url_prefix } from '@/utils/baseInfo';
 import { useBaseinfoStore } from '@/store/base';
 import { useArticleStore } from '@/store/article';
-import { date_text, category_text } from '@/utils/formatters';
+import { date_text } from '@/utils/formatters';
+import { flatten_categories, slug_category_id } from '@/utils/category';
+import { CATEGORY_SLUGS } from '@/utils/categoryConfig';
 
 const route = useRoute();
 const router = useRouter();
@@ -17,31 +19,22 @@ const { article_list, article_total, article_page, article_has_next } = storeToR
 
 const loading = ref(true);
 
-const active_category = computed(() => Number(route.query.category) || 3);
+const flattened = computed(() => flatten_categories(categories.value));
+const page_number = computed(() => Number(route.query.page) || 1);
 
-watch(
-    () => route.query,
-    (newQuery, oldQuery) => {
-        const categoryId = Number(newQuery.category) || 3;
-        const pageNum = Number(newQuery.page) || 1;
-
-        // 首次加载（oldQuery 不存在）或页码变化
-        if (!oldQuery || newQuery.category === oldQuery.category) {
-            article_store.getArticleList(categoryId, pageNum, 30);
-        } else {
-            // 分类变化时重置页码为 1
-            article_store.getArticleList(categoryId, 1, 45);
-            // 如果页码不是 1，需要同步更新路由
-            if (pageNum !== 1) {
-                router.replace({
-                    name: 'ArticleList',
-                    query: { category: categoryId, page: 1 }
-                });
-            }
-        }
-    },
-    { immediate: true }
+// 默认分类：集中配置 slug → 找不到则树中第一个分类（spec §3.5 兜底）
+const default_category_id = computed(() =>
+    slug_category_id(categories.value, CATEGORY_SLUGS.news)
+    ?? flattened.value[0]?.node.id
 );
+const active_category = computed(() => Number(route.query.category) || default_category_id.value);
+
+// 监听计算属性而非 route.query：分类树异步到达时也能自动补一次取数
+watch([active_category, page_number], ([categoryId, pageNum]) => {
+    if (categoryId) {
+        article_store.getArticleList(categoryId, pageNum, 30);
+    }
+}, { immediate: true });
 
 onMounted(async () => {
     loading.value = true;
@@ -52,17 +45,12 @@ onMounted(async () => {
 });
 
 const handleCategoryClick = (categoryId: number) => {
-    // 如果点击的是当前已激活的分类，强制重新 push 当前路由
-    // 这样会触发上方的 watch，从而刷新列表数据
+    // 点击当前已激活的分类：路由不变不会再触发导航，直接重新拉取
     if (active_category.value === categoryId) {
-        router.push({
-            name: 'ArticleList',
-            query: { category: categoryId }
-        });
+        article_store.getArticleList(categoryId, page_number.value, 30);
     }
 };
 
-// 【功能】翻页功能
 const goToPage = (page: number) => {
     router.push({
         name: 'ArticleList',
@@ -106,14 +94,17 @@ const goToNextPage = () => {
                                 新闻分类
                             </h3>
                             <nav class="flex flex-col space-y-1">
-                                <RouterLink v-for="item in categories" :key="item.id"
-                                    :to="{ name: 'ArticleList', query: { category: item.id } }" :class="[
-                                        active_category === item.id
+                                <RouterLink v-for="{ node, depth } in flattened" :key="node.id"
+                                    :to="{ name: 'ArticleList', query: { category: node.id } }" :class="[
+                                        active_category === node.id
                                             ? 'bg-primary-500 text-white font-bold'
                                             : 'text-gray-700 hover:bg-gray-100 hover:font-bold hover:text-primary-400'
                                     ]" class="rounded-md px-3 py-2 text-sm"
-                                    @click.prevent="handleCategoryClick(item.id)">
-                                    {{ item.name }}
+                                    :style="{ paddingLeft: `${0.75 + depth * 0.75}rem` }"
+                                    @click="handleCategoryClick(node.id)">
+                                    <span :class="depth > 0
+                                        ? (active_category === node.id ? 'text-xs' : 'text-xs text-gray-400')
+                                        : ''">{{ node.name }}</span>
                                 </RouterLink>
                             </nav>
                         </div>
@@ -130,13 +121,21 @@ const goToNextPage = () => {
 
                         <!-- 正常内容 -->
                         <template v-else>
-                            <div class="grid grid-cols-3 gap-8">
+                            <div v-if="article_list.length === 0"
+                                class="bg-white rounded shadow-xs p-12 text-center text-gray-500">
+                                暂无文章
+                            </div>
+                            <div v-else class="grid grid-cols-3 gap-8">
                                 <article v-for="(article, index) in article_list" :key="index"
                                     class="flex flex-col overflow-hidden bg-white rounded shadow-xs transition-transform duration-300 group hover:-translate-y-2">
                                     <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }">
                                         <div class="w-full overflow-hidden">
-                                            <img class="w-full h-52" :src="url_prefix.pic_prefix + article.cover_img"
-                                                alt="news_pic" />
+                                            <img v-if="article.cover_img_slug" class="w-full h-52"
+                                                :src="url_prefix.pic_prefix + article.cover_img_slug" alt="news_pic" />
+                                            <div v-else
+                                                class="w-full h-52 bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+                                                暂无封面
+                                            </div>
                                         </div>
                                         <div class="p-4 flex flex-col gap-4 divide-y  divide-gray-100">
                                             <div class="flex flex-row items-center justify-between">
@@ -150,8 +149,7 @@ const goToNextPage = () => {
                                                             d="M12.1581 5.52566L9.19761 4.53883Q7.58114 4 5.87722 4L3 4C2.72386 4 2.5 4.22386 2.5 4.5L2.5 18.5C2.5 18.7761 2.72386 19 3 19L5.87722 19Q7.41887 19 8.88139 19.4875L11.8419 20.4743C12.1657 20.5823 12.5 20.3413 12.5 20L12.5 6C12.5 5.78478 12.3623 5.59372 12.1581 5.52566ZM11.8419 6.47434L12 6L11.5 6L11.5 20L12 20L12.1581 19.5257L9.19761 18.5388Q7.58114 18 5.87722 18L3 18L3 18.5L3.5 18.5L3.5 4.5L3 4.5L3 5L5.87722 5Q7.41886 5 8.88139 5.48751L11.8419 6.47434Z">
                                                         </path>
                                                     </svg>
-                                                    {{
-                                                        category_text(article.category_id, categories) }}
+                                                    {{ article.categories[0]?.name }}
 
                                                 </div>
                                                 <div class="flex flex-row items-center">
