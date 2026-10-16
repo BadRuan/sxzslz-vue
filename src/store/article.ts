@@ -1,30 +1,38 @@
 import { ref, reactive } from 'vue';
 import { defineStore } from 'pinia';
 import apiService from '@/utils/apiService';
+import type { CategoryModel } from '@/store/base';
+
+export interface ArticleUserModel {
+    id: number,
+    slug: string,
+    nickname: string,
+}
 
 export interface ArticleModel {
     id: number,
     slug: string,
-    cover_img: string,
+    cover_img_slug: string | null,
     title: string,
-    view_count: number
-    content: string
-    category_id: number
-    user_id: number
-    create_at: string
-    is_public: boolean
-    is_recommended: boolean
+    is_hidden: boolean,
+    is_recommended: boolean,
+    create_at: string,
+    view_count: number,
+    like_count: number,
+    categories: CategoryModel[],
+    user: ArticleUserModel | null,
+    content?: string | null,
 }
 
 class ArticleService{
     public getArticleByCategoryId(category_id: number = 1, page: number = 1, page_size: number = 30) {
-        return apiService.get('/article/latest/', { category_id, page, page_size })
+        return apiService.get('/articles/', { category_id, page, page_size })
     }
     public getRecommended(limit: number) {
-        return apiService.get('/article/recommended', { limit })
+        return apiService.get('/articles/recommended', { limit })
     }
     public getDetail(slug: string) {
-        return apiService.get('/article/detail/' + slug)
+        return apiService.get('/articles/detail/' + slug)
     }
 }
 
@@ -49,8 +57,13 @@ export const useArticleStore = defineStore('article', () => {
     loading.value = true
     try {
       if (recommended_article.value.length == 0) {
-        const res = await articleService.getRecommended(8)
-        recommended_article.value = res
+        // 推荐位接口后端暂未提供：独立容错，失败不得阻塞下方分类资讯（spec §2.2）
+        try {
+          const res = await articleService.getRecommended(8)
+          recommended_article.value = res
+        } catch (error) {
+          console.warn('推荐文章接口暂不可用:', error)
+        }
       };
       if (notice_article.value.length == 0){
         const res = await articleService.getArticleByCategoryId(4, 1, 8);
