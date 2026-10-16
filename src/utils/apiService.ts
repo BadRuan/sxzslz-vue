@@ -12,6 +12,10 @@ class ApiService {
     return service.post(url, data);
   }
 
+    public async patch<T = any>(url: string, data?: RequestOptions): Promise<T> {
+    return service.patch(url, data);
+  }
+
     public async put<T = any>(url: string, data?: RequestOptions): Promise<T> {
     return service.put(url, data);
   }
