@@ -50,6 +50,7 @@ const switch_view = (target: 'active' | 'trash') => {
     if (view.value === target) return;
     view.value = target;
     page.value = 1;
+    clear_selection();
     fetch_list();
 };
 
@@ -184,6 +185,11 @@ const remove_article = async (row: ArticleModel) => {
     action_slug.value = row.slug;
     try {
         await articleService.remove(row.slug);
+        if (selected.value.has(row.slug)) {
+            const next = new Set(selected.value);
+            next.delete(row.slug);
+            selected.value = next;
+        }
         await fetch_list();
     } catch (error) {
         window.alert(api_error_detail(error, '删除失败，请稍后重试'));
@@ -214,6 +220,61 @@ const toggle_recommended = async (row: ArticleModel) => {
         window.alert(api_error_detail(error, '操作失败，请稍后重试'));
     } finally {
         action_slug.value = null;
+    }
+};
+
+// —— 批量分类（正常文章视图；勾选跨页保留，切视图清空） ——
+const selected = ref<Set<string>>(new Set());
+const all_on_page_selected = computed(() =>
+    article_list.value.length > 0 && article_list.value.every(a => selected.value.has(a.slug)));
+
+const toggle_select_all = () => {
+    const next = new Set(selected.value);
+    if (all_on_page_selected.value) article_list.value.forEach(a => next.delete(a.slug));
+    else article_list.value.forEach(a => next.add(a.slug));
+    selected.value = next;
+};
+
+const toggle_select = (slug: string) => {
+    const next = new Set(selected.value);
+    if (next.has(slug)) next.delete(slug);
+    else next.add(slug);
+    selected.value = next;
+};
+
+const clear_selection = () => { selected.value = new Set(); };
+
+const show_batch_modal = ref(false);
+const batch_mode = ref<'add' | 'remove'>('add');
+const batch_category_id = ref<number | null>(null);
+const batch_error = ref('');
+const batch_saving = ref(false);
+
+const open_batch = (mode: 'add' | 'remove') => {
+    batch_mode.value = mode;
+    batch_category_id.value = null;
+    batch_error.value = '';
+    show_batch_modal.value = true;
+};
+
+const submit_batch = async () => {
+    if (!batch_category_id.value) {
+        batch_error.value = '请选择目标分类';
+        return;
+    }
+    batch_saving.value = true;
+    batch_error.value = '';
+    try {
+        const res = await articleService.batchCategory(
+            [...selected.value], batch_category_id.value, batch_mode.value);
+        show_batch_modal.value = false;
+        clear_selection();
+        window.alert(`已${batch_mode.value === 'add' ? '加入' : '移出'}分类，共处理 ${res.affected} 篇文章`);
+        await fetch_list();
+    } catch (error) {
+        batch_error.value = api_error_detail(error, '批量操作失败，请稍后重试');
+    } finally {
+        batch_saving.value = false;
     }
 };
 
@@ -257,10 +318,28 @@ onMounted(
             </button>
         </div>
 
+        <div v-if="view === 'active' && selected.size > 0"
+            class="mb-4 flex items-center gap-3 rounded-xl bg-primary-50 px-4 py-3 text-sm text-primary-800">
+            <span>已选 <b>{{ selected.size }}</b> 篇</span>
+            <button class="rounded-lg bg-primary-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-600 link-transition"
+                @click="open_batch('add')">
+                加入分类
+            </button>
+            <button class="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-primary-700 ring-1 ring-primary-300 hover:bg-primary-100 link-transition"
+                @click="open_batch('remove')">
+                从分类移除
+            </button>
+            <button class="ml-auto text-xs text-gray-500 hover:underline" @click="clear_selection">清空选择</button>
+        </div>
+
         <div class="bg-white rounded-2xl shadow-card overflow-x-auto">
             <table class="w-full text-sm text-left">
                 <thead class="border-b border-border text-gray-500">
                     <tr class="text-center">
+                        <th v-if="view === 'active'" class="px-3 py-4 font-medium">
+                            <input type="checkbox" class="cursor-pointer rounded"
+                                :checked="all_on_page_selected" @change="toggle_select_all" />
+                        </th>
                         <th class="px-4 py-4 font-medium">分类</th>
                         <th class="px-4 py-4 font-medium">标题</th>
                         <th class="px-4 py-4 font-medium">作者</th>
@@ -272,14 +351,18 @@ onMounted(
                 </thead>
                 <tbody class="divide-y divide-border divide-dashed">
                     <tr v-if="list_error">
-                        <td colspan="7" class="px-6 py-8 text-center text-red-600">{{ list_error }}</td>
+                        <td :colspan="view === 'active' ? 8 : 7" class="px-6 py-8 text-center text-red-600">{{ list_error }}</td>
                     </tr>
                     <tr v-else-if="article_list.length === 0">
-                        <td colspan="7" class="px-6 py-8 text-center text-gray-400">
+                        <td :colspan="view === 'active' ? 8 : 7" class="px-6 py-8 text-center text-gray-400">
                             {{ view === 'trash' ? '回收站为空' : '暂无文章' }}
                         </td>
                     </tr>
                     <tr v-for="article in article_list" :key="article.slug" class="text-center hover:bg-gray-50 link-transition">
+                        <td v-if="view === 'active'" class="px-3 py-3.5">
+                            <input type="checkbox" class="cursor-pointer rounded"
+                                :checked="selected.has(article.slug)" @change="toggle_select(article.slug)" />
+                        </td>
                         <td class="px-4 py-3.5 text-gray-600">
                             {{ article.categories?.[0]?.name || '—' }}
                         </td>
@@ -412,6 +495,43 @@ onMounted(
                             class="px-4 py-2 text-sm rounded-lg link-transition"
                             @click="submit_form">
                             {{ saving ? '保存中...' : '保存' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Transition>
+
+        <!-- 批量分类弹窗 -->
+        <Transition name="modal">
+            <div v-if="show_batch_modal" class="fixed inset-0 z-50 flex items-center justify-center">
+                <div class="absolute inset-0 bg-black/30" @click="show_batch_modal = false"></div>
+                <div class="modal-panel relative bg-white rounded-2xl shadow-card-hover w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">
+                        {{ batch_mode === 'add' ? '批量加入分类' : '批量从分类移除' }}
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-4">
+                        已选 {{ selected.size }} 篇文章，选择目标分类（仅二级）：
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <button v-for="opt in second_level_options" :key="opt.id" type="button"
+                            class="rounded-full px-3 py-1 text-xs transition-colors"
+                            :class="batch_category_id === opt.id
+                                ? 'bg-primary-500 text-white'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                            @click="batch_category_id = opt.id">
+                            {{ opt.label }}
+                        </button>
+                    </div>
+                    <p v-if="batch_error" class="mt-3 text-sm text-red-600">{{ batch_error }}</p>
+                    <div class="mt-5 flex justify-end gap-3">
+                        <button class="px-4 py-2 text-sm rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 link-transition"
+                            @click="show_batch_modal = false">取消</button>
+                        <button :disabled="batch_saving" :class="batch_saving
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-primary-500 text-white hover:bg-primary-600'"
+                            class="px-4 py-2 text-sm rounded-lg link-transition"
+                            @click="submit_batch">
+                            {{ batch_saving ? '提交中...' : '确认' }}
                         </button>
                     </div>
                 </div>

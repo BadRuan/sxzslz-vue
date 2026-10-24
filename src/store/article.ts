@@ -47,7 +47,7 @@ interface ArticleQuery {
     is_deleted?: boolean
 }
 
-/** POST /articles/ 请求体；作者由服务端 DEFAULT_USER_ID 指定 */
+/** POST /articles/ 请求体；作者为当前登录用户（服务端从 JWT 解析），DEFAULT_USER_ID 仅 service 层兜底 */
 export interface ArticleCreateInput {
     title: string,
     content?: string | null,
@@ -91,6 +91,12 @@ class ArticleService {
     /** 恢复回收站文章（需登录）：文章重新进入正常列表 */
     public restore(slug: string) {
         return apiService.post<ArticleModel>('/articles/' + slug + '/restore')
+    }
+    /** 批量把多篇文章加入/移出一个二级分类（幂等，需登录） */
+    public batchCategory(slugs: string[], category_id: number, mode: 'add' | 'remove') {
+        return apiService.post<{ affected: number }>('/articles/batch-category', {
+            slugs, category_id, mode,
+        })
     }
     /** 匿名点赞：公开接口，每次 +1，返回自增后的计数 */
     public like(slug: string) {
