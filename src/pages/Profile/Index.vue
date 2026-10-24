@@ -12,12 +12,12 @@ const route = useRoute();
 const user_id = Number(route.params.id);
 const head_img = '192878a6502947989a25d49d55f39266.jpg';
 
-// 后端无 /profile/ 接口：从公开文章列表（page_size 上限 100）过滤作者
+// 后端无 /profile/ 专用接口：用 GET /articles/?user_id= 服务端过滤作者文章
 const latest_article = ref<ArticleModel[]>([]);
 const getArticles = async () => {
     try {
-        const res = await articleService.getArticles({ page: 1, page_size: 100 });
-        latest_article.value = (res.data ?? []).filter(article => article.user?.id === user_id);
+        const res = await articleService.getArticles({ page: 1, page_size: 100, user_id });
+        latest_article.value = res.data ?? [];
     } catch (error) {
         console.error('获取失败:', error)
     }
