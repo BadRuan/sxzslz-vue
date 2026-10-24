@@ -1,17 +1,19 @@
 <script setup lang="ts">
+import { useRoute } from 'vue-router'
 import Header from '@/common/Header.vue'
 import Footer from '@/common/Footer.vue'
-// TODO: 调试插桩，定位后移除
-const dbg = (ev: string) => console.log('[transition]', ev, location.pathname);
+
+const route = useRoute()
 </script>
 
 <template>
   <Header />
   <router-view v-slot="{ Component }">
-    <Transition name="page" mode="out-in"
-      @enter="dbg('enter')" @after-enter="dbg('after-enter')"
-      @leave="dbg('leave')" @after-leave="dbg('after-leave')">
-      <component :is="Component" />
+    <!-- 不用 mode="out-in"：Vue 3.5 + vue-router 5 下其出场 wrapper 可能不触发，
+         isLeaving 卡住导致后续路由正文永不可见（曾表现为"只有页头页尾"）。
+         默认交叉淡入 + :key 保证每次导航都是全新挂载。 -->
+    <Transition name="page">
+      <component :is="Component" :key="route.fullPath" />
     </Transition>
   </router-view>
   <Footer />
