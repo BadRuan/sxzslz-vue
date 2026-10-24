@@ -1,49 +1,21 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import apiService from '@/utils/apiService';
+import { api_error_detail } from '@/store/article';
+import {
+    type CategoryFlat,
+    type CategoryTreeNode,
+    build_category_tree,
+    flatten_tree,
+} from '@/utils/category';
 
-interface FlatCategory {
-    id: number
-    name: string
-    slug: string
-    parent_id: number
-    path: string
-    level: number
-    sort: number
-}
+const categories = ref<CategoryFlat[]>([]);
 
-interface TreeNode extends FlatCategory {
-    children: TreeNode[]
-}
-
-const categories = ref<FlatCategory[]>([]);
-
-// 扁平列表建树；父分类已（软）删除的孤儿子分类提升为顶级，避免管理列表静默丢数据
-const build_tree = (list: FlatCategory[]): TreeNode[] => {
-    const map = new Map<number, TreeNode>();
-    list.forEach(item => map.set(item.id, { ...item, children: [] }));
-    const roots: TreeNode[] = [];
-    list.forEach(item => {
-        const node = map.get(item.id)!;
-        const parent = item.parent_id !== 0 ? map.get(item.parent_id) : undefined;
-        if (parent) {
-            parent.children.push(node);
-        } else {
-            roots.push(node);
-        }
-    });
-    return roots;
-};
-
-// 先序展开，表格逐行渲染
-const flatten_tree = (nodes: TreeNode[], depth = 0): { node: TreeNode; depth: number }[] =>
-    nodes.flatMap(n => [{ node: n, depth }, ...flatten_tree(n.children, depth + 1)]);
-
-const tree_rows = computed(() => flatten_tree(build_tree(categories.value)));
+const tree_rows = computed(() => flatten_tree(build_category_tree(categories.value)));
 
 const queryCategoryInfo = async () => {
     try {
-        const res = await apiService.get('/categories/');
+        const res = await apiService.get<CategoryFlat[]>('/categories/');
         categories.value = res;
     } catch (error) {
         console.error('获取分类详细信息失败:', error)
@@ -53,58 +25,103 @@ const queryCategoryInfo = async () => {
 // —— 弹窗表单 ——
 const show_modal = ref(false);
 const modal_mode = ref<'create' | 'edit'>('create');
-const form = ref({ name: '', slug: '', parent_id: 0, sort: 0 });
+const form = ref({ name: '', parent_id: 0, sort: 0 });
 const editing_id = ref<number | null>(null);
+const original_parent_id = ref<number>(0);
 const modal_error = ref('');
+const saving = ref(false);
 
-// 父分类下拉：编辑时排除自身（选其他节点由后端校验防环并回 400）
-const parent_options = computed(() =>
-    categories.value.filter(c => c.id !== editing_id.value)
+/** 编辑一级分类时锁定父级（后端：一级分类不支持调整父级） */
+const editing_is_first_level = computed(() =>
+    modal_mode.value === 'edit' && original_parent_id.value === 0
 );
+
+/** 父分类下拉：严格二级，只允许挂到一级分类下；编辑时排除自身及子孙（防环） */
+const parent_options = computed(() => {
+    const excluded = new Set<number>();
+    if (editing_id.value !== null) {
+        const find_and_walk = (nodes: CategoryTreeNode[]): boolean => {
+            for (const node of nodes) {
+                if (node.id === editing_id.value) {
+                    flatten_tree([node]).forEach(({ node: n }) => excluded.add(n.id));
+                    return true;
+                }
+                if (find_and_walk(node.children)) return true;
+            }
+            return false;
+        };
+        find_and_walk(build_category_tree(categories.value));
+    }
+    return build_category_tree(categories.value)
+        .filter(node => !excluded.has(node.id))
+        .map(node => ({ id: node.id, label: node.name }));
+});
 
 const open_create = (parent_id = 0) => {
     modal_mode.value = 'create';
     editing_id.value = null;
-    form.value = { name: '', slug: '', parent_id, sort: 0 };
+    original_parent_id.value = 0;
+    form.value = { name: '', parent_id, sort: 0 };
     modal_error.value = '';
     show_modal.value = true;
 };
 
-const open_edit = (row: FlatCategory) => {
+const open_edit = (row: CategoryFlat) => {
     modal_mode.value = 'edit';
     editing_id.value = row.id;
-    form.value = { name: row.name, slug: row.slug, parent_id: row.parent_id, sort: row.sort };
+    original_parent_id.value = row.parent_id;
+    form.value = { name: row.name, parent_id: row.parent_id, sort: row.sort };
     modal_error.value = '';
     show_modal.value = true;
 };
-
-const error_detail = (error: any, fallback: string): string =>
-    error?.response?.data?.detail || fallback;
 
 const submit_form = async () => {
     modal_error.value = '';
+    if (!form.value.name.trim()) {
+        modal_error.value = '名称不能为空';
+        return;
+    }
+    saving.value = true;
     try {
         if (modal_mode.value === 'create') {
-            await apiService.post('/categories/', form.value);
+            await apiService.post('/categories/', {
+                name: form.value.name.trim(),
+                parent_id: form.value.parent_id,
+                sort: form.value.sort,
+            });
         } else if (editing_id.value !== null) {
-            await apiService.patch('/categories/' + editing_id.value, form.value);
+            const payload: Record<string, unknown> = {
+                name: form.value.name.trim(),
+                sort: form.value.sort,
+            };
+            // 父级未变不传，避免误触后端「一级不调父级 / 不能降为一级」校验
+            if (!editing_is_first_level.value && form.value.parent_id !== original_parent_id.value) {
+                payload.parent_id = form.value.parent_id;
+            }
+            await apiService.patch('/categories/' + editing_id.value, payload);
         }
         show_modal.value = false;
         await queryCategoryInfo();
     } catch (error: any) {
-        modal_error.value = error_detail(error, '保存失败，请稍后重试');
+        modal_error.value = api_error_detail(error, '保存失败，请稍后重试');
+    } finally {
+        saving.value = false;
     }
 };
 
-const remove_category = async (row: TreeNode) => {
-    if (!window.confirm(`确认删除分类「${row.name}」吗？`)) {
+const remove_category = async (row: CategoryTreeNode) => {
+    const child_count = flatten_tree([row]).length - 1;
+    const tip = child_count > 0
+        ? `确认删除分类「${row.name}」吗？其下 ${child_count} 个子分类将一并删除，关联文章的分类会被清空。`
+        : `确认删除分类「${row.name}」吗？关联文章的分类会被清空。`;
+    if (!window.confirm(tip)) {
         return;
     }
     try {
         await apiService.delete('/categories/' + row.id);
         await queryCategoryInfo();
     } catch (error: any) {
-        window.alert(error_detail(error, '删除失败，请稍后重试'));
+        window.alert(api_error_detail(error, '删除失败，请稍后重试'));
     }
 };
 
@@ -115,35 +132,34 @@ onMounted(queryCategoryInfo);
     <main class="flex-1 overflow-y-auto p-6">
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-xl font-bold text-gray-800">分类管理</h2>
-            <button class="rounded-md bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-400"
+            <button class="rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600 link-transition"
                 @click="open_create()">
                 + 新增分类
             </button>
         </div>
 
-        <div class="bg-white rounded-lg shadow-xs ring-1 ring-border overflow-x-auto">
+        <div class="bg-white rounded-2xl shadow-card overflow-x-auto">
             <table class="w-full text-sm text-center">
                 <thead class="border-b border-border text-gray-500">
                     <tr>
-                        <th class="px-5 py-3 font-medium">分类名称</th>
-                        <th class="px-5 py-3 font-medium">Slug</th>
-                        <th class="px-5 py-3 font-medium">层级</th>
-                        <th class="px-5 py-3 font-medium">排序</th>
-                        <th class="px-5 py-3 font-medium">操作</th>
+                        <th class="px-6 py-4 font-medium">分类名称</th>
+                        <th class="px-6 py-4 font-medium">层级</th>
+                        <th class="px-6 py-4 font-medium">排序</th>
+                        <th class="px-6 py-4 font-medium">操作</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-border divide-dashed">
-                    <tr v-for="{ node, depth } in tree_rows" :key="node.id" class="hover:bg-gray-50">
-                        <td class="px-5 py-3 text-gray-700 text-left"
+                    <tr v-for="{ node, depth } in tree_rows" :key="node.id" class="hover:bg-gray-50 link-transition">
+                        <td class="px-6 py-3.5 text-gray-700 text-left"
                             :style="{ paddingLeft: `${1.25 + depth * 1.5}rem` }">
                             {{ node.name }}
                         </td>
-                        <td class="px-5 py-3 text-gray-500">{{ node.slug }}</td>
-                        <td class="px-5 py-3 text-gray-500">{{ node.level }}</td>
-                        <td class="px-5 py-3 text-gray-500">{{ node.sort }}</td>
-                        <td class="px-5 py-3">
+                        <td class="px-6 py-3.5 text-gray-500">{{ depth + 1 }}</td>
+                        <td class="px-6 py-3.5 text-gray-500">{{ node.sort }}</td>
+                        <td class="px-6 py-3.5">
                             <div class="flex items-center justify-center gap-3">
-                                <button class="text-xs text-primary-700 hover:underline"
+                                <!-- 仅一级分类可添加子分类（严格二级） -->
+                                <button v-if="depth === 0" class="text-xs text-primary-700 hover:underline"
                                     @click="open_create(node.id)">添加子分类</button>
                                 <button class="text-xs text-primary-700 hover:underline"
                                     @click="open_edit(node)">编辑</button>
@@ -157,41 +173,49 @@ onMounted(queryCategoryInfo);
         </div>
 
         <!-- 新增/编辑弹窗 -->
-        <div v-if="show_modal" class="fixed inset-0 z-50 flex items-center justify-center">
-            <div class="absolute inset-0 bg-black/30" @click="show_modal = false"></div>
-            <div class="relative bg-white rounded-lg shadow-xl w-96 p-6">
-                <h3 class="text-lg font-bold text-gray-800 mb-4">
-                    {{ modal_mode === 'create' ? '新增分类' : '编辑分类' }}
-                </h3>
-                <div class="flex flex-col gap-3">
-                    <label class="text-sm text-gray-600">名称
-                        <input v-model="form.name"
-                            class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-800" />
-                    </label>
-                    <label class="text-sm text-gray-600">Slug
-                        <input v-model="form.slug"
-                            class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-800" />
-                    </label>
-                    <label class="text-sm text-gray-600">父分类
-                        <select v-model.number="form.parent_id"
-                            class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-800">
-                            <option :value="0">顶级分类</option>
-                            <option v-for="c in parent_options" :key="c.id" :value="c.id">{{ c.name }}</option>
-                        </select>
-                    </label>
-                    <label class="text-sm text-gray-600">排序
-                        <input v-model.number="form.sort" type="number"
-                            class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-800" />
-                    </label>
-                    <p v-if="modal_error" class="text-sm text-red-600">{{ modal_error }}</p>
-                </div>
-                <div class="mt-5 flex justify-end gap-3">
-                    <button class="px-4 py-2 text-sm rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200"
-                        @click="show_modal = false">取消</button>
-                    <button class="px-4 py-2 text-sm rounded-md bg-primary-500 text-white hover:bg-primary-400"
-                        @click="submit_form">保存</button>
+        <Transition name="modal">
+            <div v-if="show_modal" class="fixed inset-0 z-50 flex items-center justify-center">
+                <div class="absolute inset-0 bg-black/30" @click="show_modal = false"></div>
+                <div class="modal-panel relative bg-white rounded-2xl shadow-card-hover w-96 p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">
+                        {{ modal_mode === 'create' ? '新增分类' : '编辑分类' }}
+                    </h3>
+                    <div class="flex flex-col gap-3">
+                        <label class="text-sm text-gray-600">名称
+                            <input v-model="form.name"
+                                class="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm text-gray-800 focus:border-primary-400 focus:ring-2 focus:ring-primary-100" />
+                        </label>
+                        <label class="text-sm text-gray-600">父分类
+                            <select v-model.number="form.parent_id" :disabled="editing_is_first_level"
+                                class="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm text-gray-800 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 disabled:bg-gray-50 disabled:text-gray-500">
+                                <option :value="0">一级分类</option>
+                                <option v-for="opt in parent_options" :key="opt.id" :value="opt.id">{{ opt.label }}</option>
+                            </select>
+                            <span class="block mt-1 text-xs text-gray-400">
+                                {{ editing_is_first_level
+                                    ? '一级分类不可调整父级'
+                                    : '分类仅支持二级：子分类只能挂在一级分类下' }}
+                            </span>
+                        </label>
+                        <label class="text-sm text-gray-600">排序
+                            <input v-model.number="form.sort" type="number"
+                                class="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm text-gray-800 focus:border-primary-400 focus:ring-2 focus:ring-primary-100" />
+                        </label>
+                        <p v-if="modal_error" class="text-sm text-red-600">{{ modal_error }}</p>
+                    </div>
+                    <div class="mt-5 flex justify-end gap-3">
+                        <button class="px-4 py-2 text-sm rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 link-transition"
+                            @click="show_modal = false">取消</button>
+                        <button :disabled="saving" :class="saving
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-primary-500 text-white hover:bg-primary-600'"
+                            class="px-4 py-2 text-sm rounded-lg link-transition"
+                            @click="submit_form">
+                            {{ saving ? '保存中...' : '保存' }}
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </Transition>
     </main>
 </template>

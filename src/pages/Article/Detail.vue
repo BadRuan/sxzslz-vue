@@ -7,7 +7,9 @@ import linkAttributes from 'markdown-it-link-attributes';
 import mark from 'markdown-it-mark';
 import DOMPurify from 'dompurify';
 import dayjs from 'dayjs';
-import { useArticleStore } from '@/store/article';
+import { useArticleStore, articleService } from '@/store/article';
+import { useBaseinfoStore } from '@/store/base';
+import { category_crumbs } from '@/utils/category';
 import { url_prefix } from '@/utils/baseInfo';
 import 'github-markdown-css/github-markdown.css';
 
@@ -15,8 +17,15 @@ const route = useRoute();
 const router = useRouter();
 const slug = route.params.slug;
 const article_store = useArticleStore();
+const baseinfo_store = useBaseinfoStore();
 
 const { article_detail } = storeToRefs(article_store);
+const { categories } = storeToRefs(baseinfo_store);
+
+/** 首页分类树到达后，面包屑才能补全中间层级 */
+const category_breadcrumb_crumbs = computed(() =>
+    category_crumbs(article_detail.value?.categories?.[0], categories.value)
+);
 
 const error = ref<string | null>(null);
 const loading = ref(true);
@@ -30,6 +39,7 @@ onMounted(async () => {
     loading.value = true;
     error.value = null;
 
+    baseinfo_store.checkBaseinfo();
     const result = await article_store.getDetail(slug);
     if (result == undefined) {
         error.value = '文章不存在或已被删除';
@@ -37,6 +47,44 @@ onMounted(async () => {
 
     loading.value = false;
 })
+
+// —— 匿名点赞：公开接口每次 +1，localStorage 记录已点赞的浏览器防重复 ——
+const LIKED_STORAGE_KEY = 'liked_articles';
+
+const load_liked = (): Set<string> => {
+    try {
+        return new Set(JSON.parse(localStorage.getItem(LIKED_STORAGE_KEY) ?? '[]'));
+    } catch {
+        return new Set();
+    }
+};
+
+const liked_slugs = ref<Set<string>>(load_liked());
+const liking = ref(false);
+const like_message = ref('');
+const like_count = computed(() => article_detail.value?.like_count ?? 0);
+const has_liked = computed(() => typeof slug === 'string' && liked_slugs.value.has(slug));
+
+const handle_like = async () => {
+    if (typeof slug !== 'string' || has_liked.value || liking.value) return;
+    liking.value = true;
+    like_message.value = '';
+    try {
+        const res = await articleService.like(slug);
+        if (article_detail.value) {
+            article_detail.value.like_count = res.like_count;
+        }
+        liked_slugs.value.add(slug);
+        localStorage.setItem(LIKED_STORAGE_KEY, JSON.stringify([...liked_slugs.value]));
+        like_message.value = '感谢点赞！';
+    } catch (error) {
+        console.error('点赞失败:', error);
+        like_message.value = '点赞失败，请稍后重试';
+    } finally {
+        liking.value = false;
+        setTimeout(() => { like_message.value = ''; }, 2000);
+    }
+};
 
 const md = new MarkdownIt({
     html: false,
@@ -83,22 +131,26 @@ const renderedHtml = computed(() => {
 
 <template>
     <main class="bg-background">
-        <div class="min-h-screen py-10 px-4">
-            <nav class="w-7xl mx-auto mb-6 px-4 sm:px-6 lg:px-8" aria-label="Breadcrumb">
+        <div class="min-h-screen section-y px-4">
+            <nav class="w-7xl mx-auto mb-8 px-4 sm:px-6 lg:px-8" aria-label="Breadcrumb">
                 <ol class="flex items-center gap-2 text-base text-gray-500">
                     <li>
                         <RouterLink :to="{ name: 'Home' }"
-                            class="hover:text-primary-400  hover:font-bold transition-colors">
+                            class="hover:text-primary-400 hover:font-bold link-transition">
                             网站首页
                         </RouterLink>
                     </li>
-                    <span class="text-primary-500">/</span>
-                    <li>
-                        <RouterLink :to="{ name: 'ArticleList', query: { category: article_detail?.categories[0]?.id } }"
-                            class="hover:text-primary-400 transition-colors hover:font-bold">
-                            {{ article_detail?.categories[0]?.name }}
-                        </RouterLink>
-                    </li>
+                    <template v-for="(crumb, index) in category_breadcrumb_crumbs" :key="crumb.id">
+                        <!-- 多级分类之间用竖线，避免与路径分隔斜线混淆 -->
+                        <span class="text-primary-500">{{ index === 0 ? '/' : '│' }}</span>
+                        <li>
+                            <RouterLink :to="{ name: 'ArticleList', query: { category: crumb.id } }"
+                                class="hover:text-primary-400 hover:font-bold link-transition"
+                                :class="index === category_breadcrumb_crumbs.length - 1 ? 'text-gray-700 font-medium' : ''">
+                                {{ crumb.name }}
+                            </RouterLink>
+                        </li>
+                    </template>
                     <span class="text-primary-500">/</span>
                     <li class="text-gray-700">正文</li>
                 </ol>
@@ -122,20 +174,20 @@ const renderedHtml = computed(() => {
                 <p class="text-gray-500 mb-6">请检查文章链接是否正确，或返回其他页面</p>
                 <div class="flex justify-center gap-4">
                     <RouterLink :to="{ name: 'ArticleList' }"
-                        class="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-500 transition-colors">
+                        class="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 link-transition">
                         返回列表
                     </RouterLink>
                     <RouterLink :to="{ name: 'Home' }"
-                        class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                        class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 link-transition">
                         返回首页
                     </RouterLink>
                 </div>
             </div>
 
             <!-- 正常内容 -->
-            <article v-else class="max-w-7xl mx-auto min-h-120 px-4 bg-white rounded shadow-sm overflow-hidden">
-                <div class="px-6 sm:px-10 pt-10 border-b border-border text-center">
-                    <h1 class="text-3xl font-bold text-gray-700 leading-tight mb-4">
+            <article v-else class="max-w-7xl mx-auto min-h-120 px-4 bg-white rounded-2xl shadow-card overflow-hidden">
+                <div class="px-8 sm:px-14 pt-12 pb-8 border-b border-border text-center">
+                    <h1 class="text-3xl font-bold text-gray-800 leading-tight mb-5">
                         {{ article_detail?.title }}
                     </h1>
 
@@ -184,7 +236,7 @@ const renderedHtml = computed(() => {
                         </div>
                     </div>
                 </div>
-                <div class="px-6 sm:px-10 py-8 prose prose-primary-500 prose-lg max-w-none
+                <div class="px-8 sm:px-14 py-12 prose prose-primary-500 prose-lg max-w-none
                         prose-headings:font-bold prose-headings:text-gray-800 prose-headings:mb-4 prose-headings:mt-8
                         prose-h1:text-2xl prose-h2:text-2xl prose-h3:text-base prose-p:text-base
                         prose-p:leading-relaxed prose-p:indent-2em
@@ -196,6 +248,25 @@ const renderedHtml = computed(() => {
                         prose-img:w-2/3 prose-img:shadow prose-img:rounded-sm prose-img:my-6 prose-img:mx-auto
                         " v-html="renderedHtml">
 
+                </div>
+
+                <!-- 匿名点赞 -->
+                <div class="px-8 sm:px-14 pb-10 flex flex-col items-center gap-2 border-t border-border pt-8">
+                    <button type="button" :disabled="has_liked || liking"
+                        class="inline-flex items-center gap-2 rounded-full px-8 py-2.5 text-base font-semibold link-transition"
+                        :class="has_liked
+                            ? 'bg-primary-100 text-primary-600 cursor-default'
+                            : 'bg-primary-500 text-white hover:bg-primary-600 hover:shadow-soft'"
+                        @click="handle_like">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                            :fill="has_liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+                        </svg>
+                        {{ has_liked ? '已点赞' : '点赞' }} {{ like_count > 0 ? `· ${like_count}` : '' }}
+                    </button>
+                    <p v-if="like_message" class="text-sm text-gray-500">{{ like_message }}</p>
                 </div>
 
             </article>

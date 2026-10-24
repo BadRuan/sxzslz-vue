@@ -3,18 +3,18 @@ import { defineStore } from 'pinia';
 import apiService from '@/utils/apiService';
 
 
+/** CategoryTree：/base/ 与文章 categories 使用的树节点（严格二级，children 恒为下级数组） */
 export interface CategoryModel {
     id: number,
     name: string,
-    slug: string,
-    path: string,
-    level: number,
     sort: number,
     children: CategoryModel[],
 }
 
+/** UserOut */
 export interface UserModel {
     id: number,
+    slug: string,
     nickname: string,
 }
 

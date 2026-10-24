@@ -8,20 +8,21 @@ const { station_array } = storeToRefs(station_store);
 </script>
 
 <template>
-    <div class="mx-auto py-4 w-7xl">
+    <div class="mx-auto section-y w-7xl">
         <TitleComponent>
             <template #first>泵站信息</template>
             <template #second>Station Info</template>
         </TitleComponent>
 
-        <div class="grid grid-cols-4 gap-4">
+        <div class="grid grid-cols-4 gap-6 pt-2">
             <RouterLink v-for="(station, index) in station_array" :key="index"
                 :to="{ name: 'Station', query: { index: index } }"
-                class="bg-white rounded shadow-xs shadow-slate-200 group flex flex-col overflow-hidden transition-transform duration-300 hover:-translate-y-2">
+                class="bg-white rounded-2xl shadow-card card-hover group flex flex-col overflow-hidden hover:-translate-y-1 hover:shadow-card-hover">
                 <div class="overflow-hidden h-52">
-                    <img class="w-full h-full" :src="url_prefix.pic_prefix + station.thumb" alt="pic">
+                    <img class="w-full h-full transition-transform duration-500 ease-out-soft group-hover:scale-105"
+                        :src="url_prefix.pic_prefix + station.thumb" alt="pic">
                 </div>
-                <div class="p-4 flex flex-col gap-2">
+                <div class="p-5 flex flex-col gap-2">
 
                     <div class="flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"

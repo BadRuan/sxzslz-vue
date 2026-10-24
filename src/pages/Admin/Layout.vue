@@ -1,6 +1,15 @@
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import SideBar from '@/pages/Admin/components/sidebar.vue'
 import Header from '@/pages/Admin/components/header.vue'
+import { useAuthStore } from '@/store/auth';
+
+const auth_store = useAuthStore();
+
+onMounted(() => {
+    // 进入后台拉取当前登录用户（token 无效时拦截器会跳登录页）
+    auth_store.fetchMe();
+});
 </script>
 
 <template>

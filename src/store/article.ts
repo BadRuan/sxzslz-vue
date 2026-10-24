@@ -1,7 +1,10 @@
-import { ref, reactive } from 'vue';
+import { ref, reactive, type Ref } from 'vue';
 import { defineStore } from 'pinia';
 import apiService from '@/utils/apiService';
 import type { CategoryModel } from '@/store/base';
+import { useBaseinfoStore } from '@/store/base';
+import { name_category_id } from '@/utils/category';
+import { CATEGORY_NAMES } from '@/utils/categoryConfig';
 
 export interface ArticleUserModel {
     id: number,
@@ -9,12 +12,14 @@ export interface ArticleUserModel {
     nickname: string,
 }
 
+/** ArticleOut / ArticleDetailOut */
 export interface ArticleModel {
     id: number,
     slug: string,
     cover_img_slug: string | null,
     title: string,
-    is_hidden: boolean,
+    /** true = 在回收站（前台不展示），后台可恢复 */
+    is_deleted: boolean,
     is_recommended: boolean,
     create_at: string,
     view_count: number,
@@ -24,19 +29,76 @@ export interface ArticleModel {
     content?: string | null,
 }
 
-class ArticleService{
-    public getArticleByCategoryId(category_id: number = 1, page: number = 1, page_size: number = 30) {
-        return apiService.get('/articles/', { category_id, page, page_size })
-    }
-    public getRecommended(limit: number) {
-        return apiService.get('/articles/recommended', { limit })
+/** PageResponse */
+export interface PageResponse<T> {
+    data: T[],
+    total: number,
+    page: number,
+    page_size: number,
+    has_next: boolean,
+}
+
+interface ArticleQuery {
+    page?: number
+    page_size?: number
+    category_id?: number
+    user_id?: number
+    /** true 只返回回收站文章（后台），默认只返回未删除文章 */
+    is_deleted?: boolean
+}
+
+/** POST /articles/ 请求体；作者由服务端 DEFAULT_USER_ID 指定 */
+export interface ArticleCreateInput {
+    title: string,
+    content?: string | null,
+    cover_img_slug?: string | null,
+    is_recommended?: boolean,
+    category_ids?: number[],
+}
+
+/** PATCH /articles/{slug}：只更新传入字段；可空字段显式传 null 表示清空 */
+export interface ArticleUpdateInput {
+    title?: string | null,
+    content?: string | null,
+    cover_img_slug?: string | null,
+    is_recommended?: boolean | null,
+    category_ids?: number[] | null,
+}
+
+/** 从 axios 错误提取后端 detail（400/401/404 为字符串，422 为数组取首条 msg） */
+export const api_error_detail = (error: any, fallback: string): string => {
+    const detail = error?.response?.data?.detail;
+    if (Array.isArray(detail)) return detail[0]?.msg || fallback;
+    return detail || fallback;
+};
+
+class ArticleService {
+    public getArticles(params: ArticleQuery = {}) {
+        return apiService.get<PageResponse<ArticleModel>>('/articles/', params)
     }
     public getDetail(slug: string) {
-        return apiService.get('/articles/detail/' + slug)
+        return apiService.get<ArticleModel>('/articles/' + slug)
+    }
+    public create(data: ArticleCreateInput) {
+        return apiService.post<ArticleModel>('/articles/', data)
+    }
+    public update(slug: string, data: ArticleUpdateInput) {
+        return apiService.patch<ArticleModel>('/articles/' + slug, data)
+    }
+    public remove(slug: string) {
+        return apiService.delete<void>('/articles/' + slug)
+    }
+    /** 恢复回收站文章（需登录）：文章重新进入正常列表 */
+    public restore(slug: string) {
+        return apiService.post<ArticleModel>('/articles/' + slug + '/restore')
+    }
+    /** 匿名点赞：公开接口，每次 +1，返回自增后的计数 */
+    public like(slug: string) {
+        return apiService.post<{ like_count: number }>('/articles/' + slug + '/like')
     }
 }
 
-const articleService = new ArticleService();
+export const articleService = new ArticleService();
 
 export const useArticleStore = defineStore('article', () => {
   const loading = ref(false);
@@ -53,34 +115,39 @@ export const useArticleStore = defineStore('article', () => {
     finance: finance_article, // 财务信息
     hr_job: hr_job // 人事动态
   })
+
+  /** 按分类名称拉取首页栏目文章；名称在分类树中缺失时跳过该栏目 */
+  const fill_by_name = async (target: Ref<ArticleModel[]>, names: readonly string[], page_size: number, tree: CategoryModel[]) => {
+    if (target.value.length > 0) return;
+    const category_id = name_category_id(tree, [...names]);
+    if (category_id === undefined) return;
+    const res = await articleService.getArticles({ category_id, page: 1, page_size });
+    target.value = res.data ?? [];
+  }
+
   const checkHomeArticle = async () =>{
     loading.value = true
     try {
+      const baseinfo_store = useBaseinfoStore();
+      await baseinfo_store.checkBaseinfo();
+      const tree = baseinfo_store.categories;
+
       if (recommended_article.value.length == 0) {
-        // 推荐位接口后端暂未提供：独立容错，失败不得阻塞下方分类资讯（spec §2.2）
+        // 后端无独立推荐接口：取列表后按 is_recommended 过滤，失败不阻塞分类栏目
         try {
-          const res = await articleService.getRecommended(8)
-          recommended_article.value = res
+          const res = await articleService.getArticles({ page: 1, page_size: 100 });
+          recommended_article.value = (res.data ?? [])
+            .filter((item) => item.is_recommended)
+            .slice(0, 8);
         } catch (error) {
-          console.warn('推荐文章接口暂不可用:', error)
+          console.warn('获取推荐文章失败:', error)
         }
       };
-      if (notice_article.value.length == 0){
-        const res = await articleService.getArticleByCategoryId(4, 1, 8);
-        notice_article.value = res.data;
-      };
-      if (meeting_article.value.length == 0) {
-        const res = await articleService.getArticleByCategoryId(5, 1, 6)
-        meeting_article.value = res.data;
-      };
-      if (finance_article.value.length == 0) {
-        const res = await articleService.getArticleByCategoryId(8, 1, 6)
-        finance_article.value = res.data;
-      };
-      if (hr_job.value.length == 0) {
-        const res = await articleService.getArticleByCategoryId(7, 1, 6)
-        hr_job.value = res.data;
-      }
+
+      await fill_by_name(notice_article, CATEGORY_NAMES.notice, 8, tree);
+      await fill_by_name(meeting_article, CATEGORY_NAMES.meeting, 6, tree);
+      await fill_by_name(finance_article, CATEGORY_NAMES.finance, 6, tree);
+      await fill_by_name(hr_job, CATEGORY_NAMES.hr, 6, tree);
     } catch (error) {
       console.error('获取最新文章列表失败:', error)
     } finally {
@@ -97,8 +164,9 @@ const article_has_next = ref<boolean>(false);
 const getArticleList = async (category_id: number, page: number, page_size: number) => {
     loading.value = true
     try {
-      const res = await articleService.getArticleByCategoryId(category_id, page, page_size)
-      article_list.value = res.data
+      const res = await articleService.getArticles({ category_id, page, page_size })
+      // 后端已过滤回收站文章，total 与展示条目一致
+      article_list.value = res.data ?? []
       article_total.value = res.total
       article_page.value = res.page
       article_has_next.value = res.has_next

@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
+import { get_token } from '@/store/auth';
 
 const routes: RouteRecordRaw[] = [
     {
@@ -48,6 +49,12 @@ const routes: RouteRecordRaw[] = [
         ]
     },
     {
+        path: '/admin/login',
+        name: 'AdminLogin',
+        component: () => import('@/pages/Admin/Login.vue'),
+        meta: { title: '登录' }
+    },
+    {
         path: '/admin',
         name: 'Admin',
         component: () => import("@/pages/Admin/Layout.vue"),
@@ -76,6 +83,12 @@ const routes: RouteRecordRaw[] = [
                 name: 'AdminPhoto',
                 component: () => import('@/pages/Admin/Photo.vue'),
                 meta: { title: '照片管理' }
+            },
+            {
+                path: 'document',
+                name: 'AdminDocument',
+                component: () => import('@/pages/Admin/Document.vue'),
+                meta: { title: '文档管理' }
             }
         ]
     },
@@ -91,6 +104,15 @@ export const router = createRouter({
     routes,
     scrollBehavior(to, from, savedPosition) {
         return { top: 0 }
+    }
+})
+
+// 后台页面需登录：无 token 一律重定向登录页（写接口需 JWT，见后端文档「鉴权」）
+router.beforeEach((to) => {
+    if (to.path.startsWith('/admin')
+        && to.path !== '/admin/login'
+        && !get_token()) {
+        return { name: 'AdminLogin' }
     }
 })
 

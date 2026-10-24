@@ -1,57 +1,168 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import apiService from '@/utils/apiService';
+import { api_error_detail } from '@/store/article';
 import { url_prefix } from '@/utils/baseInfo';
+import dayjs from 'dayjs';
 
+/** 图片列表项，字段与 GET /image/ 一致 */
 export interface ImageModel {
     id: number,
-    size: number,
-    view: number,
     slug: string,
-    mime_type: string,
     raw_filename: string,
-    upload_at: string
+    mime_type: string,
+    size_bytes: number,
+    view: number,
+    uploaded_at: string
 };
+
+const PAGE_SIZE = 30;
+const IMAGE_MIME_WHITELIST = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+
 const image_list = ref<ImageModel[]>([]);
+const total = ref(0);
+const page = ref(1);
+const has_next = ref(false);
+const list_error = ref('');
+const uploading = ref(false);
+const upload_error = ref('');
+const upload_success = ref('');
+const copied_slug = ref('');
 
 const getImageList = async () => {
+    list_error.value = '';
     try {
-        const res = await apiService.get('/image/');
-        image_list.value = res['data'];
+        const res = await apiService.get('/image/', { page: page.value, page_size: PAGE_SIZE });
+        image_list.value = res.data ?? [];
+        total.value = res.total;
+        has_next.value = res.has_next;
     } catch (error) {
+        list_error.value = api_error_detail(error, '获取图片列表失败');
         console.error('获取管理后台图片列表失败:', error)
     }
 }
-onMounted(
-    async () => {
-        getImageList();
+
+const go_page = (target: number) => {
+    page.value = target;
+    getImageList();
+};
+
+const pick_files = async (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    input.value = '';
+    if (files.length === 0) return;
+
+    upload_error.value = '';
+    upload_success.value = '';
+    // 前端自行限制：图片 ≤ 10MB，格式白名单同后端
+    for (const file of files) {
+        if (!IMAGE_MIME_WHITELIST.includes(file.type)) {
+            upload_error.value = `「${file.name}」格式不支持，仅支持 JPG/PNG/GIF/WebP`;
+            return;
+        }
+        if (file.size > MAX_IMAGE_SIZE) {
+            upload_error.value = `「${file.name}」超过 10MB`;
+            return;
+        }
     }
-)
+
+    uploading.value = true;
+    try {
+        // 后端为单文件接口，逐个上传
+        for (const file of files) {
+            await apiService.upload('/image/', file);
+        }
+        upload_success.value = `已上传 ${files.length} 张图片`;
+        page.value = 1;
+        await getImageList();
+    } catch (error) {
+        upload_error.value = api_error_detail(error, '上传失败，请稍后重试');
+    } finally {
+        uploading.value = false;
+    }
+};
+
+const copy_slug = async (slug: string) => {
+    try {
+        await navigator.clipboard.writeText(slug);
+        copied_slug.value = slug;
+        setTimeout(() => { copied_slug.value = ''; }, 1500);
+    } catch {
+        window.prompt('复制 slug:', slug);
+    }
+};
+
+const format_size = (bytes: number) => {
+    if (bytes >= 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+    if (bytes >= 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return bytes + ' B';
+};
+
+onMounted(getImageList);
 </script>
+
 <template>
     <main class="flex-1 overflow-y-auto p-6">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center justify-between mb-2">
             <h2 class="text-xl font-bold text-gray-900">照片管理</h2>
-            <button id="uploadBtn"
-                class="rounded-md bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-400 transition">
-                + 上传照片
-            </button>
+            <label class="rounded-md bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-400 transition cursor-pointer"
+                :class="uploading ? 'opacity-60 cursor-not-allowed' : ''">
+                {{ uploading ? '上传中...' : '+ 上传照片' }}
+                <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" multiple class="hidden"
+                    :disabled="uploading" @change="pick_files" />
+            </label>
         </div>
+        <p class="mb-4 text-xs text-gray-400">支持 JPG / PNG / GIF / WebP，单张 ≤ 10MB</p>
 
+        <p v-if="upload_error" class="mb-4 text-sm text-red-600">{{ upload_error }}</p>
+        <p v-if="upload_success" class="mb-4 text-sm text-green-600">{{ upload_success }}</p>
+        <p v-if="list_error" class="mb-4 text-sm text-red-600">{{ list_error }}</p>
 
         <!-- 照片网格 -->
-        <div class="grid grid-cols-6 gap-6">
-            <div v-for="(image, index) in image_list" :key="index"
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6">
+            <div v-for="image in image_list" :key="image.id"
                 class="bg-white rounded-lg shadow-xs ring-1 ring-border overflow-hidden group">
-                <div class="relative overflow-hidden">
+                <div class="relative overflow-hidden aspect-square">
                     <img :src="url_prefix.pic_prefix + image.slug" :alt="image.raw_filename"
                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 </div>
-                <div class="p-4">
-                    <p class="text-sm my-2 font-medium text-gray-900 truncate">{{ image.raw_filename }}</p>
-                    <p class="text-xs text-gray-500 mt-0.5">浏览量：{{ image.view }}</p>
+                <div class="p-3">
+                    <p class="text-sm my-1 font-medium text-gray-900 truncate" :title="image.raw_filename">{{ image.raw_filename }}</p>
+                    <p class="text-xs text-gray-500">{{ format_size(image.size_bytes) }} · 浏览 {{ image.view }}</p>
+                    <p class="text-xs text-gray-400">{{ dayjs(image.uploaded_at).format('YYYY-MM-DD HH:mm') }}</p>
+                    <button class="mt-1 text-xs text-primary-600 hover:underline"
+                        @click="copy_slug(image.slug)">
+                        {{ copied_slug === image.slug ? '已复制 slug' : '复制 slug' }}
+                    </button>
                 </div>
             </div>
         </div>
+
+        <p v-if="!list_error && image_list.length === 0" class="py-16 text-center text-gray-400">暂无图片</p>
+
+        <nav class="mt-8 flex items-center justify-between border-t border-border pt-6" aria-label="Pagination">
+            <p class="text-sm text-gray-700">
+                共 <span class="font-medium">{{ total }}</span> 张，
+                第 <span class="font-medium">{{ page }}</span> 页
+            </p>
+            <div class="flex gap-2">
+                <button @click="go_page(page - 1)" :disabled="page <= 1" :class="[
+                    page <= 1
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-white text-gray-900 hover:bg-gray-50'
+                ]" class="rounded-md px-3 py-1.5 text-sm ring-1 ring-inset ring-gray-300">
+                    上一页
+                </button>
+                <button @click="go_page(page + 1)" :disabled="!has_next" :class="[
+                    !has_next
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        : 'bg-primary-500 text-white hover:bg-primary-400'
+                ]" class="rounded-md px-3 py-1.5 text-sm">
+                    下一页
+                </button>
+            </div>
+        </nav>
     </main>
 </template>

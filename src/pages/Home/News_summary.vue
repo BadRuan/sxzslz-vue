@@ -8,8 +8,8 @@ import { computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useBaseinfoStore } from '@/store/base';
 import { useArticleStore } from '@/store/article';
-import { slug_category_id } from '@/utils/category';
-import { CATEGORY_SLUGS } from '@/utils/categoryConfig';
+import { name_category_id, categories_label, to_second_level_id } from '@/utils/category';
+import { CATEGORY_NAMES } from '@/utils/categoryConfig';
 
 const baseinfo_store = useBaseinfoStore();
 const article_store = useArticleStore();
@@ -17,7 +17,8 @@ const article_store = useArticleStore();
 const { categories } = storeToRefs(baseinfo_store);
 const { article_obj, loading } = storeToRefs(article_store);
 
-const notice_category_id = computed(() => slug_category_id(categories.value, CATEGORY_SLUGS.notice));
+// 跳列表页：名称命中一级分类时取其第一个子分类（文章只挂二级）
+const notice_category_id = computed(() => to_second_level_id(categories.value, name_category_id(categories.value, CATEGORY_NAMES.notice)));
 
 const options = {
     type: 'loop',        // 无缝循环播放
@@ -39,7 +40,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="">
+    <div class="section-y">
         <section class="mx-auto w-7xl h-full">
             <div class="flex justify-between items-end">
                 <TitleComponent>
@@ -56,9 +57,9 @@ onMounted(async () => {
                 <p class="text-primary-500">加载中...</p>
             </div>
 
-            <div v-else class="w-7xl flex flex-row gap-8 items-center justify-around ">
+            <div v-else class="w-7xl flex flex-row gap-10 items-center justify-around pt-2">
 
-                <Splide :options="options" class="overflow-hidden shadow rounded w-180 h-120">
+                <Splide :options="options" class="overflow-hidden rounded-2xl shadow-card w-180 h-120">
                     <SplideSlide v-for="(article, index) in article_obj.recommended" :key="index">
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
                             class="relative bg-cover bg-center">
@@ -72,7 +73,7 @@ onMounted(async () => {
                             <div class="absolute bottom-0 left-0 p-6 text-white max-w-2xl">
                                 <span
                                     class="inline-block px-3 py-1 mb-3 text-xs font-semibold tracking-wider text-white uppercase bg-primary-500 rounded-full">
-                                    {{ article.categories[0]?.name }}
+                                    {{ categories_label(article.categories) }}
                                 </span>
                                 <h2 class="mb-2 font-bold leading-tight">{{ article.title }}</h2>
                             </div>
@@ -80,7 +81,7 @@ onMounted(async () => {
                     </SplideSlide>
                 </Splide>
 
-                <div class="bg-white w-140 p-4 shadow rounded divide-y divide-border">
+                <div class="bg-white w-140 p-6 rounded-2xl shadow-card divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-base font-bold my-2">通知公告</div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: notice_category_id } }"

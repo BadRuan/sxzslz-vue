@@ -1,11 +1,12 @@
 /**
- * 全站分类 slug 集中配置（替代原硬编码 id：news=3, notice=4, meeting=5, hr=7, finance=8）。
- * ⚠️ 以下为占位 slug，实施时（Task 8 Step 2）与用户核对实际数据库分类后替换。
+ * 全站分类名称集中配置（后端分类已无 slug 字段，改为按名称从分类树解析 id）。
+ * 匹配顺序为配置数组顺序，命中第一个名称相同的分类。
+ * ⚠️ 名称需与后端分类实际名称保持一致，否则对应栏目不会加载文章。
  */
-export const CATEGORY_SLUGS = {
-    news: 'news',       // 新闻列表导航 & 文章列表页默认分类
-    notice: 'notice',   // 通知公告
-    meeting: 'meeting', // 会议公开
-    hr: 'hr',           // 人事动态
-    finance: 'finance', // 财务信息 / 财务公开
+export const CATEGORY_NAMES = {
+    news: ['新闻动态', '水利站动态', '新闻'], // 新闻列表导航 & 文章列表页默认分类
+    notice: ['通知公告'],                   // 通知公告
+    meeting: ['会议公开'],                  // 会议公开
+    hr: ['人事信息', '人事动态'],            // 人事
+    finance: ['财务信息', '财务公开'],       // 财务信息 / 财务公开
 } as const;

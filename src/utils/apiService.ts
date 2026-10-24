@@ -23,6 +23,16 @@ class ApiService {
     public async delete<T = any>(url: string, data?: RequestOptions): Promise<T> {
     return service.delete(url, { data });
   }
+
+    /** multipart 上传：字段名固定为 file（图片/文档上传接口约定） */
+    public async upload<T = any>(url: string, file: File): Promise<T> {
+        const form = new FormData();
+        form.append('file', file);
+        return service.post(url, form, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+            timeout: 60000,
+        });
+  }
 }
 
 export default new ApiService();

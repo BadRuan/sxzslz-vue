@@ -1,6 +1,9 @@
 <script setup lang="ts">
-const link_default_class = 'flex items-center px-4 py-2 rounded hover:bg-primary-300 hover:text-white hover:font-bold';
-const link_active_class = 'text-white bg-primary-500 font-bold';
+import { useAuthStore } from '@/store/auth';
+
+const auth_store = useAuthStore();
+const link_default_class = 'flex items-center px-4 py-2.5 rounded-lg link-transition hover:bg-primary-100 hover:text-primary-700';
+const link_active_class = 'text-white bg-primary-500 font-semibold shadow-soft';
 </script>
 <template>
     <aside class="w-48 h-full bg-background flex flex-col">
@@ -23,6 +26,9 @@ const link_active_class = 'text-white bg-primary-500 font-bold';
             <RouterLink :to="{ name: 'AdminPhoto' }" :active-class="link_active_class" :class="link_default_class">
                 照片管理
             </RouterLink>
+            <RouterLink :to="{ name: 'AdminDocument' }" :active-class="link_active_class" :class="link_default_class">
+                文档管理
+            </RouterLink>
         </nav>
 
         <div class="p-4 border-t border-white/10">
@@ -37,7 +43,7 @@ const link_active_class = 'text-white bg-primary-500 font-bold';
                         d="M12 13C7.02944 13 3 17.0294 3 22L1 22C1 15.9249 5.92487 11 12 11C18.0751 11 23 15.9249 23 22L21 22C21 17.0294 16.9706 13 12 13Z"
                         fill-rule="evenodd" fill="#000000"></path>
                 </svg>
-                <span class="px-2">Admin</span>
+                <span class="px-2">{{ auth_store.user?.nickname ?? '...' }}</span>
             </div>
         </div>
     </aside>

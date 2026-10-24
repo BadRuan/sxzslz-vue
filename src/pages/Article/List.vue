@@ -3,11 +3,11 @@ import { ref, watch, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { url_prefix } from '@/utils/baseInfo';
-import { useBaseinfoStore } from '@/store/base';
-import { useArticleStore } from '@/store/article';
+import { useBaseinfoStore, type CategoryModel } from '@/store/base';
+import { useArticleStore, type ArticleModel } from '@/store/article';
 import { date_text } from '@/utils/formatters';
-import { flatten_categories, slug_category_id } from '@/utils/category';
-import { CATEGORY_SLUGS } from '@/utils/categoryConfig';
+import { flatten_categories, name_category_id, categories_compact, to_second_level_id } from '@/utils/category';
+import { CATEGORY_NAMES } from '@/utils/categoryConfig';
 
 const route = useRoute();
 const router = useRouter();
@@ -20,14 +20,58 @@ const { article_list, article_total, article_page, article_has_next } = storeToR
 const loading = ref(true);
 
 const flattened = computed(() => flatten_categories(categories.value));
+// 文章仅挂二级分类，一级分类只做分组展示不可筛选
+const second_level = computed(() => flattened.value.filter(({ depth }) => depth > 0));
 const page_number = computed(() => Number(route.query.page) || 1);
 
-// 默认分类：集中配置 slug → 找不到则树中第一个分类（spec §3.5 兜底）
-const default_category_id = computed(() =>
-    slug_category_id(categories.value, CATEGORY_SLUGS.news)
-    ?? flattened.value[0]?.node.id
-);
-const active_category = computed(() => Number(route.query.category) || default_category_id.value);
+// 默认分类：集中配置名称（新闻动态）→ 命中一级分类时退化为其第一个子分类 → 找不到则第一个二级分类（兜底）
+const default_category_id = computed(() => {
+    const configured = name_category_id(categories.value, CATEGORY_NAMES.news);
+    if (configured !== undefined) {
+        const matched = flattened.value.find(({ node }) => node.id === configured);
+        if (matched && matched.depth > 0) return configured;
+        return flattened.value.find(({ node }) => node.id === configured)?.node.children[0]?.id
+            ?? second_level.value[0]?.node.id;
+    }
+    return second_level.value[0]?.node.id;
+});
+// 路由带一级分类 id（旧链接等）时退化为其第一个子分类，避免按一级 id 精确过滤查不到文章
+const active_category = computed(() =>
+    to_second_level_id(categories.value, Number(route.query.category) || undefined)
+    ?? default_category_id.value);
+
+/** 当前激活分类所属的一级分类 id（侧边栏默认展开用） */
+const parent_of_active = computed(() => {
+    for (const parent of categories.value) {
+        if (parent.children.some(child => child.id === active_category.value)) {
+            return parent.id;
+        }
+    }
+    return undefined;
+});
+
+// —— 侧边栏折叠：默认只展开当前激活分类所在的一级分组 ——
+const expanded_ids = ref<Set<number>>(new Set());
+
+const sync_expanded_with_active = () => {
+    if (parent_of_active.value !== undefined) {
+        expanded_ids.value.add(parent_of_active.value);
+    }
+};
+
+// 分类树异步到达 / 路由切换分类时，自动展开激活项所在分组
+watch([categories, parent_of_active], () => sync_expanded_with_active(), { immediate: true });
+
+const is_expanded = (id: number) => expanded_ids.value.has(id);
+
+const toggle_group = (parent: CategoryModel) => {
+    // 无子分类的一级分类不可挂文章，仅展示
+    if (parent.children.length === 0) return;
+    const next = new Set(expanded_ids.value);
+    if (next.has(parent.id)) next.delete(parent.id);
+    else next.add(parent.id);
+    expanded_ids.value = next;
+};
 
 // 监听计算属性而非 route.query：分类树异步到达时也能自动补一次取数
 watch([active_category, page_number], ([categoryId, pageNum]) => {
@@ -43,6 +87,10 @@ onMounted(async () => {
     ]);
     loading.value = false;
 });
+
+/** 卡片分类展示：优先当前浏览分类，多分类折叠为 +N（悬停 title 可看全部） */
+const article_categories = (article: ArticleModel) =>
+    categories_compact(article.categories, active_category.value);
 
 const handleCategoryClick = (categoryId: number) => {
     // 点击当前已激活的分类：路由不变不会再触发导航，直接重新拉取
@@ -73,11 +121,11 @@ const goToNextPage = () => {
 
 <template>
     <main class="bg-background">
-        <div class="min-h-screen py-10 px-4">
+        <div class="min-h-screen section-y px-4">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col gap-8 lg:flex-row">
                     <aside class="lg:w-64 shrink-0">
-                        <div class="rounded-lg bg-white p-4 shadow-xs">
+                        <div class="rounded-2xl bg-white p-5 shadow-card">
                             <h3 class="text-sm font-semibold text-gray-900 mb-3 flex flex-row items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                     fill="none" class="mr-1">
@@ -94,18 +142,32 @@ const goToNextPage = () => {
                                 新闻分类
                             </h3>
                             <nav class="flex flex-col space-y-1">
-                                <RouterLink v-for="{ node, depth } in flattened" :key="node.id"
-                                    :to="{ name: 'ArticleList', query: { category: node.id } }" :class="[
-                                        active_category === node.id
-                                            ? 'bg-primary-500 text-white font-bold'
-                                            : 'text-gray-700 hover:bg-gray-100 hover:font-bold hover:text-primary-400'
-                                    ]" class="rounded-md px-3 py-2 text-sm"
-                                    :style="{ paddingLeft: `${0.75 + depth * 0.75}rem` }"
-                                    @click="handleCategoryClick(node.id)">
-                                    <span :class="depth > 0
-                                        ? (active_category === node.id ? 'text-xs' : 'text-xs text-gray-400')
-                                        : ''">{{ node.name }}</span>
-                                </RouterLink>
+                                <template v-for="parent in categories" :key="parent.id">
+                                    <!-- 一级分类：折叠分组头，点击展开/收起（文章只挂二级，一级不可筛选） -->
+                                    <button type="button" class="flex items-center justify-between w-full rounded-lg px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-100 link-transition"
+                                        :class="parent.children.length === 0 ? 'cursor-default text-gray-500 font-medium' : 'cursor-pointer'"
+                                        @click="toggle_group(parent)">
+                                        <span>{{ parent.name }}</span>
+                                        <svg v-if="parent.children.length > 0" xmlns="http://www.w3.org/2000/svg"
+                                            class="h-4 w-4 text-gray-400 transition-transform duration-200"
+                                            :class="is_expanded(parent.id) ? 'rotate-90' : ''"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </button>
+                                    <template v-if="is_expanded(parent.id)">
+                                        <RouterLink v-for="child in parent.children" :key="child.id"
+                                            :to="{ name: 'ArticleList', query: { category: child.id } }" :class="[
+                                                active_category === child.id
+                                                    ? 'bg-primary-500 text-white font-bold'
+                                                    : 'text-gray-700 hover:bg-gray-100 hover:font-bold hover:text-primary-400'
+                                            ]" class="rounded-lg px-3 py-2 text-sm link-transition"
+                                            style="padding-left: 1.5rem"
+                                            @click="handleCategoryClick(child.id)">
+                                            <span class="text-xs">{{ child.name }}</span>
+                                        </RouterLink>
+                                    </template>
+                                </template>
                             </nav>
                         </div>
                     </aside>
@@ -122,26 +184,28 @@ const goToNextPage = () => {
                         <!-- 正常内容 -->
                         <template v-else>
                             <div v-if="article_list.length === 0"
-                                class="bg-white rounded shadow-xs p-12 text-center text-gray-500">
+                                class="bg-white rounded-2xl shadow-card p-12 text-center text-gray-500">
                                 暂无文章
                             </div>
                             <div v-else class="grid grid-cols-3 gap-8">
                                 <article v-for="(article, index) in article_list" :key="index"
-                                    class="flex flex-col overflow-hidden bg-white rounded shadow-xs transition-transform duration-300 group hover:-translate-y-2">
+                                    class="flex flex-col overflow-hidden bg-white rounded-2xl shadow-card card-hover group hover:-translate-y-1 hover:shadow-card-hover">
                                     <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }">
                                         <div class="w-full overflow-hidden">
-                                            <img v-if="article.cover_img_slug" class="w-full h-52"
+                                            <img v-if="article.cover_img_slug"
+                                                class="w-full h-52 transition-transform duration-500 ease-out-soft group-hover:scale-105"
                                                 :src="url_prefix.pic_prefix + article.cover_img_slug" alt="news_pic" />
                                             <div v-else
                                                 class="w-full h-52 bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
                                                 暂无封面
                                             </div>
                                         </div>
-                                        <div class="p-4 flex flex-col gap-4 divide-y  divide-gray-100">
-                                            <div class="flex flex-row items-center justify-between">
-                                                <div class="text-sm text-gray-700 py-1 flex flex-row items-center">
+                                        <div class="p-5 flex flex-col gap-4 divide-y divide-gray-100">
+                                            <div class="flex flex-row items-center justify-between gap-2">
+                                                <div class="min-w-0 flex flex-row items-center text-sm text-gray-700 py-1"
+                                                    :title="article_categories(article).title">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                        viewBox="0 0 24 24" fill="none" class="mx-1">
+                                                        viewBox="0 0 24 24" fill="none" class="mx-1 shrink-0">
                                                         <path fill="currentColor"
                                                             d="M11.8419 5.52566L14.8024 4.53883Q16.4189 4 18.1228 4L21 4C21.2761 4 21.5 4.22386 21.5 4.5L21.5 18.5C21.5 18.7761 21.2761 19 21 19L18.1228 19Q16.5811 19 15.1186 19.4875L12.1581 20.4743C11.8343 20.5823 11.5 20.3413 11.5 20L11.5 6C11.5 5.78478 11.6377 5.59372 11.8419 5.52566ZM12.1581 6.47434L12 6L12.5 6L12.5 20L12 20L11.8419 19.5257L14.8024 18.5388Q16.4189 18 18.1228 18L21 18L21 18.5L20.5 18.5L20.5 4.5L21 4.5L21 5L18.1228 5Q16.5811 5 15.1186 5.48751L12.1581 6.47434Z">
                                                         </path>
@@ -149,10 +213,13 @@ const goToNextPage = () => {
                                                             d="M12.1581 5.52566L9.19761 4.53883Q7.58114 4 5.87722 4L3 4C2.72386 4 2.5 4.22386 2.5 4.5L2.5 18.5C2.5 18.7761 2.72386 19 3 19L5.87722 19Q7.41887 19 8.88139 19.4875L11.8419 20.4743C12.1657 20.5823 12.5 20.3413 12.5 20L12.5 6C12.5 5.78478 12.3623 5.59372 12.1581 5.52566ZM11.8419 6.47434L12 6L11.5 6L11.5 20L12 20L12.1581 19.5257L9.19761 18.5388Q7.58114 18 5.87722 18L3 18L3 18.5L3.5 18.5L3.5 4.5L3 4.5L3 5L5.87722 5Q7.41886 5 8.88139 5.48751L11.8419 6.47434Z">
                                                         </path>
                                                     </svg>
-                                                    {{ article.categories[0]?.name }}
-
+                                                    <span class="truncate">{{ article_categories(article).label }}</span>
+                                                    <span v-if="article_categories(article).extra > 0"
+                                                        class="ml-1 shrink-0 rounded-full bg-gray-100 px-1.5 py-0.5 text-xs text-gray-500">
+                                                        +{{ article_categories(article).extra }}
+                                                    </span>
                                                 </div>
-                                                <div class="flex flex-row items-center">
+                                                <div class="flex flex-row items-center shrink-0">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                         viewBox="0 0 24 24" fill="none" class="text-gray-500 mr-2">
                                                         <path d="M2 3.5L22 3.5L22 22.5L2 22.5L2 3.5Z"

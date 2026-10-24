@@ -5,17 +5,18 @@ import { storeToRefs } from 'pinia';
 import { useArticleStore } from '@/store/article';
 import { useBaseinfoStore } from '@/store/base';
 import { easy_date_text } from '@/utils/formatters';
-import { slug_category_id } from '@/utils/category';
-import { CATEGORY_SLUGS } from '@/utils/categoryConfig';
+import { name_category_id, to_second_level_id } from '@/utils/category';
+import { CATEGORY_NAMES } from '@/utils/categoryConfig';
 
 const article_store = useArticleStore();
 const baseinfo_store = useBaseinfoStore();
 const { article_obj } = storeToRefs(article_store);
 const { categories } = storeToRefs(baseinfo_store);
 
-const meeting_category_id = computed(() => slug_category_id(categories.value, CATEGORY_SLUGS.meeting));
-const hr_category_id = computed(() => slug_category_id(categories.value, CATEGORY_SLUGS.hr));
-const finance_category_id = computed(() => slug_category_id(categories.value, CATEGORY_SLUGS.finance));
+// 「更多」跳列表页：名称命中一级分类时取其第一个子分类（文章只挂二级）
+const meeting_category_id = computed(() => to_second_level_id(categories.value, name_category_id(categories.value, CATEGORY_NAMES.meeting)));
+const hr_category_id = computed(() => to_second_level_id(categories.value, name_category_id(categories.value, CATEGORY_NAMES.hr)));
+const finance_category_id = computed(() => to_second_level_id(categories.value, name_category_id(categories.value, CATEGORY_NAMES.finance)));
 
 onMounted(() => {
     Promise.all([
@@ -29,16 +30,16 @@ const item_title_class = 'text-gray-900 hover:text-primary-500 hover:font-bold t
 </script>
 
 <template>
-    <div class="py-4">
+    <div class="section-y">
         <section class="mx-auto w-7xl h-full">
             <TitleComponent>
                 <template #first>分类资讯</template>
                 <template #second>Category News</template>
             </TitleComponent>
 
-            <div class="flex flex-row justify-around">
+            <div class="flex flex-row justify-around gap-8 pt-2">
 
-                <div class="bg-white w-100 p-4 shadow rounded divide-y divide-border">
+                <div class="bg-white w-100 p-6 rounded-2xl shadow-card divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-base font-bold my-2">会议公开</div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: meeting_category_id } }" :class="more_link_class">
@@ -61,7 +62,7 @@ const item_title_class = 'text-gray-900 hover:text-primary-500 hover:font-bold t
                     </ul>
                 </div>
 
-                <div class="bg-white w-100 p-4 shadow rounded divide-y divide-border">
+                <div class="bg-white w-100 p-6 rounded-2xl shadow-card divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-base font-bold my-2">人事动态</div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: hr_category_id } }" :class="more_link_class">
@@ -87,7 +88,7 @@ const item_title_class = 'text-gray-900 hover:text-primary-500 hover:font-bold t
 
 
 
-                <div class="bg-white w-100 p-4 shadow rounded divide-y divide-border">
+                <div class="bg-white w-100 p-6 rounded-2xl shadow-card divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-gray-600 text-base font-bold my-2">财务信息</div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: finance_category_id } }" :class="more_link_class">

@@ -2,15 +2,17 @@
 import { computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useBaseinfoStore } from '@/store/base';
-import { slug_category_id } from '@/utils/category';
-import { CATEGORY_SLUGS } from '@/utils/categoryConfig';
+import { name_category_id, to_second_level_id } from '@/utils/category';
+import { CATEGORY_NAMES } from '@/utils/categoryConfig';
 
-const default_class = 'rounded-md px-3 py-2 font-medium text-gray-500 hover:bg-gray-100 hover:text-primary-400 hover:font-bold flex flex-row items-center'
-const active_class = '!bg-gray-100 !text-primary-500 !font-semibold rounded-md'
+const default_class = 'rounded-lg px-4 py-2 font-medium text-gray-500 hover:bg-gray-100 hover:text-primary-500 flex flex-row items-center link-transition'
+const active_class = '!bg-primary-50 !text-primary-600 !font-semibold rounded-lg'
 
 const baseinfo_store = useBaseinfoStore();
 const { categories } = storeToRefs(baseinfo_store);
-const news_category_id = computed(() => slug_category_id(categories.value, CATEGORY_SLUGS.news));
+// 文章只挂二级分类：名称命中一级分类（如"新闻动态"）时取其第一个子分类，否则列表页会按一级 id 查不到文章
+const news_category_id = computed(() =>
+    to_second_level_id(categories.value, name_category_id(categories.value, CATEGORY_NAMES.news)));
 
 onMounted(() => {
     // 导航栏在所有前台页面常驻，由此统一拉取分类树（store 内部有空缓存判断，不会重复请求）

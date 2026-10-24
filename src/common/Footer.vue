@@ -2,13 +2,14 @@
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useBaseinfoStore } from '@/store/base';
-import { slug_category_id } from '@/utils/category';
-import { CATEGORY_SLUGS } from '@/utils/categoryConfig';
+import { name_category_id, to_second_level_id } from '@/utils/category';
+import { CATEGORY_NAMES } from '@/utils/categoryConfig';
 
 const baseinfo_store = useBaseinfoStore();
 const { categories } = storeToRefs(baseinfo_store);
-const finance_category_id = computed(() => slug_category_id(categories.value, CATEGORY_SLUGS.finance));
-const notice_category_id = computed(() => slug_category_id(categories.value, CATEGORY_SLUGS.notice));
+// 跳列表页：名称命中一级分类时取其第一个子分类（文章只挂二级）
+const finance_category_id = computed(() => to_second_level_id(categories.value, name_category_id(categories.value, CATEGORY_NAMES.finance)));
+const notice_category_id = computed(() => to_second_level_id(categories.value, name_category_id(categories.value, CATEGORY_NAMES.notice)));
 </script>
 
 <template>
@@ -49,21 +50,21 @@ const notice_category_id = computed(() => slug_category_id(categories.value, CAT
                     <h3 class="text-sm font-semibold text-white mb-4">快速链接</h3>
                     <ul class="grid grid-cols-2 gap-2 text-sm">
                         <li>
-                            <RouterLink :to="{ name: 'Home' }" class="hover:text-primary transition">网站首页
+                            <RouterLink :to="{ name: 'Home' }" class="hover:text-primary-300 link-transition">网站首页
                             </RouterLink>
                         </li>
                         <li>
-                            <RouterLink :to="{ name: 'About' }" class="hover:text-primary transition">关于我们</RouterLink>
+                            <RouterLink :to="{ name: 'About' }" class="hover:text-primary-300 link-transition">关于我们</RouterLink>
                         </li>
                         <li>
                             <RouterLink :to="{ name: 'ArticleList', query: { category: finance_category_id } }"
-                                class="hover:text-primary transition">财务公开</RouterLink>
+                                class="hover:text-primary-300 link-transition">财务公开</RouterLink>
                         </li>
                         <li>
                             <RouterLink :to="{ name: 'ArticleList', query: { category: notice_category_id } }"
-                                class="hover:text-primary transition">通知公告</RouterLink>
+                                class="hover:text-primary-300 link-transition">通知公告</RouterLink>
                         </li>
-                        <li><a href="#" class="hover:text-primary transition">政策法规</a></li>
+                        <li><a href="#" class="hover:text-primary-300 link-transition">政策法规</a></li>
                     </ul>
                 </div>
 
