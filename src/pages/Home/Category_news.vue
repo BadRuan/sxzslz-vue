@@ -41,7 +41,7 @@ const item_title_class = 'text-gray-900 hover:text-primary-500 hover:font-bold t
 
                 <div class="bg-white w-100 p-6 rounded-2xl shadow-card divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
-                        <div class="text-gray-600 text-base font-bold my-2">会议公开</div>
+                        <div class="text-gray-600 text-base font-bold my-2">{{ CATEGORY_NAMES.meeting[0] }}</div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: meeting_category_id } }" :class="more_link_class">
                             更多 &gt;
                         </RouterLink>
@@ -64,7 +64,7 @@ const item_title_class = 'text-gray-900 hover:text-primary-500 hover:font-bold t
 
                 <div class="bg-white w-100 p-6 rounded-2xl shadow-card divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
-                        <div class="text-gray-600 text-base font-bold my-2">人事动态</div>
+                        <div class="text-gray-600 text-base font-bold my-2">{{ CATEGORY_NAMES.hr[0] }}</div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: hr_category_id } }" :class="more_link_class">
                             更多 &gt;
                         </RouterLink>
@@ -90,7 +90,7 @@ const item_title_class = 'text-gray-900 hover:text-primary-500 hover:font-bold t
 
                 <div class="bg-white w-100 p-6 rounded-2xl shadow-card divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
-                        <div class="text-gray-600 text-base font-bold my-2">财务信息</div>
+                        <div class="text-gray-600 text-base font-bold my-2">{{ CATEGORY_NAMES.finance[0] }}</div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: finance_category_id } }" :class="more_link_class">
                             更多 &gt;
                         </RouterLink>

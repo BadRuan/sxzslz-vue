@@ -116,10 +116,10 @@ export const useArticleStore = defineStore('article', () => {
   const hr_job = ref<ArticleModel[]>([]);
   const article_obj = reactive({
     recommended: recommended_article, // 首页封面图
-    notice: notice_article, // 通知公告
-    metting: meeting_article, // 会议公开
-    finance: finance_article, // 财务信息
-    hr_job: hr_job // 人事动态
+    notice: notice_article, // 泵站动态（原通知公告栏）
+    metting: meeting_article, // 区级通知（原会议公开栏）
+    finance: finance_article, // 财务通知（原财务信息栏）
+    hr_job: hr_job // 人事通知（原人事动态栏）
   })
 
   /** 按分类名称拉取首页栏目文章；名称在分类树中缺失时跳过该栏目 */

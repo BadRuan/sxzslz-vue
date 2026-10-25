@@ -83,7 +83,7 @@ onMounted(async () => {
 
                 <div class="bg-white w-140 p-6 rounded-2xl shadow-card divide-y divide-border">
                     <div class="flex flex-row justify-between items-center">
-                        <div class="text-gray-600 text-base font-bold my-2">通知公告</div>
+                        <div class="text-gray-600 text-base font-bold my-2">{{ CATEGORY_NAMES.notice[0] }}</div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: notice_category_id } }"
                             class="text-sm mr-4 px-3 py-1 hover:text-primary-500 hover:font-bold transition-transform duration-300 hover:translate-x-1">
                             更多 &gt;

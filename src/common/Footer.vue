@@ -3,13 +3,13 @@ import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useBaseinfoStore } from '@/store/base';
 import { name_category_id, to_second_level_id } from '@/utils/category';
-import { CATEGORY_NAMES } from '@/utils/categoryConfig';
 
 const baseinfo_store = useBaseinfoStore();
 const { categories } = storeToRefs(baseinfo_store);
-// 跳列表页：名称命中一级分类时取其第一个子分类（文章只挂二级）
-const finance_category_id = computed(() => to_second_level_id(categories.value, name_category_id(categories.value, CATEGORY_NAMES.finance)));
-const notice_category_id = computed(() => to_second_level_id(categories.value, name_category_id(categories.value, CATEGORY_NAMES.notice)));
+// 页脚链接不随 CATEGORY_NAMES（首页栏目配置）漂移：保留原有语义，用本地名称数组。
+// 名称命中一级分类时取其第一个子分类（文章只挂二级）
+const finance_category_id = computed(() => to_second_level_id(categories.value, name_category_id(categories.value, ['财务信息', '财务公开'])));
+const notice_category_id = computed(() => to_second_level_id(categories.value, name_category_id(categories.value, ['通知公告'])));
 </script>
 
 <template>
