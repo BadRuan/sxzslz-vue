@@ -129,68 +129,58 @@ const renderedHtml = computed(() => {
 </script>
 
 <template>
-    <main class="bg-background">
-        <div class="min-h-screen section-y px-4">
-            <nav class="w-7xl mx-auto mb-8 px-4 sm:px-6 lg:px-8" aria-label="Breadcrumb">
-                <ol class="flex items-center gap-2 text-base text-gray-500">
+    <main class="bg-base-200">
+        <div class="min-h-screen pt-5 pb-14 px-4">
+            <nav class="breadcrumbs w-7xl mx-auto mb-4 px-4 sm:px-6 lg:px-8 text-base text-base-content/60"
+                aria-label="Breadcrumb">
+                <ul>
                     <li>
-                        <RouterLink :to="{ name: 'Home' }"
-                            class="hover:text-primary-400 hover:font-bold link-transition">
-                            网站首页
+                        <RouterLink :to="{ name: 'Home' }" class="link-hover">网站首页</RouterLink>
+                    </li>
+                    <li v-if="category_crumb">
+                        <RouterLink :to="{ name: 'ArticleList', query: { category: category_crumb.id } }"
+                            class="link-hover">
+                            {{ category_crumb.name }}
                         </RouterLink>
                     </li>
-                    <template v-if="category_crumb">
-                        <span class="text-primary-500">/</span>
-                        <li>
-                            <RouterLink :to="{ name: 'ArticleList', query: { category: category_crumb.id } }"
-                                class="text-gray-700 font-medium hover:text-primary-400 hover:font-bold link-transition">
-                                {{ category_crumb.name }}
-                            </RouterLink>
-                        </li>
-                    </template>
-                    <span class="text-primary-500">/</span>
-                    <li class="text-gray-700">正文</li>
-                </ol>
+                    <li class="text-base-content/80 font-medium">正文</li>
+                </ul>
             </nav>
 
             <!-- 加载状态 -->
-            <div v-if="loading" class="max-w-7xl mx-auto bg-white rounded-xl shadow-sm p-12 text-center">
-                <div
-                    class="animate-spin w-8 h-8 border-4 border-primary-400 border-t-transparent rounded-full mx-auto mb-4">
-                </div>
-                <p class="text-primary-500">加载中...</p>
+            <div v-if="loading" class="max-w-7xl mx-auto card rounded-box p-12 text-center">
+                <span class="loading loading-spinner loading-md mx-auto mb-4 block"></span>
+                <p class="text-base-content/60">加载中...</p>
             </div>
 
             <!-- 错误状态 -->
-            <div v-else-if="error" class="max-w-7xl mx-auto bg-white rounded-xl shadow-sm p-12 text-center">
-                <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div v-else-if="error" class="max-w-7xl mx-auto card rounded-box p-12 text-center">
+                <svg class="w-16 h-16 text-base-content/40 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
-                <h2 class="text-xl font-semibold text-gray-700 mb-2">{{ error }}</h2>
-                <p class="text-gray-500 mb-6">请检查文章链接是否正确，或返回其他页面</p>
+                <h2 class="text-xl font-semibold text-base-content/80 mb-2">{{ error }}</h2>
+                <p class="text-base-content/60 mb-6">请检查文章链接是否正确，或返回其他页面</p>
                 <div class="flex justify-center gap-4">
-                    <RouterLink :to="{ name: 'ArticleList' }"
-                        class="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 link-transition">
+                    <RouterLink :to="{ name: 'ArticleList' }" class="btn btn-primary">
                         返回列表
                     </RouterLink>
-                    <RouterLink :to="{ name: 'Home' }"
-                        class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 link-transition">
+                    <RouterLink :to="{ name: 'Home' }" class="btn">
                         返回首页
                     </RouterLink>
                 </div>
             </div>
 
             <!-- 正常内容 -->
-            <article v-else class="max-w-7xl mx-auto min-h-120 px-4 bg-white rounded-2xl shadow-card overflow-hidden">
-                <div class="px-8 sm:px-14 pt-12 pb-8 border-b border-border text-center">
-                    <h1 class="text-3xl font-bold text-gray-800 leading-tight mb-5">
+            <article v-else class="max-w-7xl mx-auto min-h-120 px-4 card rounded-box overflow-hidden">
+                <div class="px-8 sm:px-14 pt-12 pb-8 border-b border-base-300 text-center">
+                    <h1 class="text-3xl font-bold text-base-content/90 leading-tight mb-5">
                         {{ article_detail?.title }}
                     </h1>
 
-                    <div class="inline-flex items-center justify-center gap-12 text-sm text-gray-500">
+                    <div class="inline-flex items-center justify-center gap-12 text-sm text-base-content/60">
                         <div class="flex flex-row items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="text-gray-500 mr-2" width="20" height="20"
+                            <svg xmlns="http://www.w3.org/2000/svg" class="text-base-content/60 mr-2" width="20" height="20"
                                 viewBox="0 0 24 24" fill="none">
                                 <circle cx="12" cy="7" r="5" stroke="currentColor" stroke-width="1"
                                     stroke-linejoin="bevel"></circle>
@@ -198,13 +188,13 @@ const renderedHtml = computed(() => {
                                     d="M22 22C22 16.4772 17.5228 12 12 12C6.47715 12 2 16.4772 2 22"></path>
                             </svg>
                             <RouterLink :to="{ name: 'Profile', params: { id: article_detail?.user?.id } }"
-                                class="text-base text-gray-500 hover:text-primary-500 hover:font-bold truncate">
+                                class="text-base text-base-content/60 hover:text-primary hover:font-bold truncate">
                                 <span>{{ article_detail?.user?.nickname }}</span>
                             </RouterLink>
                         </div>
                         <div class="flex flex-row items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" class="text-gray-500 mr-2">
+                                fill="none" class="text-base-content/60 mr-2">
                                 <path d="M2 3.5L22 3.5L22 22.5L2 22.5L2 3.5Z" stroke="currentColor" stroke-width="1"
                                     stroke-linejoin="round"></path>
                                 <path stroke="currentColor" stroke-width="1" d="M6 5L6 2"></path>
@@ -221,7 +211,7 @@ const renderedHtml = computed(() => {
                         </div>
                         <div class="flex flex-row items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" class="text-gray-500 mr-2">
+                                fill="none" class="text-base-content/60 mr-2">
                                 <path stroke="currentColor" stroke-width="1" stroke-linejoin="round"
                                     d="M2 2L2 22L22 22"></path>
                                 <path d="M20.6107 10.8462L20.6877 6.33992L16.4984 8.00208L20.6107 10.8462Z"
@@ -233,27 +223,27 @@ const renderedHtml = computed(() => {
                         </div>
                     </div>
                 </div>
-                <div class="px-8 sm:px-14 py-12 prose prose-primary-500 prose-lg max-w-none
-                        prose-headings:font-bold prose-headings:text-gray-800 prose-headings:mb-4 prose-headings:mt-8
-                        prose-h1:text-2xl prose-h2:text-2xl prose-h3:text-base prose-p:text-base
+                <div class="px-8 sm:px-14 py-12 prose prose-lg max-w-none
+                        prose-headings:font-bold prose-headings:text-base-content/90 prose-headings:mb-4 prose-headings:mt-8
+                        prose-h1:text-2xl prose-h2:text-2xl prose-h3:text-base
                         prose-p:leading-relaxed prose-p:indent-2em
-                        prose-strong:text-gray-700 prose-strong:font-semibold
-                        prose-blockquote:border-l-primary-500 prose-blockquote:bg-red-50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded
-                        prose-ul:list-disc prose-ul:mx-8 prose-ul:my-4 prose-ul:text-gray-700
-                        prose-ol:list-decimal prose-ol:mx-8 prose-ol:my-4 prose-ol:text-gray-700
-                        prose-a:text-primary-500 prose-a:underline prose-a:underline-offset-2 prose-a:font-bold
+                        prose-strong:text-base-content/80 prose-strong:font-semibold
+                        prose-blockquote:border-l-primary prose-blockquote:bg-error/10 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded
+                        prose-ul:list-disc prose-ul:mx-8 prose-ul:my-4 prose-ul:text-base-content/80
+                        prose-ol:list-decimal prose-ol:mx-8 prose-ol:my-4 prose-ol:text-base-content/80
+                        prose-a:text-primary prose-a:underline prose-a:underline-offset-2 prose-a:font-bold
                         prose-img:w-2/3 prose-img:shadow prose-img:rounded-sm prose-img:my-6 prose-img:mx-auto
                         " v-html="renderedHtml">
 
                 </div>
 
                 <!-- 匿名点赞 -->
-                <div class="px-8 sm:px-14 pb-10 flex flex-col items-center gap-2 border-t border-border pt-8">
+                <div class="px-8 sm:px-14 pb-10 flex flex-col items-center gap-2 border-t border-base-300 pt-8">
                     <button type="button" :disabled="has_liked || liking"
-                        class="inline-flex items-center gap-2 rounded-full px-8 py-2.5 text-base font-semibold link-transition"
+                        class="btn btn-main gap-2"
                         :class="has_liked
-                            ? 'bg-primary-100 text-primary-600 cursor-default'
-                            : 'bg-primary-500 text-white hover:bg-primary-600 hover:shadow-soft'"
+                            ? 'btn-primary btn-soft btn-disabled cursor-default'
+                            : 'btn-primary'"
                         @click="handle_like">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                             :fill="has_liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2"
@@ -263,7 +253,7 @@ const renderedHtml = computed(() => {
                         </svg>
                         {{ has_liked ? '已点赞' : '点赞' }} {{ like_count > 0 ? `· ${like_count}` : '' }}
                     </button>
-                    <p v-if="like_message" class="text-sm text-gray-500">{{ like_message }}</p>
+                    <p v-if="like_message" class="text-sm text-base-content/60">{{ like_message }}</p>
                 </div>
 
             </article>

@@ -7,7 +7,7 @@ import Freatres from './Features.vue';
 </script>
 
 <template>
-    <main class="bg-background flex flex-col">
+    <main class="bg-base-200 flex flex-col">
         <News_summary />
         <Category_news />
         <Station_info />

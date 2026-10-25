@@ -8,34 +8,46 @@
 
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
+@plugin "daisyui" {
+  themes: false;
+  logs: false;
+}
+@plugin "daisyui/theme" {
+  name: "brand";
+  default: true;
+  color-scheme: light;
+  --color-base-100: #ffffff;
+  --color-base-200: #f5f6f8;
+  --color-base-300: #e4e4e7;
+  --color-base-content: #101118;
+  --color-primary: #f25807;
+  --color-primary-content: #ffffff;
+  --color-secondary: #303841;
+  --color-secondary-content: #ffffff;
+  --color-accent: #fabc9c;
+  --color-accent-content: #612303;
+  --color-neutral: #1a1a1a;
+  --color-neutral-content: #a1a1aa;
+  --color-info: #0284c7;
+  --color-info-content: #ffffff;
+  --color-success: #16a34a;
+  --color-success-content: #ffffff;
+  --color-warning: #d97706;
+  --color-warning-content: #ffffff;
+  --color-error: #dc2626;
+  --color-error-content: #ffffff;
+  --radius-selector: 1rem;
+  --radius-field: 0.5rem;
+  --radius-box: 1rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.3125rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
 
 @theme {
     --font-sans: "GoogleSansCode", "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif;
-
-    --color-primary-100: #fcdecd;
-    --color-primary-200: #fabc9c;
-    --color-primary-300: #f79b6a;
-    --color-primary-400: #f57939;
-    --color-primary-500: #f25807;
-    --color-primary-600: #c24606;
-    --color-primary-700: #913504;
-    --color-primary-800: #612303;
-    --color-primary-900: #301201;
-
-    --color-background: #f5f6f8;
-    --color-foreground: #101118;
-    --color-card: #ffffff;
-    --color-border: #e4e4e7;
-    --color-accent: #303841;
-
-    --color-footer-bg: #1a1a1a;
-    --color-footer-text: #a1a1aa;
-
-    /* 统一阴影与缓动，避免各页手写不一致 */
-    --shadow-card: 0 1px 2px rgb(16 17 24 / 0.04), 0 4px 12px rgb(16 17 24 / 0.04);
-    --shadow-card-hover: 0 4px 8px rgb(16 17 24 / 0.06), 0 16px 32px rgb(16 17 24 / 0.08);
-    --shadow-soft: 0 1px 2px rgb(16 17 24 / 0.05);
-
     --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -43,15 +55,45 @@
     text-indent: 2em;
 }
 
+/* daisyUI 的 card 不自带底色：全站卡片统一 base-100，避免透出灰色画布 */
+@utility card {
+    background-color: var(--color-base-100);
+}
+
+/* 菜单激活项：默认随 neutral（近黑）显脏，改品牌橙轻底，与主题统一 */
+@utility menu-active {
+    background-color: color-mix(in oklab, var(--color-primary) 12%, transparent);
+    color: var(--color-primary);
+}
+
+/* 主操作按钮字号 14→15px：独立类名叠加在 btn 上，不覆盖 daisy 的 btn 本体 */
+@utility btn-main {
+    font-size: 0.9375rem;
+}
+
+/* 复选框保持近方形（radius-selector 为 badge/toggle 共用，不宜缩小；checkbox 单独覆盖） */
+@utility checkbox {
+    border-radius: 0.33rem;
+}
+
+/* 加载指示器统一品牌橙（loading 默认跟随 currentColor） */
+@utility loading {
+    color: var(--color-primary);
+}
+
+/* 字号规范（全站阅读层级）：
+   导航/菜单 14px · 面包屑 14px · 列表条目标题 14px/600 · 卡片标题 16px/600
+   页面页头 20px/700 · 弹窗标题 16px/700 · 详情正文 prose-lg（18px）· 辅助信息 12-14px */
+
 /* 区块统一纵向节奏 */
 @utility section-y {
     padding-top: 3.5rem;
     padding-bottom: 3.5rem;
 }
 
-/* 可交互卡片：轻抬升 + 阴影过渡 */
+/* 可交互卡片：轻抬升 + 阴影过渡（含 translate：Tailwind v4 位移工具类走 CSS translate 属性） */
 @utility card-hover {
-    transition-property: transform, box-shadow, border-color;
+    transition-property: transform, translate, scale, rotate, box-shadow, border-color;
     transition-duration: 300ms;
     transition-timing-function: var(--ease-out-soft);
 }
@@ -63,20 +105,24 @@
     transition-timing-function: var(--ease-out-soft);
 }
 
-/* 页面切换 */
-.page-enter-active,
+/* 页面切换：淡入上滑（Motion.Lab fade-in-up 思路）
+   进场 320ms 从下方 16px 上浮淡入；出场 180ms 略快上移淡出，避免拖沓 */
+.page-enter-active {
+    transition: opacity 320ms var(--ease-out-soft), transform 320ms var(--ease-out-soft);
+}
+
 .page-leave-active {
-    transition: opacity 220ms var(--ease-out-soft), transform 220ms var(--ease-out-soft);
+    transition: opacity 180ms var(--ease-out-soft), transform 180ms var(--ease-out-soft);
 }
 
 .page-enter-from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(16px);
 }
 
 .page-leave-to {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translateY(-8px);
 }
 
 /* 弹层 */
@@ -95,8 +141,8 @@
     transition: opacity 220ms var(--ease-out-soft);
 }
 
-.modal-enter-active .modal-panel,
-.modal-leave-active .modal-panel {
+.modal-enter-active .modal-box,
+.modal-leave-active .modal-box {
     transition: transform 220ms var(--ease-out-soft), opacity 220ms var(--ease-out-soft);
 }
 
@@ -105,8 +151,8 @@
     opacity: 0;
 }
 
-.modal-enter-from .modal-panel,
-.modal-leave-to .modal-panel {
+.modal-enter-from .modal-box,
+.modal-leave-to .modal-box {
     opacity: 0;
     transform: translateY(12px) scale(0.98);
 }
@@ -125,19 +171,22 @@
 
 /* 键盘可达性 */
 :focus-visible {
-    outline: 2px solid var(--color-primary-500);
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
 }
 
-/* 全局交互元素默认过渡，减少逐处补写 */
-a,
-button,
-input,
-select,
-textarea {
-    transition-property: color, background-color, border-color, box-shadow, opacity, transform;
-    transition-duration: 200ms;
-    transition-timing-function: var(--ease-out-soft);
+/* 全局交互元素默认过渡（放 base 层：utilities 层的 card-hover 等才能覆盖它，
+   否则无层样式会压过带 translate 的卡片过渡，链接类卡片 hover 变瞬间生硬） */
+@layer base {
+    a,
+    button,
+    input,
+    select,
+    textarea {
+        transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+        transition-duration: 200ms;
+        transition-timing-function: var(--ease-out-soft);
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

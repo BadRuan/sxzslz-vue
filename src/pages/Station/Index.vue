@@ -14,14 +14,14 @@ const length = station_array.value.length
 if (isNaN(indexValue) || indexValue < 0 || indexValue >= length) {
     router.replace({ name: 'Home' });
 }
-const desc_txt_class = 'mr-4 text-gray-600';
-const txt_class = 'font-bold text-gray-800';
+const desc_txt_class = 'mr-4 text-base-content/70';
+const txt_class = 'font-bold text-base-content/90';
 </script>
 
 <template>
-    <section class="bg-background py-8">
-        <div class="w-7xl m-auto bg-white shadow rounded px-8 pb-12">
-            <h1 class="py-8 font-bold text-center text-2xl text-primary-500 border-b border-border">{{
+    <section class="bg-base-200 py-8">
+        <div class="w-7xl m-auto bg-base-100 shadow rounded px-8 pb-12">
+            <h1 class="py-8 font-bold text-center text-2xl text-primary border-b border-base-300">{{
                 station_array[indexValue]?.station_name }}</h1>
 
             <TitleComponent class="px-16 py-8">
@@ -286,7 +286,7 @@ const txt_class = 'font-bold text-gray-800';
             <div class="w-6xl mx-auto">
                 <div class="flex flex-col items-center">
                     <div v-for="(item, index) in station_array[indexValue]?.station_pic_list" :key="index"
-                        class="w-2/3 shadow my-4 bg-white">
+                        class="w-2/3 shadow my-4 bg-base-100">
                         <div class="flex flex-col">
                             <div class="overflow-hidden ">
                                 <img alt="gallery"
@@ -296,9 +296,9 @@ const txt_class = 'font-bold text-gray-800';
                             <div class="flex flex-row items-center justify-between px-8 py-4">
                                 <div>
                                     <div class="text-sm font-bold">{{ station_array[indexValue]?.station_name }}</div>
-                                    <div class="text-gray-500 text-sm">2025年08月04日 09:05:10</div>
+                                    <div class="text-base-content/60 text-sm">2025年08月04日 09:05:10</div>
                                 </div>
-                                <div class="font-medium text-gray-600">{{ item.title
+                                <div class="font-medium text-base-content/70">{{ item.title
                                     }}
                                 </div>
                             </div>

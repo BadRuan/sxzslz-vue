@@ -4,6 +4,7 @@ import apiService from '@/utils/apiService';
 import { api_error_detail } from '@/store/article';
 import { url_prefix } from '@/utils/baseInfo';
 import dayjs from 'dayjs';
+import AppPagination from '@/components/AppPagination.vue';
 
 /** 文件列表项，字段与 GET /document/ 一致 */
 export interface DocumentModel {
@@ -114,8 +115,8 @@ onMounted(fetch_list);
 <template>
     <main class="flex-1 overflow-y-auto p-6">
         <div class="flex items-center justify-between mb-2">
-            <h2 class="text-xl font-bold text-gray-900">文档管理</h2>
-            <label class="rounded-md bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-400 transition cursor-pointer"
+            <h2 class="text-xl font-bold text-base-content">文档管理</h2>
+            <label class="btn btn-main btn-primary cursor-pointer"
                 :class="uploading ? 'opacity-60 cursor-not-allowed' : ''">
                 {{ uploading ? '上传中...' : '+ 上传文档' }}
                 <input type="file" multiple class="hidden"
@@ -123,15 +124,15 @@ onMounted(fetch_list);
                     :disabled="uploading" @change="pick_files" />
             </label>
         </div>
-        <p class="mb-4 text-xs text-gray-400">支持 txt / pdf / doc / docx / xls / xlsx / ppt / pptx / zip，单个 ≤ 50MB</p>
+        <p class="mb-4 text-xs text-base-content/40">支持 txt / pdf / doc / docx / xls / xlsx / ppt / pptx / zip，单个 ≤ 50MB</p>
 
-        <p v-if="upload_error" class="mb-4 text-sm text-red-600">{{ upload_error }}</p>
+        <p v-if="upload_error" class="alert alert-error mb-4 text-sm">{{ upload_error }}</p>
         <p v-if="upload_success" class="mb-4 text-sm text-green-600">{{ upload_success }}</p>
-        <p v-if="list_error" class="mb-4 text-sm text-red-600">{{ list_error }}</p>
+        <p v-if="list_error" class="alert alert-error mb-4 text-sm">{{ list_error }}</p>
 
-        <div class="bg-white rounded-2xl shadow-card overflow-x-auto">
-            <table class="w-full text-sm text-left">
-                <thead class="border-b border-border text-gray-500">
+        <div class="bg-base-100 rounded-2xl shadow-sm overflow-x-auto">
+            <table class="table text-sm">
+                <thead class="border-b border-base-300 text-base-content/60">
                     <tr>
                         <th class="px-6 py-4 font-medium">文件名</th>
                         <th class="px-6 py-4 font-medium">类型</th>
@@ -141,48 +142,28 @@ onMounted(fetch_list);
                         <th class="px-6 py-4 font-medium">操作</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-border divide-dashed">
+                <tbody class="divide-y divide-base-300 divide-dashed">
                     <tr v-if="!list_error && document_list.length === 0">
-                        <td colspan="6" class="px-6 py-8 text-center text-gray-400">暂无文件</td>
+                        <td colspan="6" class="px-6 py-8 text-center text-base-content/40">暂无文件</td>
                     </tr>
-                    <tr v-for="doc in document_list" :key="doc.id" class="hover:bg-gray-50 link-transition">
-                        <td class="px-6 py-3.5 text-gray-700 max-w-md truncate" :title="doc.raw_filename">
+                    <tr v-for="doc in document_list" :key="doc.id" class="hover:bg-base-300/50 link-transition">
+                        <td class="px-6 py-3.5 text-base-content/80 max-w-md truncate" :title="doc.raw_filename">
                             {{ doc.raw_filename }}
                         </td>
-                        <td class="px-6 py-3.5 text-gray-500">{{ ext_of(doc.raw_filename).toUpperCase() }}</td>
-                        <td class="px-6 py-3.5 text-gray-500">{{ format_size(doc.size_bytes) }}</td>
-                        <td class="px-6 py-3.5 text-gray-500">{{ doc.view }}</td>
-                        <td class="px-6 py-3.5 text-gray-500">{{ dayjs(doc.uploaded_at).format('YYYY-MM-DD HH:mm') }}</td>
+                        <td class="px-6 py-3.5 text-base-content/60">{{ ext_of(doc.raw_filename).toUpperCase() }}</td>
+                        <td class="px-6 py-3.5 text-base-content/60">{{ format_size(doc.size_bytes) }}</td>
+                        <td class="px-6 py-3.5 text-base-content/60">{{ doc.view }}</td>
+                        <td class="px-6 py-3.5 text-base-content/60">{{ dayjs(doc.uploaded_at).format('YYYY-MM-DD HH:mm') }}</td>
                         <td class="px-6 py-3.5">
                             <a :href="url_prefix.document_prefix + doc.slug" target="_blank" rel="noopener"
-                                class="text-xs text-primary-700 hover:underline">下载</a>
+                                class="text-xs text-primary/90 hover:underline">下载</a>
                         </td>
                     </tr>
                 </tbody>
             </table>
 
-            <nav class="flex items-center justify-between border-t border-border px-6 py-4" aria-label="Pagination">
-                <p class="text-sm text-gray-700">
-                    共 <span class="font-medium">{{ total }}</span> 个，
-                    第 <span class="font-medium">{{ page }}</span> 页
-                </p>
-                <div class="flex gap-2">
-                    <button @click="go_page(page - 1)" :disabled="page <= 1" :class="[
-                        page <= 1
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'bg-white text-gray-900 hover:bg-gray-50'
-                    ]" class="rounded-md px-3 py-1.5 text-sm ring-1 ring-inset ring-gray-300">
-                        上一页
-                    </button>
-                    <button @click="go_page(page + 1)" :disabled="!has_next" :class="[
-                        !has_next
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'bg-primary-500 text-white hover:bg-primary-400'
-                    ]" class="rounded-md px-3 py-1.5 text-sm">
-                        下一页
-                    </button>
-                </div>
-            </nav>
+            <AppPagination class="px-6 py-4" :page="page" :has-next="has_next"
+                :total="total" unit="个" @change="go_page" />
         </div>
     </main>
 </template>

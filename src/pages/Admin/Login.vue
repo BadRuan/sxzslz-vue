@@ -33,30 +33,31 @@ const submit = async () => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-background flex items-center justify-center px-4">
-        <div class="w-full max-w-sm bg-white rounded-2xl shadow-card p-8">
+    <div class="min-h-screen bg-base-200 flex items-center justify-center px-4">
+        <div class="w-full max-w-sm card rounded-box p-8">
             <div class="flex flex-col items-center mb-6">
                 <img src="/icon/water-logo.svg" class="h-10 w-10 mb-3" alt="logo" />
-                <h1 class="text-xl font-bold text-gray-900">管理后台登录</h1>
-                <p class="text-sm text-gray-500 mt-1">芜湖市鸠江区沈巷镇水利站</p>
+                <h1 class="text-xl font-bold text-base-content">管理后台登录</h1>
+                <p class="text-sm text-base-content/60 mt-1">芜湖市鸠江区沈巷镇水利站</p>
             </div>
 
             <form class="flex flex-col gap-4" @submit.prevent="submit">
-                <label class="text-sm text-gray-600">用户名
-                    <input v-model="username" autocomplete="username"
-                        class="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm text-gray-800 focus:border-primary-400 focus:ring-2 focus:ring-primary-100" />
+                <label class="form-control w-full">
+                    <span class="label-text mb-1 text-base-content/70">用户名</span>
+                    <input v-model="username" autocomplete="username" placeholder="请输入用户名"
+                        class="input input-bordered w-full" />
                 </label>
-                <label class="text-sm text-gray-600">密码
-                    <input v-model="password" type="password" autocomplete="current-password"
-                        class="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm text-gray-800 focus:border-primary-400 focus:ring-2 focus:ring-primary-100" />
+                <label class="form-control w-full">
+                    <span class="label-text mb-1 text-base-content/70">密码</span>
+                    <input v-model="password" type="password" autocomplete="current-password" placeholder="请输入密码"
+                        class="input input-bordered w-full" />
                 </label>
 
-                <p v-if="error_message" class="text-sm text-red-600">{{ error_message }}</p>
+                <p v-if="error_message" class="text-sm text-error">{{ error_message }}</p>
 
-                <button type="submit" :disabled="auth_store.loading" :class="auth_store.loading
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-primary-500 text-white hover:bg-primary-600'"
-                    class="mt-2 w-full rounded-lg px-4 py-2 text-sm font-semibold link-transition">
+                <button type="submit" :disabled="auth_store.loading"
+                    class="btn btn-main btn-primary mt-2 btn-block"
+                    :class="{ 'btn-disabled': auth_store.loading }">
                     {{ auth_store.loading ? '登录中...' : '登 录' }}
                 </button>
             </form>

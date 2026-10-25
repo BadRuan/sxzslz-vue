@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import apiService from '@/utils/apiService';
 import { api_error_detail } from '@/store/article';
+import AppModal from '@/components/AppModal.vue';
 import {
     type CategoryFlat,
     type CategoryTreeNode,
@@ -131,16 +132,15 @@ onMounted(queryCategoryInfo);
 <template>
     <main class="flex-1 overflow-y-auto p-6">
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-bold text-gray-800">分类管理</h2>
-            <button class="rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600 link-transition"
-                @click="open_create()">
+            <h2 class="text-xl font-bold text-base-content/90">分类管理</h2>
+            <button class="btn btn-main btn-primary" @click="open_create()">
                 + 新增分类
             </button>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-card overflow-x-auto">
-            <table class="w-full text-sm text-center">
-                <thead class="border-b border-border text-gray-500">
+        <div class="bg-base-100 rounded-2xl shadow-sm overflow-x-auto">
+            <table class="table text-sm text-center">
+                <thead class="border-b border-base-300 text-base-content/60">
                     <tr>
                         <th class="px-6 py-4 font-medium">分类名称</th>
                         <th class="px-6 py-4 font-medium">层级</th>
@@ -148,23 +148,21 @@ onMounted(queryCategoryInfo);
                         <th class="px-6 py-4 font-medium">操作</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-border divide-dashed">
-                    <tr v-for="{ node, depth } in tree_rows" :key="node.id" class="hover:bg-gray-50 link-transition">
-                        <td class="px-6 py-3.5 text-gray-700 text-left"
+                <tbody class="divide-y divide-base-300 divide-dashed">
+                    <tr v-for="{ node, depth } in tree_rows" :key="node.id" class="hover:bg-base-300/50 link-transition">
+                        <td class="px-6 py-3.5 text-base-content/80 text-left"
                             :style="{ paddingLeft: `${1.25 + depth * 1.5}rem` }">
                             {{ node.name }}
                         </td>
-                        <td class="px-6 py-3.5 text-gray-500">{{ depth + 1 }}</td>
-                        <td class="px-6 py-3.5 text-gray-500">{{ node.sort }}</td>
+                        <td class="px-6 py-3.5 text-base-content/60">{{ depth + 1 }}</td>
+                        <td class="px-6 py-3.5 text-base-content/60">{{ node.sort }}</td>
                         <td class="px-6 py-3.5">
-                            <div class="flex items-center justify-center gap-3">
+                            <div class="flex items-center justify-center gap-1">
                                 <!-- 仅一级分类可添加子分类（严格二级） -->
-                                <button v-if="depth === 0" class="text-xs text-primary-700 hover:underline"
+                                <button v-if="depth === 0" class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
                                     @click="open_create(node.id)">添加子分类</button>
-                                <button class="text-xs text-primary-700 hover:underline"
-                                    @click="open_edit(node)">编辑</button>
-                                <button class="text-xs text-red-600 hover:underline"
-                                    @click="remove_category(node)">删除</button>
+                                <button class="btn btn-ghost btn-xs text-primary whitespace-nowrap" @click="open_edit(node)">编辑</button>
+                                <button class="btn btn-ghost btn-xs text-error whitespace-nowrap" @click="remove_category(node)">删除</button>
                             </div>
                         </td>
                     </tr>
@@ -173,49 +171,39 @@ onMounted(queryCategoryInfo);
         </div>
 
         <!-- 新增/编辑弹窗 -->
-        <Transition name="modal">
-            <div v-if="show_modal" class="fixed inset-0 z-50 flex items-center justify-center">
-                <div class="absolute inset-0 bg-black/30" @click="show_modal = false"></div>
-                <div class="modal-panel relative bg-white rounded-2xl shadow-card-hover w-96 p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">
-                        {{ modal_mode === 'create' ? '新增分类' : '编辑分类' }}
-                    </h3>
-                    <div class="flex flex-col gap-3">
-                        <label class="text-sm text-gray-600">名称
-                            <input v-model="form.name"
-                                class="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm text-gray-800 focus:border-primary-400 focus:ring-2 focus:ring-primary-100" />
-                        </label>
-                        <label class="text-sm text-gray-600">父分类
-                            <select v-model.number="form.parent_id" :disabled="editing_is_first_level"
-                                class="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm text-gray-800 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 disabled:bg-gray-50 disabled:text-gray-500">
-                                <option :value="0">一级分类</option>
-                                <option v-for="opt in parent_options" :key="opt.id" :value="opt.id">{{ opt.label }}</option>
-                            </select>
-                            <span class="block mt-1 text-xs text-gray-400">
-                                {{ editing_is_first_level
-                                    ? '一级分类不可调整父级'
-                                    : '分类仅支持二级：子分类只能挂在一级分类下' }}
-                            </span>
-                        </label>
-                        <label class="text-sm text-gray-600">排序
-                            <input v-model.number="form.sort" type="number"
-                                class="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm text-gray-800 focus:border-primary-400 focus:ring-2 focus:ring-primary-100" />
-                        </label>
-                        <p v-if="modal_error" class="text-sm text-red-600">{{ modal_error }}</p>
-                    </div>
-                    <div class="mt-5 flex justify-end gap-3">
-                        <button class="px-4 py-2 text-sm rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 link-transition"
-                            @click="show_modal = false">取消</button>
-                        <button :disabled="saving" :class="saving
-                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            : 'bg-primary-500 text-white hover:bg-primary-600'"
-                            class="px-4 py-2 text-sm rounded-lg link-transition"
-                            @click="submit_form">
-                            {{ saving ? '保存中...' : '保存' }}
-                        </button>
-                    </div>
-                </div>
+        <AppModal v-model="show_modal" max-width="max-w-sm"
+            :title="modal_mode === 'create' ? '新增分类' : '编辑分类'">
+            <div class="flex flex-col gap-3">
+                <label class="text-sm text-base-content/70">名称
+                    <input v-model="form.name"
+                        class="input input-bordered w-full mt-1" />
+                </label>
+                <label class="text-sm text-base-content/70">父分类
+                    <select v-model.number="form.parent_id" :disabled="editing_is_first_level"
+                        class="select select-bordered w-full mt-1 disabled:opacity-60">
+                        <option :value="0">一级分类</option>
+                        <option v-for="opt in parent_options" :key="opt.id" :value="opt.id">{{ opt.label }}</option>
+                    </select>
+                    <span class="block mt-1 text-xs text-base-content/40">
+                        {{ editing_is_first_level
+                            ? '一级分类不可调整父级'
+                            : '分类仅支持二级：子分类只能挂在一级分类下' }}
+                    </span>
+                </label>
+                <label class="text-sm text-base-content/70">排序
+                    <input v-model.number="form.sort" type="number"
+                        class="input input-bordered w-full mt-1" />
+                </label>
+                <p v-if="modal_error" class="text-sm text-error">{{ modal_error }}</p>
             </div>
-        </Transition>
+            <template #footer>
+                <button class="btn" @click="show_modal = false">取消</button>
+                <button class="btn btn-main btn-primary" :disabled="saving"
+                    :class="{ 'btn-disabled': saving }"
+                    @click="submit_form">
+                    {{ saving ? '保存中...' : '保存' }}
+                </button>
+            </template>
+        </AppModal>
     </main>
 </template>

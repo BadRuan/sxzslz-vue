@@ -2,6 +2,8 @@
 import { ref, computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import dayjs from 'dayjs';
+import AppPagination from '@/components/AppPagination.vue';
+import AppModal from '@/components/AppModal.vue';
 import apiService from '@/utils/apiService';
 import { useBaseinfoStore } from '@/store/base';
 import { flatten_categories } from '@/utils/category';
@@ -290,21 +292,13 @@ onMounted(
     <main class="flex-1 overflow-y-auto p-6">
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-4">
-                <h2 class="text-xl font-bold text-gray-900">文章管理</h2>
-                <div class="flex rounded-lg bg-gray-100 p-1 text-sm">
-                    <button
-                        class="rounded-md px-3 py-1.5 link-transition"
-                        :class="view === 'active'
-                            ? 'bg-white text-gray-900 shadow-sm'
-                            : 'text-gray-500 hover:text-gray-700'"
+                <h2 class="text-xl font-bold text-base-content">文章管理</h2>
+                <div role="tablist" class="tabs tabs-box tabs-sm">
+                    <button role="tab" class="tab" :class="{ 'tab-active': view === 'active' }"
                         @click="switch_view('active')">
                         正常文章
                     </button>
-                    <button
-                        class="rounded-md px-3 py-1.5 link-transition"
-                        :class="view === 'trash'
-                            ? 'bg-white text-gray-900 shadow-sm'
-                            : 'text-gray-500 hover:text-gray-700'"
+                    <button role="tab" class="tab" :class="{ 'tab-active': view === 'trash' }"
                         @click="switch_view('trash')">
                         回收站
                     </button>
@@ -312,32 +306,30 @@ onMounted(
             </div>
             <button
                 v-if="view === 'active'"
-                class="rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600 link-transition"
+                class="btn btn-main btn-primary"
                 @click="open_create">
                 + 新增文章
             </button>
         </div>
 
-        <div v-if="view === 'active' && selected.size > 0"
-            class="mb-4 flex items-center gap-3 rounded-xl bg-primary-50 px-4 py-3 text-sm text-primary-800">
+        <div v-if="view === 'active' && selected.size > 0" role="alert"
+            class="alert alert-info mb-4 text-sm">
             <span>已选 <b>{{ selected.size }}</b> 篇</span>
-            <button class="rounded-lg bg-primary-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-600 link-transition"
-                @click="open_batch('add')">
+            <button class="btn btn-primary btn-xs whitespace-nowrap" @click="open_batch('add')">
                 加入分类
             </button>
-            <button class="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-primary-700 ring-1 ring-primary-300 hover:bg-primary-100 link-transition"
-                @click="open_batch('remove')">
+            <button class="btn btn-xs whitespace-nowrap" @click="open_batch('remove')">
                 从分类移除
             </button>
-            <button class="ml-auto text-xs text-gray-500 hover:underline" @click="clear_selection">清空选择</button>
+            <button class="btn btn-ghost btn-xs" @click="clear_selection">清空选择</button>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-card overflow-x-auto">
-            <table class="w-full text-sm text-left">
-                <thead class="border-b border-border text-gray-500">
+        <div class="card rounded-box overflow-x-auto">
+            <table class="table text-sm">
+                <thead class="border-b border-base-300 text-base-content/60">
                     <tr class="text-center">
                         <th v-if="view === 'active'" class="px-3 py-4 font-medium">
-                            <input type="checkbox" class="cursor-pointer rounded"
+                            <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
                                 :checked="all_on_page_selected" @change="toggle_select_all" />
                         </th>
                         <th class="px-4 py-4 font-medium">分类</th>
@@ -349,52 +341,53 @@ onMounted(
                         <th class="px-4 py-4 font-medium">操作</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-border divide-dashed">
+                <tbody class="divide-y divide-base-300 divide-dashed">
                     <tr v-if="list_error">
-                        <td :colspan="view === 'active' ? 8 : 7" class="px-6 py-8 text-center text-red-600">{{ list_error }}</td>
+                        <td :colspan="view === 'active' ? 8 : 7" class="px-6 py-8 text-center text-error">{{ list_error }}</td>
                     </tr>
                     <tr v-else-if="article_list.length === 0">
-                        <td :colspan="view === 'active' ? 8 : 7" class="px-6 py-8 text-center text-gray-400">
+                        <td :colspan="view === 'active' ? 8 : 7" class="px-6 py-8 text-center text-base-content/40">
                             {{ view === 'trash' ? '回收站为空' : '暂无文章' }}
                         </td>
                     </tr>
-                    <tr v-for="article in article_list" :key="article.slug" class="text-center hover:bg-gray-50 link-transition">
+                    <tr v-for="article in article_list" :key="article.slug" class="text-center hover:bg-base-300/50 link-transition">
                         <td v-if="view === 'active'" class="px-3 py-3.5">
-                            <input type="checkbox" class="cursor-pointer rounded"
+                            <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
                                 :checked="selected.has(article.slug)" @change="toggle_select(article.slug)" />
                         </td>
-                        <td class="px-4 py-3.5 text-gray-600">
+                        <td class="px-4 py-3.5 text-base-content/70">
                             {{ article.categories?.[0]?.name || '—' }}
                         </td>
-                        <td class="px-4 py-3 text-gray-700 text-left max-w-xs truncate">
-                            {{ article.title }}
+                        <td class="px-4 py-3 text-base-content/80 text-left max-w-xs truncate">
+                            <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
+                                target="_blank" rel="noopener" class="link link-hover"
+                                :title="'预览：' + article.title">
+                                {{ article.title }}
+                            </RouterLink>
                         </td>
-                        <td class="px-4 py-3 text-gray-600 text-left">
+                        <td class="px-4 py-3 text-base-content/70 text-left">
                             {{ article.user?.nickname ?? '—' }}
                         </td>
                         <td class="px-4 py-3">
-                            <button
-                                class="inline-flex items-center rounded-full px-2 py-0.5 text-xs cursor-pointer transition-colors"
-                                :class="article.is_recommended
-                                    ? 'bg-green-100 text-primary-700 hover:bg-yellow-100'
-                                    : 'bg-gray-100 text-gray-400 hover:bg-gray-200'"
+                            <button class="btn btn-xs whitespace-nowrap"
+                                :class="article.is_recommended ? 'btn-primary btn-soft' : 'btn-ghost'"
                                 :disabled="action_slug === article.slug"
                                 @click="toggle_recommended(article)">
                                 {{ article.is_recommended ? '已推荐' : '未推荐' }}
                             </button>
                         </td>
-                        <td class="px-4 py-3 text-gray-600">{{ article.view_count }}</td>
-                        <td class="px-4 py-3 text-gray-500">{{ dayjs(article.create_at).format('YYYY-MM-DD HH:mm') }}</td>
+                        <td class="px-4 py-3 text-base-content/70">{{ article.view_count }}</td>
+                        <td class="px-4 py-3 text-base-content/60">{{ dayjs(article.create_at).format('YYYY-MM-DD HH:mm') }}</td>
                         <td class="px-4 py-3">
-                            <div class="flex items-center justify-center gap-3">
+                            <div class="flex items-center justify-center gap-1">
                                 <template v-if="view === 'active'">
-                                    <button class="text-xs text-primary-700 hover:underline"
+                                    <button class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
                                         @click="open_edit(article)">编辑</button>
-                                    <button class="text-xs text-red-600 hover:underline"
+                                    <button class="btn btn-ghost btn-xs text-error whitespace-nowrap"
                                         :disabled="action_slug === article.slug"
                                         @click="remove_article(article)">删除</button>
                                 </template>
-                                <button v-else class="text-xs text-primary-700 hover:underline"
+                                <button v-else class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
                                     :disabled="action_slug === article.slug"
                                     @click="restore_article(article)">恢复</button>
                             </div>
@@ -403,139 +396,97 @@ onMounted(
                 </tbody>
             </table>
 
-            <nav class="flex items-center justify-between border-t border-border px-6 py-4" aria-label="Pagination">
-                <p class="text-sm text-gray-700">
-                    共 <span class="font-medium">{{ total }}</span> 条，
-                    第 <span class="font-medium">{{ page }}</span> 页
-                </p>
-                <div class="flex gap-2">
-                    <button @click="go_page(page - 1)" :disabled="page <= 1" :class="[
-                        page <= 1
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'bg-white text-gray-900 hover:bg-gray-50'
-                    ]" class="rounded-md px-3 py-1.5 text-sm ring-1 ring-inset ring-gray-300">
-                        上一页
-                    </button>
-                    <button @click="go_page(page + 1)" :disabled="!has_next" :class="[
-                        !has_next
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'bg-primary-500 text-white hover:bg-primary-600'
-                    ]" class="rounded-md px-3 py-1.5 text-sm">
-                        下一页
-                    </button>
+                    <AppPagination class="px-6 py-4" :page="page" :has-next="has_next"
+                        :total="total" unit="条" @change="go_page" />
                 </div>
-            </nav>
-        </div>
 
         <!-- 新增/编辑弹窗 -->
-        <Transition name="modal">
-            <div v-if="show_modal" class="fixed inset-0 z-50 flex items-center justify-center">
-                <div class="absolute inset-0 bg-black/30" @click="show_modal = false"></div>
-                <div class="modal-panel relative bg-white rounded-2xl shadow-card-hover w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">
-                        {{ modal_mode === 'create' ? '新增文章' : '编辑文章' }}
-                    </h3>
+        <AppModal v-model="show_modal" max-width="max-w-3xl"
+            :title="modal_mode === 'create' ? '新增文章' : '编辑文章'">
                     <div class="flex flex-col gap-4">
-                        <label class="text-sm text-gray-600">标题
+                        <label class="text-sm text-base-content/70">标题
                             <input v-model="form.title"
-                                class="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm text-gray-800 focus:border-primary-400 focus:ring-2 focus:ring-primary-100" />
+                                class="input input-bordered w-full mt-1" />
                         </label>
 
-                        <label class="text-sm text-gray-600">正文（Markdown）
+                        <label class="text-sm text-base-content/70">正文（Markdown）
                             <textarea v-model="form.content" rows="10"
-                                class="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm text-gray-800 font-mono focus:border-primary-400 focus:ring-2 focus:ring-primary-100"></textarea>
+                                class="textarea textarea-bordered w-full mt-1 font-mono"></textarea>
                         </label>
 
-                        <div class="text-sm text-gray-600">
+                        <div class="text-sm text-base-content/70">
                             封面图
                             <div class="mt-1 flex items-center gap-3">
                                 <input type="file" accept="image/jpeg,image/png,image/gif,image/webp"
-                                    class="text-sm text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-primary-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-primary-700 hover:file:bg-primary-100"
+                                    class="text-sm text-base-content/60 file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-primary/90 hover:file:bg-primary/20"
                                     :disabled="uploading_cover" @change="pick_cover" />
-                                <span v-if="uploading_cover" class="text-xs text-gray-400">上传中...</span>
+                                <span v-if="uploading_cover" class="text-xs text-base-content/40">上传中...</span>
                             </div>
                             <div class="mt-2 flex items-center gap-3">
                                 <img v-if="form.cover_img_slug" :src="url_prefix.pic_prefix + form.cover_img_slug" alt="cover"
-                                    class="h-16 w-24 rounded-lg object-cover ring-1 ring-border" />
+                                    class="h-16 w-24 rounded-lg object-cover ring-1 ring-base-300" />
                                 <input v-model="form.cover_img_slug" placeholder="或直接填图片 slug"
-                                    class="flex-1 rounded-lg border border-border px-3 py-2 text-sm text-gray-800 focus:border-primary-400 focus:ring-2 focus:ring-primary-100" />
-                                <button v-if="form.cover_img_slug" class="text-xs text-red-600 hover:underline shrink-0"
+                                    class="input input-bordered flex-1 mt-1" />
+                                <button v-if="form.cover_img_slug" class="btn btn-ghost btn-xs text-error shrink-0"
                                     @click="form.cover_img_slug = ''">清除</button>
                             </div>
                         </div>
 
-                        <div class="text-sm text-gray-600">
+                        <div class="text-sm text-base-content/70">
                             关联分类（仅二级，可多选）
                             <div class="mt-2 flex flex-wrap gap-2">
                                 <button v-for="opt in second_level_options" :key="opt.id" type="button"
-                                    class="rounded-full px-3 py-1 text-xs transition-colors" :class="form.category_ids.includes(opt.id)
-                                        ? 'bg-primary-500 text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                                    class="badge cursor-pointer" :class="form.category_ids.includes(opt.id)
+                                        ? 'badge-primary'
+                                        : 'badge-outline'"
                                     @click="toggle_category(opt.id)">
                                     {{ opt.label }}
                                 </button>
                             </div>
                         </div>
 
-                        <div class="flex flex-row gap-6 text-sm text-gray-600">
+                        <div class="flex flex-row gap-6 text-sm text-base-content/70">
                             <label class="flex items-center gap-2">
-                                <input v-model="form.is_recommended" type="checkbox" class="rounded" />
+                                <input v-model="form.is_recommended" type="checkbox" class="checkbox checkbox-primary" />
                                 推荐（首页轮播候选）
                             </label>
                         </div>
 
-                        <p v-if="modal_error" class="text-sm text-red-600">{{ modal_error }}</p>
-                    </div>
-                    <div class="mt-5 flex justify-end gap-3">
-                        <button class="px-4 py-2 text-sm rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 link-transition"
-                            @click="show_modal = false">取消</button>
-                        <button :disabled="saving" :class="saving
-                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            : 'bg-primary-500 text-white hover:bg-primary-600'"
-                            class="px-4 py-2 text-sm rounded-lg link-transition"
-                            @click="submit_form">
-                            {{ saving ? '保存中...' : '保存' }}
-                        </button>
-                    </div>
-                </div>
+                <p v-if="modal_error" class="text-sm text-error">{{ modal_error }}</p>
             </div>
-        </Transition>
+            <template #footer>
+                <button class="btn" @click="show_modal = false">取消</button>
+                <button class="btn btn-main btn-primary" :disabled="saving"
+                    :class="{ 'btn-disabled': saving }"
+                    @click="submit_form">
+                    {{ saving ? '保存中...' : '保存' }}
+                </button>
+            </template>
+        </AppModal>
 
         <!-- 批量分类弹窗 -->
-        <Transition name="modal">
-            <div v-if="show_batch_modal" class="fixed inset-0 z-50 flex items-center justify-center">
-                <div class="absolute inset-0 bg-black/30" @click="show_batch_modal = false"></div>
-                <div class="modal-panel relative bg-white rounded-2xl shadow-card-hover w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-2">
-                        {{ batch_mode === 'add' ? '批量加入分类' : '批量从分类移除' }}
-                    </h3>
-                    <p class="text-sm text-gray-500 mb-4">
-                        已选 {{ selected.size }} 篇文章，选择目标分类（仅二级）：
-                    </p>
-                    <div class="flex flex-wrap gap-2">
-                        <button v-for="opt in second_level_options" :key="opt.id" type="button"
-                            class="rounded-full px-3 py-1 text-xs transition-colors"
-                            :class="batch_category_id === opt.id
-                                ? 'bg-primary-500 text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-                            @click="batch_category_id = opt.id">
-                            {{ opt.label }}
-                        </button>
-                    </div>
-                    <p v-if="batch_error" class="mt-3 text-sm text-red-600">{{ batch_error }}</p>
-                    <div class="mt-5 flex justify-end gap-3">
-                        <button class="px-4 py-2 text-sm rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 link-transition"
-                            @click="show_batch_modal = false">取消</button>
-                        <button :disabled="batch_saving" :class="batch_saving
-                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            : 'bg-primary-500 text-white hover:bg-primary-600'"
-                            class="px-4 py-2 text-sm rounded-lg link-transition"
-                            @click="submit_batch">
-                            {{ batch_saving ? '提交中...' : '确认' }}
-                        </button>
-                    </div>
-                </div>
+        <AppModal v-model="show_batch_modal" max-width="max-w-lg"
+            :title="batch_mode === 'add' ? '批量加入分类' : '批量从分类移除'">
+            <p class="text-sm text-base-content/60 mb-4">
+                已选 {{ selected.size }} 篇文章，选择目标分类（仅二级）：
+            </p>
+            <div class="flex flex-wrap gap-2">
+                <button v-for="opt in second_level_options" :key="opt.id" type="button"
+                    class="badge cursor-pointer"
+                    :class="batch_category_id === opt.id ? 'badge-primary' : 'badge-outline'"
+                    @click="batch_category_id = opt.id">
+                    {{ opt.label }}
+                </button>
             </div>
-        </Transition>
+            <p v-if="batch_error" class="mt-3 text-sm text-error">{{ batch_error }}</p>
+            <template #footer>
+                <button class="btn" @click="show_batch_modal = false">取消</button>
+                <button class="btn btn-main btn-primary" :disabled="batch_saving"
+                    :class="{ 'btn-disabled': batch_saving }"
+                    @click="submit_batch">
+                    {{ batch_saving ? '提交中...' : '确认' }}
+                </button>
+            </template>
+        </AppModal>
     </main>
 </template>

@@ -13,14 +13,14 @@ const notice_category_id = computed(() => to_second_level_id(categories.value, n
 </script>
 
 <template>
-    <footer class="bg-footer-bg text-footer-text">
+    <footer class="bg-neutral text-neutral-content">
         <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-3 lg:gap-12">
+            <div class="footer grid grid-cols-1 gap-8 md:grid-cols-3 lg:gap-12">
 
                 <div>
                     <div class="flex items-center space-x-2 mb-4">
                         <img src="/icon/water-logo.svg" class="h-8 w-8 brightness-0 invert" alt="logo" />
-                        <span class="text-lg font-semibold text-white">芜湖市鸠江区沈巷镇水利站</span>
+                        <span class="text-lg font-semibold text-base-100">芜湖市鸠江区沈巷镇水利站</span>
                     </div>
                     <p class="text-sm leading-relaxed">
                         负责辖区内的水资源管理、防汛抗旱、灌溉排涝、<br />
@@ -29,7 +29,7 @@ const notice_category_id = computed(() => to_second_level_id(categories.value, n
                 </div>
 
                 <div>
-                    <h3 class="text-sm font-semibold text-white mb-4">联系我们</h3>
+                    <h3 class="footer-title text-sm font-semibold text-base-100 mb-4">联系我们</h3>
                     <ul class="space-y-2 text-sm">
                         <li class="flex items-start">
                             <span class="mr-2">📍</span>
@@ -47,30 +47,30 @@ const notice_category_id = computed(() => to_second_level_id(categories.value, n
                 </div>
 
                 <div>
-                    <h3 class="text-sm font-semibold text-white mb-4">快速链接</h3>
+                    <h3 class="footer-title text-sm font-semibold text-base-100 mb-4">快速链接</h3>
                     <ul class="grid grid-cols-2 gap-2 text-sm">
                         <li>
-                            <RouterLink :to="{ name: 'Home' }" class="hover:text-primary-300 link-transition">网站首页
+                            <RouterLink :to="{ name: 'Home' }" class="hover:text-primary link-transition">网站首页
                             </RouterLink>
                         </li>
                         <li>
-                            <RouterLink :to="{ name: 'About' }" class="hover:text-primary-300 link-transition">关于我们</RouterLink>
+                            <RouterLink :to="{ name: 'About' }" class="hover:text-primary link-transition">关于我们</RouterLink>
                         </li>
                         <li>
                             <RouterLink :to="{ name: 'ArticleList', query: { category: finance_category_id } }"
-                                class="hover:text-primary-300 link-transition">财务公开</RouterLink>
+                                class="hover:text-primary link-transition">财务公开</RouterLink>
                         </li>
                         <li>
                             <RouterLink :to="{ name: 'ArticleList', query: { category: notice_category_id } }"
-                                class="hover:text-primary-300 link-transition">通知公告</RouterLink>
+                                class="hover:text-primary link-transition">通知公告</RouterLink>
                         </li>
-                        <li><a href="#" class="hover:text-primary-300 link-transition">政策法规</a></li>
+                        <li><a href="#" class="hover:text-primary link-transition">政策法规</a></li>
                     </ul>
                 </div>
 
             </div>
 
-            <div class="mt-10 border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between">
+            <div class="mt-10 border-t border-neutral-content/10 pt-6 flex flex-col sm:flex-row items-center justify-between">
 
                 <p class="text-xs">
                     © 2026 芜湖市鸠江区沈巷镇水利站 版权所有

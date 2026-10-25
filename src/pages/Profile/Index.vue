@@ -58,53 +58,53 @@ onMounted(
 </script>
 
 <template>
-    <main class="bg-background flex flex-col gap-8 py-4">
-        <div class="bg-white m-auto w-7xl rounded-2xl shadow-card flex flex-row justify-between p-10">
+    <main class="bg-base-200 flex flex-col gap-8 py-4">
+        <div class="card rounded-box m-auto w-7xl flex flex-row justify-between p-10">
             <div class="flex flex-row gap-8">
                 <div class="w-24 h-24 rounded-2xl">
                     <img :src="url_prefix.pic_prefix + head_img" alt="head_img">
                 </div>
                 <div class="flex flex-col">
                     <div class="flex flex-row items-center">
-                        <span class="text-2xl font-bold text-gray-800">{{ nickname_text(user_id) }}</span><img
+                        <span class="text-2xl font-bold text-base-content/90">{{ nickname_text(user_id) }}</span><img
                             class="h-6 w-6 mx-4" src="/icon/v.png" alt="v">
                     </div>
-                    <span class="py-4 text-gray-700">暂无简介及其他补充信息</span>
+                    <span class="py-4 text-base-content/80">暂无简介及其他补充信息</span>
                 </div>
             </div>
             <div class="flex flex-row p-4 gap-12">
                 <div class="flex flex-col items-center">
-                    <span class="text-gray-500">发布文章</span>
-                    <span class="text-gray-800 text-2xl">{{ post_count }}</span>
+                    <span class="text-base-content/60">发布文章</span>
+                    <span class="text-base-content/90 text-2xl">{{ post_count }}</span>
                 </div>
                 <div class="flex flex-col items-center">
-                    <span class="text-gray-500">文章累计阅读量</span>
-                    <span class="text-gray-800 text-2xl">{{ view_count }}</span>
+                    <span class="text-base-content/60">文章累计阅读量</span>
+                    <span class="text-base-content/90 text-2xl">{{ view_count }}</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white w-7xl m-auto py-8 px-10 rounded-2xl shadow-card">
+        <div class="card rounded-box w-7xl m-auto py-8 px-10">
             <div class="font-bold mx-2">文章动态</div>
-            <ul class="divide-y divide-border divide-dashed">
+            <ul class="divide-y divide-base-300 divide-dashed">
                 <li v-for="(article, index) in latest_article" :key="index"
                     class="px-5 py-3 flex items-center justify-between">
                     <div class="flex flex-row items-center">
-                        <div class="bg-gray-400 w-1 h-1 rounded-xl"></div>
-                        <div class="px-4 py-2 mr-4 text-sm font-bold rounded-2xl text-gray-700 shrink-0"
+                        <div class="bg-base-300 w-1 h-1 rounded-xl"></div>
+                        <div class="px-4 py-2 mr-4 text-sm font-bold rounded-2xl text-base-content/80 shrink-0"
                             :title="article_categories(article).title">
                             {{ article_categories(article).label }}
                             <span v-if="article_categories(article).extra > 0"
-                                class="ml-1 rounded-full bg-gray-200 px-1.5 py-0.5 text-xs text-gray-600">
+                                class="badge badge-ghost badge-xs ml-1">
                                 +{{ article_categories(article).extra }}
                             </span>
                         </div>
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
-                            class="text-base text-gray-500 hover:text-primary-400 truncate">
-                            <span class="font-bold">{{ article.title }}</span>
+                            class="text-sm text-base-content/80 hover:text-primary truncate">
+                            <span class="font-semibold">{{ article.title }}</span>
                         </RouterLink>
                     </div>
-                    <time class="ml-4 shrink-0 text-xs text-gray-400">{{ date_text(article.create_at) }}</time>
+                    <time class="ml-4 shrink-0 text-xs text-base-content/40">{{ date_text(article.create_at) }}</time>
                 </li>
             </ul>
         </div>

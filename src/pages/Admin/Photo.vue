@@ -4,6 +4,7 @@ import apiService from '@/utils/apiService';
 import { api_error_detail } from '@/store/article';
 import { url_prefix } from '@/utils/baseInfo';
 import dayjs from 'dayjs';
+import AppPagination from '@/components/AppPagination.vue';
 
 /** 图片列表项，字段与 GET /image/ 一致 */
 export interface ImageModel {
@@ -106,33 +107,33 @@ onMounted(getImageList);
 <template>
     <main class="flex-1 overflow-y-auto p-6">
         <div class="flex items-center justify-between mb-2">
-            <h2 class="text-xl font-bold text-gray-900">照片管理</h2>
-            <label class="rounded-md bg-primary-500 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-400 transition cursor-pointer"
+            <h2 class="text-xl font-bold text-base-content">照片管理</h2>
+            <label class="btn btn-main btn-primary cursor-pointer"
                 :class="uploading ? 'opacity-60 cursor-not-allowed' : ''">
                 {{ uploading ? '上传中...' : '+ 上传照片' }}
                 <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" multiple class="hidden"
                     :disabled="uploading" @change="pick_files" />
             </label>
         </div>
-        <p class="mb-4 text-xs text-gray-400">支持 JPG / PNG / GIF / WebP，单张 ≤ 10MB</p>
+        <p class="mb-4 text-xs text-base-content/40">支持 JPG / PNG / GIF / WebP，单张 ≤ 10MB</p>
 
-        <p v-if="upload_error" class="mb-4 text-sm text-red-600">{{ upload_error }}</p>
+        <p v-if="upload_error" class="alert alert-error mb-4 text-sm">{{ upload_error }}</p>
         <p v-if="upload_success" class="mb-4 text-sm text-green-600">{{ upload_success }}</p>
-        <p v-if="list_error" class="mb-4 text-sm text-red-600">{{ list_error }}</p>
+        <p v-if="list_error" class="alert alert-error mb-4 text-sm">{{ list_error }}</p>
 
         <!-- 照片网格 -->
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6">
             <div v-for="image in image_list" :key="image.id"
-                class="bg-white rounded-lg shadow-xs ring-1 ring-border overflow-hidden group">
+                class="card rounded-box border border-base-300 overflow-hidden group">
                 <div class="relative overflow-hidden aspect-square">
                     <img :src="url_prefix.pic_prefix + image.slug" :alt="image.raw_filename"
                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 </div>
                 <div class="p-3">
-                    <p class="text-sm my-1 font-medium text-gray-900 truncate" :title="image.raw_filename">{{ image.raw_filename }}</p>
-                    <p class="text-xs text-gray-500">{{ format_size(image.size_bytes) }} · 浏览 {{ image.view }}</p>
-                    <p class="text-xs text-gray-400">{{ dayjs(image.uploaded_at).format('YYYY-MM-DD HH:mm') }}</p>
-                    <button class="mt-1 text-xs text-primary-600 hover:underline"
+                    <p class="text-sm my-1 font-medium text-base-content truncate" :title="image.raw_filename">{{ image.raw_filename }}</p>
+                    <p class="text-xs text-base-content/60">{{ format_size(image.size_bytes) }} · 浏览 {{ image.view }}</p>
+                    <p class="text-xs text-base-content/40">{{ dayjs(image.uploaded_at).format('YYYY-MM-DD HH:mm') }}</p>
+                    <button class="btn btn-ghost btn-xs mt-1 text-primary"
                         @click="copy_slug(image.slug)">
                         {{ copied_slug === image.slug ? '已复制 slug' : '复制 slug' }}
                     </button>
@@ -140,29 +141,9 @@ onMounted(getImageList);
             </div>
         </div>
 
-        <p v-if="!list_error && image_list.length === 0" class="py-16 text-center text-gray-400">暂无图片</p>
+        <p v-if="!list_error && image_list.length === 0" class="py-16 text-center text-base-content/40">暂无图片</p>
 
-        <nav class="mt-8 flex items-center justify-between border-t border-border pt-6" aria-label="Pagination">
-            <p class="text-sm text-gray-700">
-                共 <span class="font-medium">{{ total }}</span> 张，
-                第 <span class="font-medium">{{ page }}</span> 页
-            </p>
-            <div class="flex gap-2">
-                <button @click="go_page(page - 1)" :disabled="page <= 1" :class="[
-                    page <= 1
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-white text-gray-900 hover:bg-gray-50'
-                ]" class="rounded-md px-3 py-1.5 text-sm ring-1 ring-inset ring-gray-300">
-                    上一页
-                </button>
-                <button @click="go_page(page + 1)" :disabled="!has_next" :class="[
-                    !has_next
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-primary-500 text-white hover:bg-primary-400'
-                ]" class="rounded-md px-3 py-1.5 text-sm">
-                    下一页
-                </button>
-            </div>
-        </nav>
+        <AppPagination class="mt-8" :page="page" :has-next="has_next"
+            :total="total" unit="张" @change="go_page" />
     </main>
 </template>

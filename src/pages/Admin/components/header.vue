@@ -13,12 +13,11 @@ const handle_logout = () => {
 </script>
 
 <template>
-    <header class="h-16 bg-background flex items-center justify-between px-6">
-        <div class="text-lg font-semibold text-gray-900">仪表盘</div>
+    <header class="h-16 bg-base-100 border-b border-base-300 flex items-center justify-between px-6">
+        <div class="text-lg font-semibold text-base-content">仪表盘</div>
         <div class="flex items-center gap-4">
-            <span class="text-sm text-gray-600">{{ auth_store.user?.nickname ?? '...' }}</span>
-            <button class="text-sm text-gray-600 hover:text-primary-600 link-transition"
-                @click="handle_logout">
+            <span class="text-sm text-base-content/70">{{ auth_store.user?.nickname ?? '...' }}</span>
+            <button class="btn btn-ghost btn-sm" @click="handle_logout">
                 退出登录
             </button>
         </div>

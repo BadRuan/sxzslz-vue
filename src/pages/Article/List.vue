@@ -8,6 +8,7 @@ import { useArticleStore, type ArticleModel } from '@/store/article';
 import { date_text } from '@/utils/formatters';
 import { flatten_categories, name_category_id, categories_compact, to_second_level_id } from '@/utils/category';
 import { CATEGORY_NAMES } from '@/utils/categoryConfig';
+import AppPagination from '@/components/AppPagination.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -120,13 +121,13 @@ const goToNextPage = () => {
 </script>
 
 <template>
-    <main class="bg-background">
+    <main class="bg-base-200">
         <div class="min-h-screen section-y px-4">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col gap-8 lg:flex-row">
                     <aside class="lg:w-64 shrink-0">
-                        <div class="rounded-2xl bg-white p-5 shadow-card">
-                            <h3 class="text-sm font-semibold text-gray-900 mb-3 flex flex-row items-center">
+                        <div class="card rounded-box p-5">
+                            <h3 class="text-sm font-semibold text-base-content mb-3 flex flex-row items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                     fill="none" class="mr-1">
                                     <circle cx="15.809047641754152" cy="15.309043827056886" r="6.19"
@@ -144,12 +145,12 @@ const goToNextPage = () => {
                             <nav class="flex flex-col space-y-1">
                                 <template v-for="parent in categories" :key="parent.id">
                                     <!-- 一级分类：折叠分组头，点击展开/收起（文章只挂二级，一级不可筛选） -->
-                                    <button type="button" class="flex items-center justify-between w-full rounded-lg px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-100 link-transition"
-                                        :class="parent.children.length === 0 ? 'cursor-default text-gray-500 font-medium' : 'cursor-pointer'"
+                                    <button type="button" class="flex items-center justify-between w-full rounded-lg px-3 py-2 text-sm font-semibold text-base-content/90 hover:bg-base-200 link-transition"
+                                        :class="parent.children.length === 0 ? 'cursor-default text-base-content/60 font-medium' : 'cursor-pointer'"
                                         @click="toggle_group(parent)">
                                         <span>{{ parent.name }}</span>
                                         <svg v-if="parent.children.length > 0" xmlns="http://www.w3.org/2000/svg"
-                                            class="h-4 w-4 text-gray-400 transition-transform duration-200"
+                                            class="h-4 w-4 text-base-content/40 transition-transform duration-200"
                                             :class="is_expanded(parent.id) ? 'rotate-90' : ''"
                                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
@@ -159,8 +160,8 @@ const goToNextPage = () => {
                                         <RouterLink v-for="child in parent.children" :key="child.id"
                                             :to="{ name: 'ArticleList', query: { category: child.id } }" :class="[
                                                 active_category === child.id
-                                                    ? 'bg-primary-500 text-white font-bold'
-                                                    : 'text-gray-700 hover:bg-gray-100 hover:font-bold hover:text-primary-400'
+                                                    ? 'bg-primary/10 text-primary font-bold'
+                                                    : 'text-base-content/80 hover:bg-base-200 hover:font-bold hover:text-primary/80'
                                             ]" class="rounded-lg px-3 py-2 text-sm link-transition"
                                             style="padding-left: 1.5rem"
                                             @click="handleCategoryClick(child.id)">
@@ -174,35 +175,33 @@ const goToNextPage = () => {
 
                     <div class="flex-1 min-w-0">
                         <!-- 加载状态 -->
-                        <div v-if="loading" class="bg-white rounded-xl shadow-sm p-12 text-center">
-                            <div
-                                class="animate-spin w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full mx-auto mb-4">
-                            </div>
-                            <p class="text-gray-500">加载中...</p>
+                        <div v-if="loading" class="card rounded-box p-12 text-center">
+                            <span class="loading loading-spinner loading-md mx-auto mb-4 block"></span>
+                            <p class="text-base-content/60">加载中...</p>
                         </div>
 
                         <!-- 正常内容 -->
                         <template v-else>
                             <div v-if="article_list.length === 0"
-                                class="bg-white rounded-2xl shadow-card p-12 text-center text-gray-500">
+                                class="card rounded-box p-12 text-center text-base-content/60">
                                 暂无文章
                             </div>
                             <div v-else class="grid grid-cols-3 gap-8">
                                 <article v-for="(article, index) in article_list" :key="index"
-                                    class="flex flex-col overflow-hidden bg-white rounded-2xl shadow-card card-hover group hover:-translate-y-1 hover:shadow-card-hover">
+                                    class="card rounded-box card-hover group hover:-translate-y-1 overflow-hidden">
                                     <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }">
                                         <div class="w-full overflow-hidden">
                                             <img v-if="article.cover_img_slug"
                                                 class="w-full h-52 transition-transform duration-500 ease-out-soft group-hover:scale-105"
                                                 :src="url_prefix.pic_prefix + article.cover_img_slug" alt="news_pic" />
                                             <div v-else
-                                                class="w-full h-52 bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+                                                class="w-full h-52 bg-base-200 flex items-center justify-center text-base-content/40 text-sm">
                                                 暂无封面
                                             </div>
                                         </div>
-                                        <div class="p-5 flex flex-col gap-4 divide-y divide-gray-100">
+                                        <div class="p-5 flex flex-col gap-4 divide-y divide-base-200">
                                             <div class="flex flex-row items-center justify-between gap-2">
-                                                <div class="min-w-0 flex flex-row items-center text-sm text-gray-700 py-1"
+                                                <div class="min-w-0 flex flex-row items-center text-sm text-base-content/80 py-1"
                                                     :title="article_categories(article).title">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                         viewBox="0 0 24 24" fill="none" class="mx-1 shrink-0">
@@ -215,13 +214,13 @@ const goToNextPage = () => {
                                                     </svg>
                                                     <span class="truncate">{{ article_categories(article).label }}</span>
                                                     <span v-if="article_categories(article).extra > 0"
-                                                        class="ml-1 shrink-0 rounded-full bg-gray-100 px-1.5 py-0.5 text-xs text-gray-500">
+                                                        class="badge badge-ghost badge-xs ml-1">
                                                         +{{ article_categories(article).extra }}
                                                     </span>
                                                 </div>
                                                 <div class="flex flex-row items-center shrink-0">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                        viewBox="0 0 24 24" fill="none" class="text-gray-500 mr-2">
+                                                        viewBox="0 0 24 24" fill="none" class="text-base-content/60 mr-2">
                                                         <path d="M2 3.5L22 3.5L22 22.5L2 22.5L2 3.5Z"
                                                             stroke="currentColor" stroke-width="1"
                                                             stroke-linejoin="round"></path>
@@ -236,13 +235,13 @@ const goToNextPage = () => {
                                                         <path stroke="currentColor" stroke-width="1"
                                                             stroke-linejoin="round" d="M12 12.5L12 15.5L15 15.5"></path>
                                                     </svg>
-                                                    <time class="text-xs text-gray-600">
+                                                    <time class="text-xs text-base-content/70">
                                                         {{ date_text(article.create_at) }}
                                                     </time>
                                                 </div>
                                             </div>
                                             <h2
-                                                class="text-base font-semibold text-gray-600 group-hover:text-primary-500 h-12 overflow-hidden">
+                                                class="text-base font-semibold text-base-content/70 group-hover:text-primary h-12 overflow-hidden">
                                                 {{ article.title }}
                                             </h2>
                                         </div>
@@ -250,33 +249,8 @@ const goToNextPage = () => {
                                 </article>
                             </div>
 
-                            <nav class="m-8 flex items-center justify-between border-t border-border pt-6"
-                                aria-label="Pagination">
-                                <div class="hidden sm:block">
-                                    <p class="text-sm text-gray-700">
-                                        共 <span class="font-medium">{{ article_total }}</span> 条，
-                                        第 <span class="font-medium">{{ article_page }}</span> 页
-                                    </p>
-                                </div>
-                                <div class="flex flex-1 justify-between sm:justify-end gap-2">
-                                    <button @click="goToPrevPage" :disabled="article_page <= 1" :class="[
-                                        article_page <= 1
-                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                            : 'bg-white text-gray-900 hover:bg-gray-50'
-                                    ]"
-                                        class="relative inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold ring-1 ring-inset ring-gray-300">
-                                        上一页
-                                    </button>
-                                    <button @click="goToNextPage" :disabled="!article_has_next" :class="[
-                                        !article_has_next
-                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                            : 'bg-primary-500 text-white hover:bg-primary-dark'
-                                    ]"
-                                        class="relative inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold">
-                                        下一页
-                                    </button>
-                                </div>
-                            </nav>
+                            <AppPagination class="m-8" :page="article_page" :has-next="article_has_next"
+                                :total="article_total" unit="条" @change="goToPage" />
                         </template>
                     </div>
                 </div>

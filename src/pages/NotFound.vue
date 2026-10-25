@@ -11,22 +11,22 @@
             </div>
 
             <!-- 错误码 -->
-            <h1 class="text-7xl font-extrabold text-gray-900 tracking-tight">404</h1>
+            <h1 class="text-7xl font-extrabold text-base-content tracking-tight">404</h1>
 
             <!-- 提示信息 -->
-            <p class="mt-4 text-xl font-semibold text-gray-800">页面走丢了</p>
-            <p class="mt-2 text-gray-500 max-w-md">
+            <p class="mt-4 text-xl font-semibold text-base-content/90">页面走丢了</p>
+            <p class="mt-2 text-base-content/60 max-w-md">
                 您访问的页面可能已被移除、重命名或暂时不可用。请检查网址是否正确。
             </p>
 
             <!-- 操作按钮 -->
             <div class="mt-8 flex gap-4">
                 <RouterLink :to="{ name: 'Home' }"
-                    class="rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-dark transition">
+                    class="btn btn-main btn-primary">
                     返回首页
                 </RouterLink>
                 <button onclick="history.back()"
-                    class="rounded-md border border-border bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
+                    class="btn">
                     返回上页
                 </button>
             </div>

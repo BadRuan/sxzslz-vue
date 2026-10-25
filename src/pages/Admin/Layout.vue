@@ -13,7 +13,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="bg-background font-sans">
+    <div class="bg-base-200 font-sans">
         <div class="flex h-screen overflow-hidden">
             <SideBar />
             <div class="flex-1 flex flex-col overflow-hidden">

@@ -18,17 +18,17 @@ const tabs = [
             <button v-for="(tab, index) in tabs" :key="index" @mouseover="activeIndex = index" :class="[
                 'px-6 py-3 text-sm font-medium transition-colors duration-200 cursor-pointer',
                 activeIndex === index
-                    ? 'bg-white text-blue-600 border-b-2 border-blue-600'
+                    ? 'bg-base-100 text-blue-600 border-b-2 border-blue-600'
                     : 'text-slate-500 hover:text-slate-700'
             ]">
                 {{ tab.title }}
             </button>
         </div>
 
-        <div class="bg-white p-6 border border-t-0 border-slate-200 rounded-b-lg">
+        <div class="bg-base-100 p-6 border border-t-0 border-slate-200 rounded-b-lg">
             <transition name="fade" mode="out-in">
                 <div :key="activeIndex">
-                    <h3 class="text-lg font-semibold text-slate-800">{{ tabs[activeIndex]?.title ?? '' }}</h3>
+                    <h3 class="text-lg font-semibold text-base-content">{{ tabs[activeIndex]?.title ?? '' }}</h3>
                     <p class="mt-2 text-slate-600">{{ tabs[activeIndex]?.content ?? '' }}</p>
                 </div>
             </transition>
