@@ -7,7 +7,8 @@ const auth_store = useAuthStore();
 
 const handle_logout = () => {
     auth_store.logout();
-    router.replace({ name: 'AdminLogin' });
+    // 退出后回网站首页（而非登录页）
+    router.replace({ name: 'Home' });
 };
 </script>
 
