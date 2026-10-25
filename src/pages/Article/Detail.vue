@@ -9,7 +9,6 @@ import DOMPurify from 'dompurify';
 import dayjs from 'dayjs';
 import { useArticleStore, articleService } from '@/store/article';
 import { useBaseinfoStore } from '@/store/base';
-import { category_crumbs } from '@/utils/category';
 import { url_prefix } from '@/utils/baseInfo';
 import 'github-markdown-css/github-markdown.css';
 
@@ -20,12 +19,12 @@ const article_store = useArticleStore();
 const baseinfo_store = useBaseinfoStore();
 
 const { article_detail } = storeToRefs(article_store);
-const { categories } = storeToRefs(baseinfo_store);
 
-/** 首页分类树到达后，面包屑才能补全中间层级 */
-const category_breadcrumb_crumbs = computed(() =>
-    category_crumbs(article_detail.value?.categories?.[0], categories.value)
-);
+/** 面包屑只显示文章自身的二级分类名（不显示一级分类）；分类树/详情到达后才有值 */
+const category_crumb = computed(() => {
+    const cat = article_detail.value?.categories?.[0];
+    return cat ? { id: cat.id, name: cat.name } : undefined;
+});
 
 const error = ref<string | null>(null);
 const loading = ref(true);
@@ -140,14 +139,12 @@ const renderedHtml = computed(() => {
                             网站首页
                         </RouterLink>
                     </li>
-                    <template v-for="(crumb, index) in category_breadcrumb_crumbs" :key="crumb.id">
-                        <!-- 多级分类之间用竖线，避免与路径分隔斜线混淆 -->
-                        <span class="text-primary-500">{{ index === 0 ? '/' : '│' }}</span>
+                    <template v-if="category_crumb">
+                        <span class="text-primary-500">/</span>
                         <li>
-                            <RouterLink :to="{ name: 'ArticleList', query: { category: crumb.id } }"
-                                class="hover:text-primary-400 hover:font-bold link-transition"
-                                :class="index === category_breadcrumb_crumbs.length - 1 ? 'text-gray-700 font-medium' : ''">
-                                {{ crumb.name }}
+                            <RouterLink :to="{ name: 'ArticleList', query: { category: category_crumb.id } }"
+                                class="text-gray-700 font-medium hover:text-primary-400 hover:font-bold link-transition">
+                                {{ category_crumb.name }}
                             </RouterLink>
                         </li>
                     </template>

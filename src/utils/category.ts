@@ -100,19 +100,9 @@ export const name_category_id = (tree: CategoryModel[], names: string | string[]
     return found?.id;
 };
 
-/** 在树上查找某节点的父节点 */
-export const find_parent = (tree: CategoryModel[], id: number): CategoryModel | undefined => {
-    for (const node of tree) {
-        if (node.children.some(child => child.id === id)) return node;
-        const found = find_parent(node.children, id);
-        if (found) return found;
-    }
-    return undefined;
-};
-
 /**
  * 文章关联分类展示文本：只取分类自身名称（文章仅挂二级分类，无需拼接一级前缀；
- * 分类 name 全局唯一，单独展示不歧义），多个分类用顿号连接。
+ * 分类名允许重名，列表场景展示首个匹配的分类名即可），多个分类用顿号连接。
  */
 export const categories_label = (
     categories: Pick<CategoryModel, 'id' | 'name'>[] | undefined
@@ -131,16 +121,4 @@ export const categories_compact = (
     if (list.length === 0) return { label: '', extra: 0, title: '' };
     const shown = list.find(c => c.id === active_id) ?? list[0];
     return { label: shown?.name ?? '', extra: list.length - 1, title: categories_label(list) };
-};
-
-/** 面包屑用：从根到该分类的节点链（父级缺失时只有自身） */
-export const category_crumbs = (
-    node: Pick<CategoryModel, 'id' | 'name'> | undefined,
-    tree: CategoryModel[] = []
-): { id: number; name: string }[] => {
-    if (!node) return [];
-    const parent = find_parent(tree, node.id);
-    const crumbs = parent ? [{ id: parent.id, name: parent.name }] : [];
-    crumbs.push({ id: node.id, name: node.name });
-    return crumbs;
 };
