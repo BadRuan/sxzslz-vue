@@ -89,6 +89,12 @@ const routes: RouteRecordRaw[] = [
                 name: 'AdminDocument',
                 component: () => import('@/pages/Admin/Document.vue'),
                 meta: { title: '文档管理' }
+            },
+            {
+                path: 'password',
+                name: 'AdminPassword',
+                component: () => import('@/pages/Admin/Password.vue'),
+                meta: { title: '修改密码' }
             }
         ]
     },

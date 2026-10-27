@@ -23,12 +23,21 @@ export interface AuthUserModel {
     nickname: string,
 }
 
+/** PUT /auth/password 请求体：new_password 服务端要求至少 6 位 */
+export interface PasswordChangeInput {
+    old_password: string,
+    new_password: string,
+}
+
 class AuthService {
     public login(data: { username: string, password: string }) {
         return apiService.post<TokenModel>('/auth/login', data)
     }
     public me() {
         return apiService.get<AuthUserModel>('/auth/me')
+    }
+    public changePassword(data: PasswordChangeInput) {
+        return apiService.put<{ detail: string }>('/auth/password', data)
     }
 }
 
@@ -72,5 +81,20 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
   }
 
-  return { user, loading, is_logged_in, login, fetchMe, logout }
+  /** 修改密码：400 原密码错误 / 422 新密码不足 6 位，detail 统一抛出给页面展示 */
+  const changePassword = async (old_password: string, new_password: string) => {
+    loading.value = true
+    try {
+      await authService.changePassword({ old_password, new_password })
+      return true
+    } catch (error: any) {
+      const detail = error?.response?.data?.detail;
+      const message = Array.isArray(detail) ? detail[0]?.msg : detail;
+      throw new Error(message || '密码修改失败，请稍后重试')
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return { user, loading, is_logged_in, login, fetchMe, logout, changePassword }
 })

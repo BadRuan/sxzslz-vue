@@ -124,7 +124,6 @@ onMounted(getImageList);
                     <p class="text-xs text-base-content/60">{{ format_size(image.size_bytes) }} · 浏览 {{ image.view }}</p>
                     <p class="text-xs text-base-content/40">{{ dayjs(image.uploaded_at).format('YYYY-MM-DD HH:mm') }}</p>
                     <div class="mt-1 flex flex-wrap items-center gap-x-1 gap-y-0.5">
-                        <CopyButton :text="image.slug" />
                         <!-- 详情页会把相对路径 slug 自动补成 /api/image/，MD 里只写 slug 即可渲染 -->
                         <CopyButton :text="`![${image.raw_filename}](${image.slug})`" label="复制 md" />
                     </div>

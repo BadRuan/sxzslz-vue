@@ -34,6 +34,11 @@ const link_active_class = 'menu-active !text-primary font-semibold';
                     文档管理
                 </RouterLink>
             </li>
+            <li class="mt-auto">
+                <RouterLink :to="{ name: 'AdminPassword' }" :active-class="link_active_class" class="w-full">
+                    修改密码
+                </RouterLink>
+            </li>
         </ul>
     </aside>
 </template>
