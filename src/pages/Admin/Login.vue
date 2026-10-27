@@ -53,7 +53,7 @@ const submit = async () => {
                         class="input input-bordered w-full" />
                 </label>
 
-                <p v-if="error_message" class="text-sm text-error">{{ error_message }}</p>
+                <p v-if="error_message" role="alert" class="alert alert-error text-sm">{{ error_message }}</p>
 
                 <button type="submit" :disabled="auth_store.loading"
                     class="btn btn-main btn-primary mt-2 btn-block"

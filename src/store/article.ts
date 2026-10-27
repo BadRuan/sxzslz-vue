@@ -131,7 +131,16 @@ export const useArticleStore = defineStore('article', () => {
     target.value = res.data ?? [];
   }
 
-  const checkHomeArticle = async () =>{
+  // in-flight 锁：首页多个栏目组件并发调用时只拉一次
+  let home_inflight: Promise<void> | null = null;
+
+  const checkHomeArticle = async () => {
+    if (home_inflight) return home_inflight;
+    home_inflight = doCheckHomeArticle().finally(() => { home_inflight = null; });
+    return home_inflight;
+  }
+
+  const doCheckHomeArticle = async () =>{
     loading.value = true
     try {
       const baseinfo_store = useBaseinfoStore();
@@ -166,9 +175,12 @@ const article_list = ref<ArticleModel[]>([]);
 const article_total = ref<number>(0);
 const article_page = ref<number>(1);
 const article_has_next = ref<boolean>(false);
+// 列表接口失败标记：界面据此区分「加载失败」与「暂无文章」
+const article_list_error = ref(false);
 
 const getArticleList = async (category_id: number, page: number, page_size: number) => {
     loading.value = true
+    article_list_error.value = false
     try {
       const res = await articleService.getArticles({ category_id, page, page_size })
       // 后端已过滤回收站文章，total 与展示条目一致
@@ -177,6 +189,7 @@ const getArticleList = async (category_id: number, page: number, page_size: numb
       article_page.value = res.page
       article_has_next.value = res.has_next
     } catch (error) {
+      article_list_error.value = true
       console.error('获取文章分类列表失败:', error)
     } finally {
       loading.value = false
@@ -196,5 +209,5 @@ const getArticleList = async (category_id: number, page: number, page_size: numb
     }
   }
 
-  return { article_obj, checkHomeArticle, article_list, article_total, article_page, article_has_next, page_number, getArticleList, article_detail, getDetail, loading }
+  return { article_obj, checkHomeArticle, article_list, article_total, article_page, article_has_next, article_list_error, page_number, getArticleList, article_detail, getDetail, loading }
 })

@@ -96,7 +96,8 @@ onMounted(
 
 <template>
     <main class="flex-1 overflow-y-auto p-6 space-y-6">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- 内容区宽度 = 视口 − 侧栏 192px，lg(1024) 下 4 列仅剩 ~180px/卡，xl 起才 4 列 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
             <div v-for="item in stat_items" :key="item.label"
                 class="card rounded-box p-5 flex flex-row items-center gap-4">
                 <div class="w-10 h-10 rounded-box flex items-center justify-center shrink-0" :class="item.bg">
@@ -112,24 +113,25 @@ onMounted(
         </div>
 
         <div class="card rounded-box">
-            <div class="px-5 py-4 border-b border-base-300">
+            <div class="px-5 py-4 border-b border-base-300 flex items-center justify-between">
                 <h3 class="text-sm font-semibold text-base-content">我的最新文章</h3>
+                <RouterLink :to="{ name: 'AdminArticleList' }" class="text-xs text-primary hover:underline">查看更多</RouterLink>
             </div>
             <ul class="divide-y divide-base-300">
                 <li v-if="!latest_article?.length" class="px-5 py-8 text-center text-sm text-base-content/40">
                     暂无文章
                 </li>
                 <li v-for="(article, index) in latest_article" :key="index"
-                    class="px-5 py-3 flex items-center justify-between">
-                    <div class="flex flex-row items-center">
-                        <div class="badge badge-ghost mr-4">{{
+                    class="px-5 py-3 flex items-center justify-between gap-4">
+                    <div class="flex flex-row items-center min-w-0 flex-1">
+                        <div class="badge badge-ghost mr-4 shrink-0">{{
                             article.categories?.[0]?.name || '—' }}</div>
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
-                            class="text-sm text-base-content/80 hover:text-primary truncate">
+                            class="text-sm text-base-content/80 hover:text-primary truncate min-w-0 flex-1">
                             <span class="font-semibold">{{ article.title }}</span>
                         </RouterLink>
                     </div>
-                    <time class="ml-4 shrink-0 text-xs text-base-content/40">{{ date_text(article.create_at) }}</time>
+                    <time class="shrink-0 text-xs text-base-content/40">{{ date_text(article.create_at) }}</time>
                 </li>
             </ul>
         </div>

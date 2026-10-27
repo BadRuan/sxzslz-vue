@@ -6,7 +6,7 @@ const leader_author = url_prefix.pic_prefix + '4cefbb90ab8448e78322cf878423db0e.
 
 </script>
 <template>
-    <section class="m-auto w-7xl">
+    <section class="page-container">
         <div class="text-base-content/70 body-font">
             <div class="container px-5 py-8 mx-auto">
                 <TitleComponent>
@@ -14,12 +14,13 @@ const leader_author = url_prefix.pic_prefix + '4cefbb90ab8448e78322cf878423db0e.
                     <template #second>Leader Team</template>
                 </TitleComponent>
 
-                <div class="flex  -m-4 py-8">
-                    <div class="p-4 lg:w-1/3">
+                <div class="flex flex-wrap -m-4 py-8">
+                    <!-- 1024 下三列图文横排会把文字挤成逐字竖排：两列(md)起、头像同步缩小，xl 起三列 -->
+                    <div class="p-4 md:w-1/2 xl:w-1/3">
                         <div
                             class="h-full flex sm:flex-row flex-col items-center sm:justify-start justify-center text-center sm:text-left">
                             <img alt="team"
-                                class="flex-shrink-0 rounded-lg w-48 h-48 object-cover object-center sm:mb-0 mb-4"
+                                class="flex-shrink-0 rounded-lg w-32 h-32 xl:w-36 xl:h-36 object-cover object-center sm:mb-0 mb-4"
                                 :src="leader_author">
                             <div class="flex-grow sm:pl-8">
                                 <h2 class="title-font font-medium text-lg text-base-content">余庆斌</h2>
@@ -29,11 +30,11 @@ const leader_author = url_prefix.pic_prefix + '4cefbb90ab8448e78322cf878423db0e.
                             </div>
                         </div>
                     </div>
-                    <div class="p-4 lg:w-1/3">
+                    <div class="p-4 md:w-1/2 xl:w-1/3">
                         <div
                             class="h-full flex sm:flex-row flex-col items-center sm:justify-start justify-center text-center sm:text-left">
                             <img alt="team"
-                                class="flex-shrink-0 rounded-lg w-48 h-48 object-cover object-center sm:mb-0 mb-4"
+                                class="flex-shrink-0 rounded-lg w-32 h-32 xl:w-36 xl:h-36 object-cover object-center sm:mb-0 mb-4"
                                 :src="leader_author">
                             <div class="flex-grow sm:pl-8">
                                 <h2 class="title-font font-medium text-lg text-base-content">刘桂胜</h2>
@@ -42,11 +43,11 @@ const leader_author = url_prefix.pic_prefix + '4cefbb90ab8448e78322cf878423db0e.
                             </div>
                         </div>
                     </div>
-                    <div class="p-4 lg:w-1/3">
+                    <div class="p-4 md:w-1/2 xl:w-1/3">
                         <div
                             class="h-full flex sm:flex-row flex-col items-center sm:justify-start justify-center text-center sm:text-left">
                             <img alt="team"
-                                class="flex-shrink-0 rounded-lg w-48 h-48 object-cover object-center sm:mb-0 mb-4"
+                                class="flex-shrink-0 rounded-lg w-32 h-32 xl:w-36 xl:h-36 object-cover object-center sm:mb-0 mb-4"
                                 :src="leader_author">
                             <div class="flex-grow sm:pl-8">
                                 <h2 class="title-font font-medium text-lg text-base-content">王健</h2>

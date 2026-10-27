@@ -131,7 +131,7 @@ const renderedHtml = computed(() => {
 <template>
     <main class="bg-base-200">
         <div class="min-h-screen pt-5 pb-14 px-4">
-            <nav class="breadcrumbs w-7xl mx-auto mb-4 px-4 sm:px-6 lg:px-8 text-base text-base-content/60"
+            <nav class="breadcrumbs page-container mb-4 text-base text-base-content/60"
                 aria-label="Breadcrumb">
                 <ul>
                     <li>
@@ -173,12 +173,12 @@ const renderedHtml = computed(() => {
 
             <!-- 正常内容 -->
             <article v-else class="max-w-7xl mx-auto min-h-120 px-4 card rounded-box overflow-hidden">
-                <div class="px-8 sm:px-14 pt-12 pb-8 border-b border-base-300 text-center">
-                    <h1 class="text-3xl font-bold text-base-content/90 leading-tight mb-5">
+                <div class="px-6 sm:px-10 pt-12 pb-8 border-b border-base-300 text-center">
+                    <h1 class="text-2xl md:text-3xl font-bold text-base-content/90 leading-tight mb-5">
                         {{ article_detail?.title }}
                     </h1>
 
-                    <div class="inline-flex items-center justify-center gap-12 text-sm text-base-content/60">
+                    <div class="flex flex-wrap items-center justify-center gap-6 md:gap-12 text-sm text-base-content/60">
                         <div class="flex flex-row items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="text-base-content/60 mr-2" width="20" height="20"
                                 viewBox="0 0 24 24" fill="none">
@@ -223,7 +223,7 @@ const renderedHtml = computed(() => {
                         </div>
                     </div>
                 </div>
-                <div class="px-8 sm:px-14 py-12 prose prose-lg max-w-none
+                <div class="px-6 sm:px-10 py-12 mx-auto max-w-3xl prose prose-lg
                         prose-headings:font-bold prose-headings:text-base-content/90 prose-headings:mb-4 prose-headings:mt-8
                         prose-h1:text-2xl prose-h2:text-2xl prose-h3:text-base
                         prose-p:leading-relaxed prose-p:indent-2em
@@ -232,13 +232,13 @@ const renderedHtml = computed(() => {
                         prose-ul:list-disc prose-ul:mx-8 prose-ul:my-4 prose-ul:text-base-content/80
                         prose-ol:list-decimal prose-ol:mx-8 prose-ol:my-4 prose-ol:text-base-content/80
                         prose-a:text-primary prose-a:underline prose-a:underline-offset-2 prose-a:font-bold
-                        prose-img:w-2/3 prose-img:shadow prose-img:rounded-sm prose-img:my-6 prose-img:mx-auto
+                        prose-img:w-full prose-img:shadow prose-img:rounded-sm prose-img:my-6 prose-img:mx-auto
                         " v-html="renderedHtml">
 
                 </div>
 
                 <!-- 匿名点赞 -->
-                <div class="px-8 sm:px-14 pb-10 flex flex-col items-center gap-2 border-t border-base-300 pt-8">
+                <div class="px-6 sm:px-10 pb-10 flex flex-col items-center gap-2 border-t border-base-300 pt-8">
                     <button type="button" :disabled="has_liked || liking"
                         class="btn btn-main gap-2"
                         :class="has_liked

@@ -2,13 +2,13 @@
 import { ref, watch, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import { url_prefix } from '@/utils/baseInfo';
 import { useBaseinfoStore, type CategoryModel } from '@/store/base';
 import { useArticleStore, type ArticleModel } from '@/store/article';
 import { date_text } from '@/utils/formatters';
 import { flatten_categories, name_category_id, categories_compact, to_second_level_id } from '@/utils/category';
 import { CATEGORY_NAMES } from '@/utils/categoryConfig';
 import AppPagination from '@/components/AppPagination.vue';
+import ArticleCover from '@/components/ArticleCover.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -16,7 +16,7 @@ const baseinfo_store = useBaseinfoStore();
 const article_store = useArticleStore();
 
 const { categories } = storeToRefs(baseinfo_store);
-const { article_list, article_total, article_page, article_has_next } = storeToRefs(article_store);
+const { article_list, article_total, article_page, article_has_next, article_list_error } = storeToRefs(article_store);
 
 const loading = ref(true);
 
@@ -182,22 +182,26 @@ const goToNextPage = () => {
 
                         <!-- 正常内容 -->
                         <template v-else>
-                            <div v-if="article_list.length === 0"
+                            <!-- 接口失败与空数据区分：失败给出重试指引，而非误报「暂无文章」 -->
+                            <div v-if="article_list_error"
+                                class="card rounded-box p-12 text-center text-base-content/60">
+                                <p class="mb-4">文章加载失败，请检查网络后重试</p>
+                                <button type="button" class="btn btn-sm btn-primary"
+                                    @click="article_store.getArticleList(active_category, page_number, 30)">
+                                    重新加载
+                                </button>
+                            </div>
+                            <div v-else-if="article_list.length === 0"
                                 class="card rounded-box p-12 text-center text-base-content/60">
                                 暂无文章
                             </div>
-                            <div v-else class="grid grid-cols-3 gap-8">
+                            <div v-else class="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
                                 <article v-for="(article, index) in article_list" :key="index"
                                     class="card rounded-box card-hover group hover:-translate-y-1 overflow-hidden">
                                     <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }">
-                                        <div class="w-full overflow-hidden">
-                                            <img v-if="article.cover_img_slug"
-                                                class="w-full h-52 transition-transform duration-500 ease-out-soft group-hover:scale-105"
-                                                :src="url_prefix.pic_prefix + article.cover_img_slug" alt="news_pic" />
-                                            <div v-else
-                                                class="w-full h-52 bg-base-200 flex items-center justify-center text-base-content/40 text-sm">
-                                                暂无封面
-                                            </div>
+                                        <div class="h-52 w-full overflow-hidden bg-base-300">
+                                            <ArticleCover :slug="article.cover_img_slug" alt="news_pic"
+                                                class="transition-transform duration-500 ease-out-soft group-hover:scale-105" />
                                         </div>
                                         <div class="p-5 flex flex-col gap-4 divide-y divide-base-200">
                                             <div class="flex flex-row items-center justify-between gap-2">
@@ -241,7 +245,7 @@ const goToNextPage = () => {
                                                 </div>
                                             </div>
                                             <h2
-                                                class="text-base font-semibold text-base-content/70 group-hover:text-primary h-12 overflow-hidden">
+                                                class="text-base font-semibold text-base-content/70 group-hover:text-primary line-clamp-2 min-h-12">
                                                 {{ article.title }}
                                             </h2>
                                         </div>

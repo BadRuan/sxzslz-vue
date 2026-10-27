@@ -21,10 +21,14 @@ const close = () => emit('update:modelValue', false)
     <Transition name="modal">
         <div v-if="modelValue" class="modal modal-open">
             <div class="modal-backdrop" @click="close"></div>
-            <div class="modal-box w-full overflow-y-auto" :class="[maxWidth ?? 'max-w-lg', 'max-h-[90vh]']">
-                <h3 class="text-lg font-bold mb-4">{{ title }}</h3>
-                <slot />
-                <div v-if="$slots.footer" class="mt-5 flex justify-end gap-3">
+            <!-- flex 列布局：仅内容区滚动，footer 按钮固定可见（768 高屏编辑长文时无需滚到底） -->
+            <div class="modal-box w-full flex flex-col max-h-[90vh]" :class="maxWidth ?? 'max-w-lg'">
+                <h3 class="text-lg font-bold mb-4 shrink-0">{{ title }}</h3>
+                <div class="flex-1 overflow-y-auto min-h-0">
+                    <slot />
+                </div>
+                <div v-if="$slots.footer"
+                    class="mt-5 pt-3 border-t border-base-300 shrink-0 flex justify-end gap-3 bg-base-100">
                     <slot name="footer" />
                 </div>
             </div>

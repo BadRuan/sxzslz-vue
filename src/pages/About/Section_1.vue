@@ -4,8 +4,8 @@ import TitleComponent from '@/components/TitleComponent.vue';
 </script>
 
 <template>
-    <section class="mx-auto w-7xl h-full">
-        <img class="h-100 w-full" :src="url_prefix.pic_prefix + 'b8dc37b949384f73a03e7e515df58038.png'" alt="banner">
+    <section class="page-container h-full">
+        <img class="h-60 w-full object-cover md:h-100" :src="url_prefix.pic_prefix + 'b8dc37b949384f73a03e7e515df58038.png'" alt="banner">
 
         <div class="text-base-content/70 body-font">
             <div class="container px-5 py-12 mx-auto">

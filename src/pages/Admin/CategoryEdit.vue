@@ -11,6 +11,17 @@ import {
 } from '@/utils/category';
 
 const categories = ref<CategoryFlat[]>([]);
+const action_error = ref('');
+
+// 自定义确认弹窗（替代 window.confirm/alert）
+const confirm_dialog = ref<{ show: boolean, message: string, on_ok: (() => void) | null }>({
+    show: false, message: '', on_ok: null,
+});
+const run_confirm = () => {
+    const fn = confirm_dialog.value.on_ok;
+    confirm_dialog.value.show = false;
+    fn?.();
+};
 
 const tree_rows = computed(() => flatten_tree(build_category_tree(categories.value)));
 
@@ -110,20 +121,24 @@ const submit_form = async () => {
     }
 };
 
-const remove_category = async (row: CategoryTreeNode) => {
+const remove_category = (row: CategoryTreeNode) => {
     const child_count = flatten_tree([row]).length - 1;
-    const tip = child_count > 0
+    const message = child_count > 0
         ? `确认删除分类「${row.name}」吗？其下 ${child_count} 个子分类将一并删除，关联文章的分类会被清空。`
         : `确认删除分类「${row.name}」吗？关联文章的分类会被清空。`;
-    if (!window.confirm(tip)) {
-        return;
-    }
-    try {
-        await apiService.delete('/categories/' + row.id);
-        await queryCategoryInfo();
-    } catch (error: any) {
-        window.alert(api_error_detail(error, '删除失败，请稍后重试'));
-    }
+    confirm_dialog.value = {
+        show: true,
+        message,
+        on_ok: async () => {
+            action_error.value = '';
+            try {
+                await apiService.delete('/categories/' + row.id);
+                await queryCategoryInfo();
+            } catch (error: any) {
+                action_error.value = api_error_detail(error, '删除失败，请稍后重试');
+            }
+        },
+    };
 };
 
 onMounted(queryCategoryInfo);
@@ -131,14 +146,15 @@ onMounted(queryCategoryInfo);
 
 <template>
     <main class="flex-1 overflow-y-auto p-6">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-bold text-base-content/90">分类管理</h2>
+        <div class="flex items-center justify-end mb-6">
             <button class="btn btn-main btn-primary" @click="open_create()">
                 + 新增分类
             </button>
         </div>
 
-        <div class="bg-base-100 rounded-2xl shadow-sm overflow-x-auto">
+        <p v-if="action_error" role="alert" class="alert alert-error mb-4 text-sm">{{ action_error }}</p>
+
+        <div class="card rounded-box overflow-x-auto">
             <table class="table text-sm text-center">
                 <thead class="border-b border-base-300 text-base-content/60">
                     <tr>
@@ -203,6 +219,15 @@ onMounted(queryCategoryInfo);
                     @click="submit_form">
                     {{ saving ? '保存中...' : '保存' }}
                 </button>
+            </template>
+        </AppModal>
+
+        <!-- 删除确认弹窗 -->
+        <AppModal v-model="confirm_dialog.show" title="删除分类">
+            <p class="text-sm text-base-content/70">{{ confirm_dialog.message }}</p>
+            <template #footer>
+                <button class="btn" @click="confirm_dialog.show = false">取消</button>
+                <button class="btn btn-main btn-error" @click="run_confirm">确认删除</button>
             </template>
         </AppModal>
     </main>

@@ -7,23 +7,36 @@ import { date_text } from '@/utils/formatters';
 import { categories_compact } from '@/utils/category';
 import { articleService, type ArticleModel } from '@/store/article';
 import { url_prefix } from '@/utils/baseInfo';
+import AppPagination from '@/components/AppPagination.vue';
 
 const route = useRoute();
 const user_id = Number(route.params.id);
 const head_img = '192878a6502947989a25d49d55f39266.jpg';
 
 // 后端无 /profile/ 专用接口：用 GET /articles/?user_id= 服务端过滤作者文章
+const PAGE_SIZE = 20;
 const latest_article = ref<ArticleModel[]>([]);
+const page = ref(1);
+const total = ref(0);
+const has_next = ref(false);
 const getArticles = async () => {
     try {
-        const res = await articleService.getArticles({ page: 1, page_size: 100, user_id });
+        const res = await articleService.getArticles({ page: page.value, page_size: PAGE_SIZE, user_id });
         latest_article.value = res.data ?? [];
+        total.value = res.total;
+        has_next.value = res.has_next;
     } catch (error) {
         console.error('获取失败:', error)
     }
 }
 
-const post_count = computed(() => latest_article.value.length);
+const go_page = (target: number) => {
+    page.value = target;
+    getArticles();
+};
+
+// 统计口径改为服务端 total（分页后列表长度不再等于发文总数）
+const post_count = computed(() => total.value);
 const view_count = computed(() =>
     latest_article.value.reduce((sum, article) => sum + article.view_count, 0)
 );
@@ -59,20 +72,21 @@ onMounted(
 
 <template>
     <main class="bg-base-200 flex flex-col gap-8 py-4">
-        <div class="card rounded-box m-auto w-7xl flex flex-row justify-between p-10">
-            <div class="flex flex-row gap-8">
-                <div class="w-24 h-24 rounded-2xl">
-                    <img :src="url_prefix.pic_prefix + head_img" alt="head_img">
+        <div class="page-container">
+            <div class="card rounded-box flex flex-col sm:flex-row sm:justify-between gap-6 p-6 sm:p-10">
+            <div class="flex flex-row gap-6 sm:gap-8 min-w-0">
+                <div class="w-24 h-24 rounded-2xl shrink-0">
+                    <img class="w-full h-full object-cover rounded-2xl" :src="url_prefix.pic_prefix + head_img" alt="head_img">
                 </div>
-                <div class="flex flex-col">
-                    <div class="flex flex-row items-center">
-                        <span class="text-2xl font-bold text-base-content/90">{{ nickname_text(user_id) }}</span><img
-                            class="h-6 w-6 mx-4" src="/icon/v.png" alt="v">
+                <div class="flex flex-col min-w-0">
+                    <div class="flex flex-row items-center min-w-0">
+                        <span class="text-2xl font-bold text-base-content/90 truncate">{{ nickname_text(user_id) }}</span><img
+                            class="h-6 w-6 mx-4 shrink-0" src="/icon/v.png" alt="v">
                     </div>
                     <span class="py-4 text-base-content/80">暂无简介及其他补充信息</span>
                 </div>
             </div>
-            <div class="flex flex-row p-4 gap-12">
+            <div class="flex flex-row p-4 gap-8 sm:gap-12 shrink-0 flex-wrap">
                 <div class="flex flex-col items-center">
                     <span class="text-base-content/60">发布文章</span>
                     <span class="text-base-content/90 text-2xl">{{ post_count }}</span>
@@ -83,15 +97,17 @@ onMounted(
                 </div>
             </div>
         </div>
+        </div>
 
-        <div class="card rounded-box w-7xl m-auto py-8 px-10">
+        <div class="page-container">
+            <div class="card rounded-box py-8 px-6 sm:px-10">
             <div class="font-bold mx-2">文章动态</div>
             <ul class="divide-y divide-base-300 divide-dashed">
                 <li v-for="(article, index) in latest_article" :key="index"
                     class="px-5 py-3 flex items-center justify-between">
-                    <div class="flex flex-row items-center">
-                        <div class="bg-base-300 w-1 h-1 rounded-xl"></div>
-                        <div class="px-4 py-2 mr-4 text-sm font-bold rounded-2xl text-base-content/80 shrink-0"
+                    <div class="flex flex-row items-center min-w-0">
+                        <div class="bg-base-300 w-1 h-1 rounded-xl shrink-0"></div>
+                        <div class="px-4 py-2 mr-4 text-sm font-bold rounded-2xl text-base-content/80 shrink-0 max-w-[8em] truncate"
                             :title="article_categories(article).title">
                             {{ article_categories(article).label }}
                             <span v-if="article_categories(article).extra > 0"
@@ -100,13 +116,16 @@ onMounted(
                             </span>
                         </div>
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
-                            class="text-sm text-base-content/80 hover:text-primary truncate">
+                            class="text-sm text-base-content/80 hover:text-primary truncate min-w-0 flex-1">
                             <span class="font-semibold">{{ article.title }}</span>
                         </RouterLink>
                     </div>
                     <time class="ml-4 shrink-0 text-xs text-base-content/40">{{ date_text(article.create_at) }}</time>
                 </li>
             </ul>
+            </div>
+            <AppPagination class="mt-4" :page="page" :has-next="has_next"
+                :total="total" unit="条" @change="go_page" />
         </div>
     </main>
 </template>

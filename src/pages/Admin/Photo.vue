@@ -5,6 +5,7 @@ import { api_error_detail } from '@/store/article';
 import { url_prefix } from '@/utils/baseInfo';
 import dayjs from 'dayjs';
 import AppPagination from '@/components/AppPagination.vue';
+import CopyButton from '@/components/CopyButton.vue';
 
 /** 图片列表项，字段与 GET /image/ 一致 */
 export interface ImageModel {
@@ -29,7 +30,6 @@ const list_error = ref('');
 const uploading = ref(false);
 const upload_error = ref('');
 const upload_success = ref('');
-const copied_slug = ref('');
 
 const getImageList = async () => {
     list_error.value = '';
@@ -85,16 +85,6 @@ const pick_files = async (event: Event) => {
     }
 };
 
-const copy_slug = async (slug: string) => {
-    try {
-        await navigator.clipboard.writeText(slug);
-        copied_slug.value = slug;
-        setTimeout(() => { copied_slug.value = ''; }, 1500);
-    } catch {
-        window.prompt('复制 slug:', slug);
-    }
-};
-
 const format_size = (bytes: number) => {
     if (bytes >= 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + ' MB';
     if (bytes >= 1024) return (bytes / 1024).toFixed(1) + ' KB';
@@ -106,8 +96,7 @@ onMounted(getImageList);
 
 <template>
     <main class="flex-1 overflow-y-auto p-6">
-        <div class="flex items-center justify-between mb-2">
-            <h2 class="text-xl font-bold text-base-content">照片管理</h2>
+        <div class="flex items-center justify-end mb-2">
             <label class="btn btn-main btn-primary cursor-pointer"
                 :class="uploading ? 'opacity-60 cursor-not-allowed' : ''">
                 {{ uploading ? '上传中...' : '+ 上传照片' }}
@@ -117,12 +106,13 @@ onMounted(getImageList);
         </div>
         <p class="mb-4 text-xs text-base-content/40">支持 JPG / PNG / GIF / WebP，单张 ≤ 10MB</p>
 
-        <p v-if="upload_error" class="alert alert-error mb-4 text-sm">{{ upload_error }}</p>
-        <p v-if="upload_success" class="mb-4 text-sm text-green-600">{{ upload_success }}</p>
-        <p v-if="list_error" class="alert alert-error mb-4 text-sm">{{ list_error }}</p>
+        <p v-if="upload_error" role="alert" class="alert alert-error mb-4 text-sm">{{ upload_error }}</p>
+        <p v-if="upload_success" role="alert" class="alert alert-success mb-4 text-sm">{{ upload_success }}</p>
+        <p v-if="list_error" role="alert" class="alert alert-error mb-4 text-sm">{{ list_error }}</p>
 
         <!-- 照片网格 -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-6">
+        <!-- 内容区=视口−侧栏，lg 下 6 列每格仅 ~110px 无法辨图，xl 起才多列 -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
             <div v-for="image in image_list" :key="image.id"
                 class="card rounded-box border border-base-300 overflow-hidden group">
                 <div class="relative overflow-hidden aspect-square">
@@ -133,10 +123,11 @@ onMounted(getImageList);
                     <p class="text-sm my-1 font-medium text-base-content truncate" :title="image.raw_filename">{{ image.raw_filename }}</p>
                     <p class="text-xs text-base-content/60">{{ format_size(image.size_bytes) }} · 浏览 {{ image.view }}</p>
                     <p class="text-xs text-base-content/40">{{ dayjs(image.uploaded_at).format('YYYY-MM-DD HH:mm') }}</p>
-                    <button class="btn btn-ghost btn-xs mt-1 text-primary"
-                        @click="copy_slug(image.slug)">
-                        {{ copied_slug === image.slug ? '已复制 slug' : '复制 slug' }}
-                    </button>
+                    <div class="mt-1 flex flex-wrap items-center gap-x-1 gap-y-0.5">
+                        <CopyButton :text="image.slug" />
+                        <!-- 详情页会把相对路径 slug 自动补成 /api/image/，MD 里只写 slug 即可渲染 -->
+                        <CopyButton :text="`![${image.raw_filename}](${image.slug})`" label="复制 md" />
+                    </div>
                 </div>
             </div>
         </div>

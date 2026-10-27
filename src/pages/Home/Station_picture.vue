@@ -5,7 +5,7 @@ import TitleComponent from '@/components/TitleComponent.vue';
 
 <template>
     <div class="section-y">
-        <section class="mx-auto w-7xl">
+        <section class="page-container">
             <TitleComponent>
                 <template #first>泵站风光</template>
                 <template #second>Station Picture</template>

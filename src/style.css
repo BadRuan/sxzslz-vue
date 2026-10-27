@@ -85,10 +85,18 @@
    导航/菜单 14px · 面包屑 14px · 列表条目标题 14px/600 · 卡片标题 16px/600
    页面页头 20px/700 · 弹窗标题 16px/700 · 详情正文 prose-lg（18px）· 辅助信息 12-14px */
 
-/* 区块统一纵向节奏 */
+/* 页面主容器：全站统一最大宽 + 水平内边距（禁止再写死 w-7xl，1024 下会整页横向溢出） */
+@utility page-container {
+    width: 100%;
+    max-width: 80rem; /* = max-w-7xl */
+    margin-inline: auto;
+    padding-inline: 1rem;
+}
+
+/* 区块统一纵向节奏：低高度屏（768）收紧，大屏保持原节奏 */
 @utility section-y {
-    padding-top: 3.5rem;
-    padding-bottom: 3.5rem;
+    padding-top: clamp(2rem, 4vw, 3.5rem);
+    padding-bottom: clamp(2rem, 4vw, 3.5rem);
 }
 
 /* 可交互卡片：轻抬升 + 阴影过渡（含 translate：Tailwind v4 位移工具类走 CSS translate 属性） */

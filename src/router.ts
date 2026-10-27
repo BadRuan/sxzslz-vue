@@ -76,7 +76,7 @@ const routes: RouteRecordRaw[] = [
                 path: 'list',
                 name: 'AdminArticleList',
                 component: () => import("@/pages/Admin/ArticleList.vue"),
-                meta: { title: '新闻列表' }
+                meta: { title: '文章管理' }
             },
             {
                 path: 'photo',

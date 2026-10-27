@@ -5,6 +5,7 @@ import { api_error_detail } from '@/store/article';
 import { url_prefix } from '@/utils/baseInfo';
 import dayjs from 'dayjs';
 import AppPagination from '@/components/AppPagination.vue';
+import CopyButton from '@/components/CopyButton.vue';
 
 /** 文件列表项，字段与 GET /document/ 一致 */
 export interface DocumentModel {
@@ -114,8 +115,7 @@ onMounted(fetch_list);
 
 <template>
     <main class="flex-1 overflow-y-auto p-6">
-        <div class="flex items-center justify-between mb-2">
-            <h2 class="text-xl font-bold text-base-content">文档管理</h2>
+        <div class="flex items-center justify-end mb-2">
             <label class="btn btn-main btn-primary cursor-pointer"
                 :class="uploading ? 'opacity-60 cursor-not-allowed' : ''">
                 {{ uploading ? '上传中...' : '+ 上传文档' }}
@@ -126,44 +126,52 @@ onMounted(fetch_list);
         </div>
         <p class="mb-4 text-xs text-base-content/40">支持 txt / pdf / doc / docx / xls / xlsx / ppt / pptx / zip，单个 ≤ 50MB</p>
 
-        <p v-if="upload_error" class="alert alert-error mb-4 text-sm">{{ upload_error }}</p>
-        <p v-if="upload_success" class="mb-4 text-sm text-green-600">{{ upload_success }}</p>
-        <p v-if="list_error" class="alert alert-error mb-4 text-sm">{{ list_error }}</p>
+        <p v-if="upload_error" role="alert" class="alert alert-error mb-4 text-sm">{{ upload_error }}</p>
+        <p v-if="upload_success" role="alert" class="alert alert-success mb-4 text-sm">{{ upload_success }}</p>
+        <p v-if="list_error" role="alert" class="alert alert-error mb-4 text-sm">{{ list_error }}</p>
 
-        <div class="bg-base-100 rounded-2xl shadow-sm overflow-x-auto">
+        <div class="card rounded-box overflow-x-auto">
             <table class="table text-sm">
                 <thead class="border-b border-base-300 text-base-content/60">
                     <tr>
-                        <th class="px-6 py-4 font-medium">文件名</th>
-                        <th class="px-6 py-4 font-medium">类型</th>
-                        <th class="px-6 py-4 font-medium">大小</th>
-                        <th class="px-6 py-4 font-medium">浏览量</th>
-                        <th class="px-6 py-4 font-medium">上传时间</th>
-                        <th class="px-6 py-4 font-medium">操作</th>
+                        <th class="px-4 py-4 font-medium">文件名</th>
+                        <th class="px-4 py-4 font-medium whitespace-nowrap">类型</th>
+                        <th class="px-4 py-4 font-medium whitespace-nowrap">大小</th>
+                        <!-- 1024 内容区 784px：浏览量列 xl 起显示，保证上传时间/操作列无需横滚可见 -->
+                        <th class="px-4 py-4 font-medium hidden xl:table-cell">浏览量</th>
+                        <th class="px-4 py-4 font-medium whitespace-nowrap">上传时间</th>
+                        <th class="px-4 py-4 font-medium">操作</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-base-300 divide-dashed">
                     <tr v-if="!list_error && document_list.length === 0">
-                        <td colspan="6" class="px-6 py-8 text-center text-base-content/40">暂无文件</td>
+                        <td colspan="6" class="px-4 py-8 text-center text-base-content/40">暂无文件</td>
                     </tr>
                     <tr v-for="doc in document_list" :key="doc.id" class="hover:bg-base-300/50 link-transition">
-                        <td class="px-6 py-3.5 text-base-content/80 max-w-md truncate" :title="doc.raw_filename">
-                            {{ doc.raw_filename }}
+                        <!-- td 上的 max-width 在 auto 表格布局下不可靠：内层 div 限宽截断，悬停看全名 -->
+                        <td class="px-4 py-3.5 text-base-content/80" :title="doc.raw_filename">
+                            <div class="max-w-[16rem] truncate">{{ doc.raw_filename }}</div>
                         </td>
-                        <td class="px-6 py-3.5 text-base-content/60">{{ ext_of(doc.raw_filename).toUpperCase() }}</td>
-                        <td class="px-6 py-3.5 text-base-content/60">{{ format_size(doc.size_bytes) }}</td>
-                        <td class="px-6 py-3.5 text-base-content/60">{{ doc.view }}</td>
-                        <td class="px-6 py-3.5 text-base-content/60">{{ dayjs(doc.uploaded_at).format('YYYY-MM-DD HH:mm') }}</td>
-                        <td class="px-6 py-3.5">
-                            <a :href="url_prefix.document_prefix + doc.slug" target="_blank" rel="noopener"
-                                class="text-xs text-primary/90 hover:underline">下载</a>
+                        <td class="px-4 py-3.5 text-base-content/60 whitespace-nowrap">{{ ext_of(doc.raw_filename).toUpperCase() }}</td>
+                        <td class="px-4 py-3.5 text-base-content/60 whitespace-nowrap">{{ format_size(doc.size_bytes) }}</td>
+                        <td class="px-4 py-3.5 text-base-content/60 hidden xl:table-cell">{{ doc.view }}</td>
+                        <td class="px-4 py-3.5 text-base-content/60 whitespace-nowrap">{{ dayjs(doc.uploaded_at).format('YYYY-MM-DD HH:mm') }}</td>
+                        <td class="px-4 py-3.5">
+                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 whitespace-nowrap">
+                                <a :href="url_prefix.document_prefix + doc.slug" target="_blank" rel="noopener"
+                                    class="text-xs text-primary/90 hover:underline">下载</a>
+                                <CopyButton :text="doc.slug" />
+                                <!-- 详情页会把相对路径 slug 自动补成 /api/document/，MD 里只写 slug 即可生成下载链接 -->
+                                <CopyButton :text="`[${doc.raw_filename}](${doc.slug})`" label="复制 md" />
+                            </div>
                         </td>
                     </tr>
                 </tbody>
             </table>
-
-            <AppPagination class="px-6 py-4" :page="page" :has-next="has_next"
-                :total="total" unit="个" @change="go_page" />
         </div>
+
+        <!-- 分页放横滚容器外，避免表格溢出时翻页按钮被卷入横向滚动 -->
+        <AppPagination class="mt-4" :page="page" :has-next="has_next"
+            :total="total" unit="个" @change="go_page" />
     </main>
 </template>

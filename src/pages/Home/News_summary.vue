@@ -2,7 +2,6 @@
 import TitleComponent from '@/components/TitleComponent.vue';
 import { Splide, SplideSlide } from '@splidejs/vue-splide';
 import '@splidejs/splide/css';
-import { url_prefix } from '@/utils/baseInfo';
 import { easy_date_text } from '@/utils/formatters';
 import { computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
@@ -10,6 +9,7 @@ import { useBaseinfoStore } from '@/store/base';
 import { useArticleStore } from '@/store/article';
 import { name_category_id, categories_label, to_second_level_id } from '@/utils/category';
 import { CATEGORY_NAMES } from '@/utils/categoryConfig';
+import ArticleCover from '@/components/ArticleCover.vue';
 
 const baseinfo_store = useBaseinfoStore();
 const article_store = useArticleStore();
@@ -41,7 +41,7 @@ onMounted(async () => {
 
 <template>
     <div class="section-y">
-        <section class="mx-auto w-7xl h-full">
+        <section class="page-container h-full">
             <div class="flex justify-between items-end">
                 <TitleComponent>
                     <template #first>水利站动态</template>
@@ -50,36 +50,35 @@ onMounted(async () => {
             </div>
 
             <div v-if="loading"
-                class="max-w-7xl mx-auto card rounded-box border border-base-300 p-12 text-center">
+                class="card rounded-box border border-base-300 p-12 text-center">
                 <span class="loading loading-spinner loading-md mx-auto mb-4 block"></span>
                 <p class="text-base-content/60">加载中...</p>
             </div>
 
-            <div v-else class="w-7xl flex flex-row gap-10 items-center justify-around mt-6">
+            <!-- lg 起轮播 3/5 + 通知卡 2/5 分栏；窄视口纵向堆叠，避免 720+560 固定宽在 1366 下也溢出 -->
+            <div v-else class="grid gap-6 mt-6 lg:grid-cols-5 items-stretch">
 
-                <Splide :options="options" class="overflow-hidden rounded-box shadow-sm w-180 h-120">
+                <Splide :options="options" class="overflow-hidden rounded-box shadow-sm w-full lg:col-span-3">
                     <SplideSlide v-for="(article, index) in article_obj.recommended" :key="index">
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
-                            class="relative bg-cover bg-center">
-                            <img v-if="article.cover_img_slug" class="w-180 h-120"
-                                :src="url_prefix.pic_prefix + article.cover_img_slug" alt="new_pic">
-                            <div v-else class="w-180 h-120 bg-base-300"></div>
+                            class="relative block aspect-[3/2] w-full overflow-hidden rounded-box">
+                            <ArticleCover :slug="article.cover_img_slug" alt="new_pic" />
                             <div
                                 class="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none">
                             </div>
 
-                            <div class="absolute bottom-0 left-0 p-6 text-white max-w-2xl">
+                            <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
                                 <span
                                     class="badge badge-primary badge-sm mb-3 tracking-wider uppercase">
                                     {{ categories_label(article.categories) }}
                                 </span>
-                                <h2 class="mb-2 font-bold leading-tight">{{ article.title }}</h2>
+                                <h2 class="mb-2 font-bold leading-tight line-clamp-2">{{ article.title }}</h2>
                             </div>
                         </RouterLink>
                     </SplideSlide>
                 </Splide>
 
-                <div class="card w-140 rounded-box p-6 divide-y divide-base-300">
+                <div class="card rounded-box p-6 divide-y divide-base-300 lg:col-span-2">
                     <div class="flex flex-row justify-between items-center">
                         <div class="text-base-content/70 text-base font-bold my-2">{{ CATEGORY_NAMES.notice[0] }}</div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: notice_category_id } }"
@@ -91,10 +90,10 @@ onMounted(async () => {
                         <RouterLink v-for="item in article_obj.notice" :key="item.id"
                             :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
                             <li class="flex items-center justify-between">
-                                <div class="flex flex-row items-center">
-                                    <div class="bg-base-300 w-1 h-1 rounded-xl"></div>
+                                <div class="flex flex-row items-center min-w-0 flex-1">
+                                    <div class="bg-base-300 w-1 h-1 rounded-xl shrink-0"></div>
 
-                                    <div class="text-base-content hover:text-primary hover:font-bold text-sm py-2 px-2">
+                                    <div class="text-base-content hover:text-primary hover:font-bold text-sm py-2 px-2 truncate">
                                         {{
                                             item.title
                                         }}</div>

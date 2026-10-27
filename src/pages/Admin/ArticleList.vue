@@ -26,7 +26,22 @@ const total = ref(0);
 const page = ref(1);
 const has_next = ref(false);
 const list_error = ref('');
+const action_error = ref('');
+const action_success = ref('');
 const action_slug = ref<string | null>(null); // 正在操作（删除/恢复/切换状态）的文章 slug
+
+// —— 自定义确认弹窗（替代 window.confirm/alert，与 daisyUI 体系一致）——
+const confirm_dialog = ref<{ show: boolean, title: string, message: string, on_ok: (() => void) | null }>({
+    show: false, title: '', message: '', on_ok: null,
+});
+const ask_confirm = (title: string, message: string, on_ok: () => void) => {
+    confirm_dialog.value = { show: true, title, message, on_ok };
+};
+const run_confirm = () => {
+    const fn = confirm_dialog.value.on_ok;
+    confirm_dialog.value.show = false;
+    fn?.();
+};
 
 const baseinfo_store = useBaseinfoStore();
 const { categories } = storeToRefs(baseinfo_store);
@@ -182,44 +197,49 @@ const submit_form = async () => {
 };
 
 // —— 行内操作 ——
-const remove_article = async (row: ArticleModel) => {
-    if (!window.confirm(`确认删除文章「${row.title}」吗？（移入回收站，可在回收站恢复）`)) return;
-    action_slug.value = row.slug;
-    try {
-        await articleService.remove(row.slug);
-        if (selected.value.has(row.slug)) {
-            const next = new Set(selected.value);
-            next.delete(row.slug);
-            selected.value = next;
+const remove_article = (row: ArticleModel) => {
+    ask_confirm('删除文章', `确认删除文章「${row.title}」吗？（移入回收站，可在回收站恢复）`, async () => {
+        action_slug.value = row.slug;
+        action_error.value = '';
+        try {
+            await articleService.remove(row.slug);
+            if (selected.value.has(row.slug)) {
+                const next = new Set(selected.value);
+                next.delete(row.slug);
+                selected.value = next;
+            }
+            await fetch_list();
+        } catch (error) {
+            action_error.value = api_error_detail(error, '删除失败，请稍后重试');
+        } finally {
+            action_slug.value = null;
         }
-        await fetch_list();
-    } catch (error) {
-        window.alert(api_error_detail(error, '删除失败，请稍后重试'));
-    } finally {
-        action_slug.value = null;
-    }
+    });
 };
 
-const restore_article = async (row: ArticleModel) => {
-    if (!window.confirm(`确认恢复文章「${row.title}」吗？（重新回到正常列表）`)) return;
-    action_slug.value = row.slug;
-    try {
-        await articleService.restore(row.slug);
-        await fetch_list();
-    } catch (error) {
-        window.alert(api_error_detail(error, '恢复失败，请稍后重试'));
-    } finally {
-        action_slug.value = null;
-    }
+const restore_article = (row: ArticleModel) => {
+    ask_confirm('恢复文章', `确认恢复文章「${row.title}」吗？（重新回到正常列表）`, async () => {
+        action_slug.value = row.slug;
+        action_error.value = '';
+        try {
+            await articleService.restore(row.slug);
+            await fetch_list();
+        } catch (error) {
+            action_error.value = api_error_detail(error, '恢复失败，请稍后重试');
+        } finally {
+            action_slug.value = null;
+        }
+    });
 };
 
 const toggle_recommended = async (row: ArticleModel) => {
     action_slug.value = row.slug;
+    action_error.value = '';
     try {
         await articleService.update(row.slug, { is_recommended: !row.is_recommended });
         await fetch_list();
     } catch (error) {
-        window.alert(api_error_detail(error, '操作失败，请稍后重试'));
+        action_error.value = api_error_detail(error, '操作失败，请稍后重试');
     } finally {
         action_slug.value = null;
     }
@@ -271,7 +291,8 @@ const submit_batch = async () => {
             [...selected.value], batch_category_id.value, batch_mode.value);
         show_batch_modal.value = false;
         clear_selection();
-        window.alert(`已${batch_mode.value === 'add' ? '加入' : '移出'}分类，共处理 ${res.affected} 篇文章`);
+        action_success.value = `已${batch_mode.value === 'add' ? '加入' : '移出'}分类，共处理 ${res.affected} 篇文章`;
+        setTimeout(() => { action_success.value = ''; }, 4000);
         await fetch_list();
     } catch (error) {
         batch_error.value = api_error_detail(error, '批量操作失败，请稍后重试');
@@ -292,7 +313,6 @@ onMounted(
     <main class="flex-1 overflow-y-auto p-6">
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-4">
-                <h2 class="text-xl font-bold text-base-content">文章管理</h2>
                 <div role="tablist" class="tabs tabs-box tabs-sm">
                     <button role="tab" class="tab" :class="{ 'tab-active': view === 'active' }"
                         @click="switch_view('active')">
@@ -311,6 +331,9 @@ onMounted(
                 + 新增文章
             </button>
         </div>
+
+        <p v-if="action_error" role="alert" class="alert alert-error mb-4 text-sm">{{ action_error }}</p>
+        <p v-if="action_success" role="alert" class="alert alert-success mb-4 text-sm">{{ action_success }}</p>
 
         <div v-if="view === 'active' && selected.size > 0" role="alert"
             class="alert alert-info mb-4 text-sm">
@@ -334,10 +357,11 @@ onMounted(
                         </th>
                         <th class="px-4 py-4 font-medium">分类</th>
                         <th class="px-4 py-4 font-medium">标题</th>
-                        <th class="px-4 py-4 font-medium">作者</th>
+                        <!-- 1024 内容区仅 784px，作者+浏览量两列 xl 起显示，保证操作列无需横滚可见 -->
+                        <th class="px-4 py-4 font-medium hidden xl:table-cell">作者</th>
                         <th class="px-4 py-4 font-medium">推荐</th>
-                        <th class="px-4 py-4 font-medium">浏览量</th>
-                        <th class="px-4 py-4 font-medium">发布时间</th>
+                        <th class="px-4 py-4 font-medium hidden xl:table-cell">浏览量</th>
+                        <th class="px-4 py-4 font-medium whitespace-nowrap">发布时间</th>
                         <th class="px-4 py-4 font-medium">操作</th>
                     </tr>
                 </thead>
@@ -355,7 +379,7 @@ onMounted(
                             <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
                                 :checked="selected.has(article.slug)" @change="toggle_select(article.slug)" />
                         </td>
-                        <td class="px-4 py-3.5 text-base-content/70">
+                        <td class="px-4 py-3.5 text-base-content/70 whitespace-nowrap">
                             {{ article.categories?.[0]?.name || '—' }}
                         </td>
                         <td class="px-4 py-3 text-base-content/80 text-left max-w-xs truncate">
@@ -365,8 +389,10 @@ onMounted(
                                 {{ article.title }}
                             </RouterLink>
                         </td>
-                        <td class="px-4 py-3 text-base-content/70 text-left">
-                            {{ article.user?.nickname ?? '—' }}
+                        <!-- 长机构名不逐字换行：td 上的 max-width 在 auto 表格布局下不可靠，用内层 div 限宽 -->
+                        <td class="px-4 py-3 text-base-content/70 text-left hidden xl:table-cell"
+                            :title="article.user?.nickname ?? ''">
+                            <div class="max-w-[7rem] truncate">{{ article.user?.nickname ?? '—' }}</div>
                         </td>
                         <td class="px-4 py-3">
                             <button class="btn btn-xs whitespace-nowrap"
@@ -376,8 +402,10 @@ onMounted(
                                 {{ article.is_recommended ? '已推荐' : '未推荐' }}
                             </button>
                         </td>
-                        <td class="px-4 py-3 text-base-content/70">{{ article.view_count }}</td>
-                        <td class="px-4 py-3 text-base-content/60">{{ dayjs(article.create_at).format('YYYY-MM-DD HH:mm') }}</td>
+                        <td class="px-4 py-3 text-base-content/70 hidden xl:table-cell">{{ article.view_count }}</td>
+                        <td class="px-4 py-3 text-base-content/60 whitespace-nowrap">
+                            {{ dayjs(article.create_at).format('YYYY-MM-DD HH:mm') }}
+                        </td>
                         <td class="px-4 py-3">
                             <div class="flex items-center justify-center gap-1">
                                 <template v-if="view === 'active'">
@@ -395,10 +423,11 @@ onMounted(
                     </tr>
                 </tbody>
             </table>
+        </div>
 
-                    <AppPagination class="px-6 py-4" :page="page" :has-next="has_next"
-                        :total="total" unit="条" @change="go_page" />
-                </div>
+        <!-- 分页放横滚容器外：表格溢出时翻页按钮不被卷入横向滚动 -->
+        <AppPagination class="mt-4" :page="page" :has-next="has_next"
+            :total="total" unit="条" @change="go_page" />
 
         <!-- 新增/编辑弹窗 -->
         <AppModal v-model="show_modal" max-width="max-w-3xl"
@@ -486,6 +515,15 @@ onMounted(
                     @click="submit_batch">
                     {{ batch_saving ? '提交中...' : '确认' }}
                 </button>
+            </template>
+        </AppModal>
+
+        <!-- 删除/恢复确认弹窗 -->
+        <AppModal v-model="confirm_dialog.show" :title="confirm_dialog.title">
+            <p class="text-sm text-base-content/70">{{ confirm_dialog.message }}</p>
+            <template #footer>
+                <button class="btn" @click="confirm_dialog.show = false">取消</button>
+                <button class="btn btn-main btn-primary" @click="run_confirm">确认</button>
             </template>
         </AppModal>
     </main>
