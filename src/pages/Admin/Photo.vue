@@ -94,7 +94,7 @@ const pick_files = async (event: Event) => {
     let done_bytes = 0;
     upload_progress.value = {
         is_active: true,
-        current_name: files[0].name,
+        current_name: files[0]?.name ?? '',
         current_percent: 0,
         overall_percent: 0,
         finished: 0,
@@ -105,6 +105,7 @@ const pick_files = async (event: Event) => {
         // 后端为单文件接口，逐个上传
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
+            if (!file) continue;
             upload_progress.value.current_name = file.name;
             upload_progress.value.current_percent = 0;
             upload_progress.value.finished = i;

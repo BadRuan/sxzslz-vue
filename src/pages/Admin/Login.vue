@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore, get_token } from '@/store/auth';
 
+const route = useRoute();
 const router = useRouter();
 const auth_store = useAuthStore();
 
@@ -10,10 +11,20 @@ const username = ref('');
 const password = ref('');
 const error_message = ref('');
 
+/**
+ * 登录后回跳地址：仅接受后台内部路径（防开放重定向），默认后台概览。
+ */
+const redirect_target = computed(() => {
+    const redirect = route.query.redirect;
+    return typeof redirect === 'string' && redirect.startsWith('/admin') && !redirect.startsWith('/admin/login')
+        ? redirect
+        : '/admin/overview';
+});
+
 onMounted(() => {
     // 已登录再进登录页：直接回后台
     if (get_token()) {
-        router.replace({ name: 'AdminOverview' });
+        router.replace(redirect_target.value);
     }
 });
 
@@ -25,7 +36,7 @@ const submit = async () => {
     }
     try {
         await auth_store.login(username.value, password.value);
-        router.replace({ name: 'AdminOverview' });
+        router.replace(redirect_target.value);
     } catch (error: any) {
         error_message.value = error?.message || '登录失败，请稍后重试';
     }

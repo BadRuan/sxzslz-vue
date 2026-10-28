@@ -15,7 +15,9 @@ withDefaults(defineProps<{
 </script>
 
 <template>
+    <!-- 默认懒加载 + 异步解码：首屏外的封面不阻塞 LCP；调用方仍可通过 $attrs 覆盖 -->
     <img v-if="slug" :src="url_prefix.pic_prefix + slug" :alt="alt"
+        loading="lazy" decoding="async"
         class="h-full w-full bg-base-300 object-contain" v-bind="$attrs" />
     <div v-else
         class="flex h-full w-full items-center justify-center bg-base-300 text-sm text-base-content/40">

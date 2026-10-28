@@ -23,6 +23,7 @@ const handle_logout = () => {
         <div class="flex items-center gap-4">
             <span class="text-sm text-base-content/70">{{ auth_store.user?.nickname ?? '...' }}</span>
             <span v-if="auth_store.is_superuser" class="badge badge-primary badge-sm whitespace-nowrap">超级管理员</span>
+            <span v-else-if="auth_store.is_normal_user" class="badge badge-ghost badge-sm whitespace-nowrap">普通账号</span>
             <button class="btn btn-ghost btn-sm" @click="handle_logout">
                 退出登录
             </button>

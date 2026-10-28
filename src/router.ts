@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
-import { get_token } from '@/store/auth';
+import { get_token, useAuthStore } from '@/store/auth';
 
 const routes: RouteRecordRaw[] = [
     {
         path: '/',
-        component: ()=>import('@/MainLayout.vue'),
+        component: () => import('@/MainLayout.vue'),
         redirect: '/home',
         children: [
             {
@@ -64,13 +64,14 @@ const routes: RouteRecordRaw[] = [
                 path: 'overview',
                 name: 'AdminOverview',
                 component: () => import("@/pages/Admin/Overview.vue"),
-                meta : { title: '后台概览' }
+                meta: { title: '后台概览' }
             },
             {
                 path: 'category',
                 name: 'AdminCategory',
                 component: () => import("@/pages/Admin/CategoryEdit.vue"),
-                meta: { title: '分类管理' }
+                // 分类管理仅超级管理员：普通账号侧边栏不展示，直接访问也会被重定向
+                meta: { title: '分类管理', requires_superuser: true }
             },
             {
                 path: 'list',
@@ -113,13 +114,34 @@ export const router = createRouter({
     }
 })
 
-// 后台页面需登录：无 token 一律重定向登录页（写接口需 JWT，见后端文档「鉴权」）
-router.beforeEach((to) => {
-    if (to.path.startsWith('/admin')
-        && to.path !== '/admin/login'
-        && !get_token()) {
-        return { name: 'AdminLogin' }
+/**
+ * 后台路由守卫：
+ * 1. 未登录 → 登录页（记录 redirect，登录后回跳）；
+ * 2. 已登录但用户信息未加载 → 先拉 /auth/me 判断角色；
+ * 3. requires_superuser 路由（分类管理）→ 普通账号重定向到概览并提示无权访问。
+ */
+router.beforeEach(async (to) => {
+    if (!to.path.startsWith('/admin') || to.path === '/admin/login') {
+        return true
     }
+
+    if (!get_token()) {
+        return { name: 'AdminLogin', query: { redirect: to.fullPath } }
+    }
+
+    const auth_store = useAuthStore()
+    await auth_store.ensure_user()
+
+    // token 无效：fetchMe 已清空本地 token，重新走登录页
+    if (!get_token()) {
+        return { name: 'AdminLogin', query: { redirect: to.fullPath } }
+    }
+
+    if (to.meta.requires_superuser && !auth_store.is_superuser) {
+        return { name: 'AdminOverview', query: { denied: 'superuser' } }
+    }
+
+    return true
 })
 
 router.afterEach((to) => {

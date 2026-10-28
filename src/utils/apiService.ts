@@ -1,10 +1,7 @@
-import service from "./request";
+import type { AxiosRequestConfig } from 'axios';
+import service from './request';
 import { url_prefix } from './baseInfo';
 import { get_token, clear_token } from '@/store/auth';
-
-interface RequestOptions {
-    [key: string]: any;
-}
 
 /** UploadResult：POST /image/、POST /document/ 统一响应 */
 export interface UploadResult {
@@ -18,42 +15,49 @@ export interface UploadResult {
     raw_url: string | null,
 }
 
-class ApiService {
-    public async get<T = any> (url:string, params?: RequestOptions): Promise<T> {
-        return service.get(url, { params })
-    }
-    public async post<T = any>(url: string, data?: RequestOptions): Promise<T> {
-    return service.post(url, data);
-  }
+type RequestParams = Record<string, unknown>;
 
-    public async patch<T = any>(url: string, data?: RequestOptions): Promise<T> {
-    return service.patch(url, data);
-  }
+/**
+ * 统一 API 封装（函数式对象，无类实例）：
+ * 所有方法末位可选 `config`，传 `{ skip_auth: true }` 即匿名请求（公开接口专用）。
+ */
+export const apiService = {
+    get<T = any>(url: string, params?: RequestParams, config?: AxiosRequestConfig): Promise<T> {
+        return service.get<T, T>(url, { params, ...config });
+    },
 
-    public async put<T = any>(url: string, data?: RequestOptions): Promise<T> {
-    return service.put(url, data);
-  }
+    post<T = any>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+        return service.post<T, T>(url, data, config);
+    },
 
-    public async delete<T = any>(url: string, data?: RequestOptions): Promise<T> {
-    return service.delete(url, { data });
-  }
+    patch<T = any>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+        return service.patch<T, T>(url, data, config);
+    },
+
+    put<T = any>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+        return service.put<T, T>(url, data, config);
+    },
+
+    delete<T = any>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+        return service.delete<T, T>(url, { data, ...config });
+    },
 
     /** multipart 上传：字段名固定为 file（图片/文档上传接口约定） */
-    public async upload<T = any>(url: string, file: File): Promise<T> {
+    upload<T = any>(url: string, file: File): Promise<T> {
         const form = new FormData();
         form.append('file', file);
-        return service.post(url, form, {
+        return service.post<T, T>(url, form, {
             headers: { 'Content-Type': 'multipart/form-data' },
             timeout: 60000,
         });
-  }
+    },
 
     /**
      * 带上传进度的 multipart 上传。
      * fetch 无法读上传字节进度，按对接文档用 XMLHttpRequest + upload.onprogress；
      * 进度只反映已发送字节，到 100% 后仍需等服务端落盘返回。
      */
-    public uploadWithProgress<T = UploadResult>(
+    uploadWithProgress<T = UploadResult>(
         url: string,
         file: File,
         onProgress?: (percent: number) => void,
@@ -108,7 +112,7 @@ class ApiService {
             form.append('file', file);
             xhr.send(form);
         });
-    }
-}
+    },
+};
 
-export default new ApiService();
+export default apiService;

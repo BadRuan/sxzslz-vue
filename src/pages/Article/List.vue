@@ -118,6 +118,12 @@ const goToNextPage = () => {
         goToPage(article_page.value + 1);
     }
 };
+
+/** 加载失败重试：分类树可能尚未到达，此时不给按钮可点（active_category 未知） */
+const reload_articles = () => {
+    if (active_category.value === undefined) return;
+    article_store.getArticleList(active_category.value, page_number.value, 30);
+};
 </script>
 
 <template>
@@ -188,7 +194,7 @@ const goToNextPage = () => {
                                 <p class="mb-2 text-error">{{ article_list_error_message || '文章加载失败' }}</p>
                                 <p class="mb-4">请检查网络后重试</p>
                                 <button type="button" class="btn btn-sm btn-primary"
-                                    @click="article_store.getArticleList(active_category, page_number, 30)">
+                                    @click="reload_articles">
                                     重新加载
                                 </button>
                             </div>

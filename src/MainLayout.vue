@@ -2,6 +2,7 @@
 import { useRoute } from 'vue-router'
 import Header from '@/common/Header.vue'
 import Footer from '@/common/Footer.vue'
+import PageLoading from '@/components/PageLoading.vue'
 
 const route = useRoute()
 </script>
@@ -14,7 +15,12 @@ const route = useRoute()
          默认交叉淡入 + :key 保证每次导航都是全新挂载。 -->
     <Transition name="page">
       <!-- 仅路径变化才整页重挂载：同路由 query 变化（列表切分类/翻页）复用组件局部刷新 -->
-  <component :is="Component" :key="route.path" />
+      <Suspense>
+        <component :is="Component" :key="route.path" />
+        <template #fallback>
+          <PageLoading full-height />
+        </template>
+      </Suspense>
     </Transition>
   </router-view>
   <Footer />

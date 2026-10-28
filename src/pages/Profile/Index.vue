@@ -13,7 +13,8 @@ const route = useRoute();
 const user_id = Number(route.params.id);
 const head_img = '192878a6502947989a25d49d55f39266.jpg';
 
-// 后端无 /profile/ 专用接口：用 GET /articles/?user_id= 服务端过滤作者文章
+// 后端无 /profile/ 专用接口：用 GET /articles/?user_id= 服务端过滤作者文章。
+// 公开页面必须匿名请求：普通账号带 token 时后端会忽略 user_id 只返回本人文章，导致作者主页串号。
 const PAGE_SIZE = 20;
 const latest_article = ref<ArticleModel[]>([]);
 const page = ref(1);
@@ -21,7 +22,10 @@ const total = ref(0);
 const has_next = ref(false);
 const getArticles = async () => {
     try {
-        const res = await articleService.getArticles({ page: page.value, page_size: PAGE_SIZE, user_id });
+        const res = await articleService.getArticles(
+            { page: page.value, page_size: PAGE_SIZE, user_id },
+            { anonymous: true },
+        );
         latest_article.value = res.data ?? [];
         total.value = res.total;
         has_next.value = res.has_next;

@@ -31,72 +31,90 @@ export interface PasswordChangeInput {
     new_password: string,
 }
 
-class AuthService {
-    public login(data: { username: string, password: string }) {
-        return apiService.post<TokenModel>('/auth/login', data)
-    }
-    public me() {
-        return apiService.get<AuthUserModel>('/auth/me')
-    }
-    public changePassword(data: PasswordChangeInput) {
-        return apiService.put<{ detail: string }>('/auth/password', data)
-    }
-}
+/** 登录是公开接口：匿名请求，避免历史失效 token 干扰登录 */
+const request_login = (data: { username: string, password: string }) =>
+    apiService.post<TokenModel>('/auth/login', data, { skip_auth: true });
 
-const authService = new AuthService();
+const request_me = () => apiService.get<AuthUserModel>('/auth/me');
+
+const request_change_password = (data: PasswordChangeInput) =>
+    apiService.put<{ detail: string }>('/auth/password', data);
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<AuthUserModel | null>(null);
-  const loading = ref(false);
+    const user = ref<AuthUserModel | null>(null);
+    const loading = ref(false);
 
-  /** 是否超级管理员：控制后台差异展示（他人文章操作、作者/发布时间指定等） */
-  const is_superuser = computed(() => user.value?.is_superuser === true);
+    /** 是否超级管理员：控制后台差异展示（全站文章、作者/发布时间指定、分类管理） */
+    const is_superuser = computed(() => user.value?.is_superuser === true);
 
-  const is_logged_in = () => get_token() !== null;
+    /** 是否普通账号（已登录且非超管）：仅本人文章与本人上传可见/可管理 */
+    const is_normal_user = computed(() => user.value !== null && !user.value.is_superuser);
 
-  const login = async (username: string, password: string) => {
-    loading.value = true
-    try {
-      const res = await authService.login({ username, password });
-      set_token(res.access_token);
-      // 立即拉取用户信息（含 is_superuser），避免各页面各自等待 fetchMe
-      await fetchMe();
-      return true
-    } catch (error: any) {
-      throw new Error(api_error_detail(error, '登录失败，请稍后重试'))
-    } finally {
-      loading.value = false
+    const is_logged_in = () => get_token() !== null;
+
+    const login = async (username: string, password: string) => {
+        loading.value = true
+        try {
+            const res = await request_login({ username, password });
+            set_token(res.access_token);
+            // 立即拉取用户信息（含 is_superuser），避免各页面各自等待 fetchMe
+            await fetchMe();
+            return true
+        } catch (error: any) {
+            throw new Error(api_error_detail(error, '登录失败，请稍后重试'))
+        } finally {
+            loading.value = false
+        }
     }
-  }
 
-  const fetchMe = async () => {
-    if (!is_logged_in()) return
-    try {
-      user.value = await authService.me()
-    } catch {
-      // token 无效或过期：清掉避免后续写接口持续 401
-      clear_token()
-      user.value = null
+    /** 拉取当前用户；token 失效时清空本地登录态并返回 null */
+    const fetchMe = async (): Promise<AuthUserModel | null> => {
+        if (!is_logged_in()) return null
+        try {
+            user.value = await request_me()
+            return user.value
+        } catch {
+            // token 无效或过期：清掉避免后续写接口持续 401
+            clear_token()
+            user.value = null
+            return null
+        }
     }
-  }
 
-  const logout = () => {
-    clear_token()
-    user.value = null
-  }
-
-  /** 修改密码：400 原密码错误 / 422 新密码不足 6 位，detail 统一抛出给页面展示 */
-  const changePassword = async (old_password: string, new_password: string) => {
-    loading.value = true
-    try {
-      await authService.changePassword({ old_password, new_password })
-      return true
-    } catch (error: any) {
-      throw new Error(api_error_detail(error, '密码修改失败，请稍后重试'))
-    } finally {
-      loading.value = false
+    /** 确保用户信息已加载（路由守卫 / 权限判断前调用），无可用 token 时返回 null */
+    const ensure_user = async (): Promise<AuthUserModel | null> => {
+        if (user.value !== null) return user.value
+        return fetchMe()
     }
-  }
 
-  return { user, loading, is_superuser, is_logged_in, login, fetchMe, logout, changePassword }
+    const logout = () => {
+        clear_token()
+        user.value = null
+    }
+
+    /** 修改密码：400 原密码错误 / 422 新密码不足 6 位，detail 统一抛出给页面展示 */
+    const changePassword = async (old_password: string, new_password: string) => {
+        loading.value = true
+        try {
+            await request_change_password({ old_password, new_password })
+            return true
+        } catch (error: any) {
+            throw new Error(api_error_detail(error, '密码修改失败，请稍后重试'))
+        } finally {
+            loading.value = false
+        }
+    }
+
+    return {
+        user,
+        loading,
+        is_superuser,
+        is_normal_user,
+        is_logged_in,
+        login,
+        fetchMe,
+        ensure_user,
+        logout,
+        changePassword,
+    }
 })

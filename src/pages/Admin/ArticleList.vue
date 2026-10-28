@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import dayjs from 'dayjs';
 import AppPagination from '@/components/AppPagination.vue';
 import AppModal from '@/components/AppModal.vue';
 import apiService, { type UploadResult } from '@/utils/apiService';
 import { useBaseinfoStore } from '@/store/base';
-import { useAuthStore } from '@/store/auth';
+import { usePermissions } from '@/composables/usePermissions';
 import { flatten_categories } from '@/utils/category';
 import { api_error_detail } from '@/utils/apiError';
 import {
@@ -20,6 +20,8 @@ const PAGE_SIZE = 20;
 const IMAGE_MIME_WHITELIST = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
+const { is_superuser, is_normal_user, can_manage_categories, can_manage_article } = usePermissions();
+
 /** active = 正常文章列表；trash = 回收站（is_deleted=true，可恢复） */
 const view = ref<'active' | 'trash'>('active');
 const article_list = ref<ArticleModel[]>([]);
@@ -30,6 +32,9 @@ const list_error = ref('');
 const action_error = ref('');
 const action_success = ref('');
 const action_slug = ref<string | null>(null); // 正在操作（删除/恢复/切换状态）的文章 slug
+
+/** 作者筛选：仅超管可用（服务端仅对超管生效 user_id；普通账号被强制收敛为本人） */
+const filter_user_id = ref<number | ''>('');
 
 // —— 自定义确认弹窗（替代 window.confirm/alert，与 daisyUI 体系一致）——
 const confirm_dialog = ref<{ show: boolean, title: string, message: string, on_ok: (() => void) | null }>({
@@ -46,12 +51,6 @@ const run_confirm = () => {
 
 const baseinfo_store = useBaseinfoStore();
 const { categories, users } = storeToRefs(baseinfo_store);
-const auth_store = useAuthStore();
-
-/** 操作权限：超管可管全部；普通用户仅本人文章（后端 403 无权修改/删除/恢复他人文章） */
-const can_manage = (row: ArticleModel) =>
-    auth_store.is_superuser
-    || (auth_store.user !== null && row.user_id === auth_store.user.id);
 
 const fetch_list = async () => {
     list_error.value = '';
@@ -60,6 +59,10 @@ const fetch_list = async () => {
             page: page.value,
             page_size: PAGE_SIZE,
             is_deleted: view.value === 'trash',
+            // 普通账号不传 user_id：服务端固定只返回本人文章
+            ...(is_superuser.value && filter_user_id.value !== ''
+                ? { user_id: filter_user_id.value }
+                : {}),
         });
         article_list.value = res.data ?? [];
         total.value = res.total;
@@ -118,6 +121,13 @@ const second_level_options = computed(() =>
         .map(({ node }) => ({ id: node.id, label: node.name }))
 );
 
+/**
+ * 分类字段是否可编辑：
+ * - 超管：可任意调整文章分类；
+ * - 普通账号：仅新建文章时可选择初始分类，编辑已有文章时分类只读（禁止修改文章分类）。
+ */
+const can_edit_categories = computed(() => is_superuser.value || modal_mode.value === 'create');
+
 const open_create = () => {
     modal_mode.value = 'create';
     editing_slug.value = null;
@@ -144,9 +154,9 @@ const open_edit = async (row: ArticleModel) => {
             cover_img_slug: detail.cover_img_slug ?? '',
             is_recommended: detail.is_recommended,
             category_ids: (detail.categories ?? []).map(c => c.id),
-            user_id: auth_store.is_superuser ? detail.user_id : '',
+            user_id: is_superuser.value ? detail.user_id : '',
             // 服务端时间为无时区本地时间，datetime-local 同形，直接截到分钟
-            create_at: auth_store.is_superuser
+            create_at: is_superuser.value
                 ? dayjs(detail.create_at).format('YYYY-MM-DDTHH:mm')
                 : '',
         };
@@ -184,6 +194,7 @@ const pick_cover = async (event: Event) => {
 };
 
 const toggle_category = (id: number) => {
+    if (!can_edit_categories.value) return;
     const ids = form.value.category_ids;
     const index = ids.indexOf(id);
     if (index >= 0) ids.splice(index, 1);
@@ -203,10 +214,13 @@ const submit_form = async () => {
             content: form.value.content,
             cover_img_slug: form.value.cover_img_slug || null,
             is_recommended: form.value.is_recommended,
-            category_ids: form.value.category_ids,
         };
+        // 普通账号编辑已有文章时不提交分类（保持原分类不变）
+        if (can_edit_categories.value) {
+            payload.category_ids = form.value.category_ids;
+        }
         // user_id / create_at 仅超管提交；普通用户传了也会被服务端忽略
-        if (auth_store.is_superuser) {
+        if (is_superuser.value) {
             if (form.value.user_id !== '') payload.user_id = form.value.user_id;
             if (form.value.create_at) payload.create_at = form.value.create_at;
         }
@@ -217,6 +231,8 @@ const submit_form = async () => {
         }
         show_modal.value = false;
         await fetch_list();
+        action_success.value = modal_mode.value === 'create' ? '文章已创建' : '文章已保存';
+        setTimeout(() => { action_success.value = ''; }, 3000);
     } catch (error) {
         modal_error.value = api_error_detail(error, '保存失败，请稍后重试');
     } finally {
@@ -273,12 +289,13 @@ const toggle_recommended = async (row: ArticleModel) => {
     }
 };
 
-// —— 批量分类（正常文章视图；勾选跨页保留，切视图清空） ——
+// —— 批量分类（仅超管；后端对普通账号返回 403） ——
 const selected = ref<Set<string>>(new Set());
 const all_on_page_selected = computed(() =>
     article_list.value.length > 0 && article_list.value.every(a => selected.value.has(a.slug)));
 
 const toggle_select_all = () => {
+    if (!can_manage_categories.value) return;
     const next = new Set(selected.value);
     if (all_on_page_selected.value) article_list.value.forEach(a => next.delete(a.slug));
     else article_list.value.forEach(a => next.add(a.slug));
@@ -286,6 +303,7 @@ const toggle_select_all = () => {
 };
 
 const toggle_select = (slug: string) => {
+    if (!can_manage_categories.value) return;
     const next = new Set(selected.value);
     if (next.has(slug)) next.delete(slug);
     else next.add(slug);
@@ -301,6 +319,7 @@ const batch_error = ref('');
 const batch_saving = ref(false);
 
 const open_batch = (mode: 'add' | 'remove') => {
+    if (!can_manage_categories.value) return;
     batch_mode.value = mode;
     batch_category_id.value = null;
     batch_error.value = '';
@@ -308,6 +327,10 @@ const open_batch = (mode: 'add' | 'remove') => {
 };
 
 const submit_batch = async () => {
+    if (!can_manage_categories.value) {
+        batch_error.value = '仅超级管理员可管理文章分类';
+        return;
+    }
     if (!batch_category_id.value) {
         batch_error.value = '请选择目标分类';
         return;
@@ -329,6 +352,17 @@ const submit_batch = async () => {
     }
 };
 
+// 超管切换作者筛选：回到第一页并清空选择
+watch(filter_user_id, () => {
+    if (!is_superuser.value) return;
+    page.value = 1;
+    clear_selection();
+    fetch_list();
+});
+
+/** 表格列数随「是否显示勾选列」变化 */
+const column_count = computed(() => (is_superuser.value && view.value === 'active' ? 8 : 7));
+
 onMounted(
     async () => {
         fetch_list();
@@ -339,7 +373,7 @@ onMounted(
 
 <template>
     <main class="flex-1 overflow-y-auto p-6">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-4">
                 <div role="tablist" class="tabs tabs-box tabs-sm">
                     <button role="tab" class="tab" :class="{ 'tab-active': view === 'active' }"
@@ -352,18 +386,33 @@ onMounted(
                     </button>
                 </div>
             </div>
-            <button
-                v-if="view === 'active'"
-                class="btn btn-main btn-primary"
-                @click="open_create">
-                + 新增文章
-            </button>
+            <div class="flex items-center gap-3">
+                <!-- 超管：按发布主体筛选（普通账号由后端固定收敛为本人，无需筛选） -->
+                <select v-if="is_superuser" v-model="filter_user_id"
+                    class="select select-bordered select-sm w-48">
+                    <option :value="''">全部作者</option>
+                    <option v-for="u in users" :key="u.id" :value="u.id">{{ u.nickname }}</option>
+                </select>
+                <button
+                    v-if="view === 'active'"
+                    class="btn btn-main btn-primary"
+                    @click="open_create">
+                    + 新增文章
+                </button>
+            </div>
+        </div>
+
+        <!-- 普通账号权限说明：仅本人文章，分类不可改 -->
+        <div v-if="is_normal_user" role="status" class="alert alert-info mb-4 text-sm py-2">
+            <span>
+                当前为普通账号：仅显示并管理本人文章；文章分类由管理员维护，普通账号不可修改。
+            </span>
         </div>
 
         <p v-if="action_error" role="alert" class="alert alert-error mb-4 text-sm">{{ action_error }}</p>
         <p v-if="action_success" role="alert" class="alert alert-success mb-4 text-sm">{{ action_success }}</p>
 
-        <div v-if="view === 'active' && selected.size > 0" role="alert"
+        <div v-if="is_superuser && view === 'active' && selected.size > 0" role="alert"
             class="alert alert-info mb-4 text-sm">
             <span>已选 <b>{{ selected.size }}</b> 篇</span>
             <button class="btn btn-primary btn-xs whitespace-nowrap" @click="open_batch('add')">
@@ -379,7 +428,7 @@ onMounted(
             <table class="table text-sm">
                 <thead class="border-b border-base-300 text-base-content/60">
                     <tr class="text-center">
-                        <th v-if="view === 'active'" class="px-3 py-4 font-medium">
+                        <th v-if="is_superuser && view === 'active'" class="px-3 py-4 font-medium">
                             <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
                                 :checked="all_on_page_selected" @change="toggle_select_all" />
                         </th>
@@ -395,15 +444,15 @@ onMounted(
                 </thead>
                 <tbody class="divide-y divide-base-300 divide-dashed">
                     <tr v-if="list_error">
-                        <td :colspan="view === 'active' ? 8 : 7" class="px-6 py-8 text-center text-error">{{ list_error }}</td>
+                        <td :colspan="column_count" class="px-6 py-8 text-center text-error">{{ list_error }}</td>
                     </tr>
                     <tr v-else-if="article_list.length === 0">
-                        <td :colspan="view === 'active' ? 8 : 7" class="px-6 py-8 text-center text-base-content/40">
-                            {{ view === 'trash' ? '回收站为空' : '暂无文章' }}
+                        <td :colspan="column_count" class="px-6 py-8 text-center text-base-content/40">
+                            {{ view === 'trash' ? '回收站为空' : (is_normal_user ? '暂无我的文章' : '暂无文章') }}
                         </td>
                     </tr>
                     <tr v-for="article in article_list" :key="article.slug" class="text-center hover:bg-base-200 link-transition">
-                        <td v-if="view === 'active'" class="px-3 py-3.5">
+                        <td v-if="is_superuser && view === 'active'" class="px-3 py-3.5">
                             <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
                                 :checked="selected.has(article.slug)" @change="toggle_select(article.slug)" />
                         </td>
@@ -423,7 +472,7 @@ onMounted(
                             <div class="max-w-[7rem] truncate">{{ article.user?.nickname ?? '—' }}</div>
                         </td>
                         <td class="px-4 py-3">
-                            <button v-if="can_manage(article)" class="btn btn-xs whitespace-nowrap"
+                            <button v-if="can_manage_article(article.user_id)" class="btn btn-xs whitespace-nowrap"
                                 :class="article.is_recommended ? 'btn-primary btn-soft' : 'btn-ghost'"
                                 :disabled="action_slug === article.slug"
                                 @click="toggle_recommended(article)">
@@ -439,7 +488,7 @@ onMounted(
                             <div class="flex items-center justify-center gap-1">
                                 <template v-if="view === 'active'">
                                     <!-- 超管可操作全部；普通用户仅本人文章（他人操作后端 403） -->
-                                    <template v-if="can_manage(article)">
+                                    <template v-if="can_manage_article(article.user_id)">
                                         <button class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
                                             @click="open_edit(article)">编辑</button>
                                         <button class="btn btn-ghost btn-xs text-error whitespace-nowrap"
@@ -448,7 +497,7 @@ onMounted(
                                     </template>
                                     <span v-else class="text-xs text-base-content/30">—</span>
                                 </template>
-                                <button v-else-if="can_manage(article)" class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
+                                <button v-else-if="can_manage_article(article.user_id)" class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
                                     :disabled="action_slug === article.slug"
                                     @click="restore_article(article)">恢复</button>
                                 <span v-else class="text-xs text-base-content/30">—</span>
@@ -491,6 +540,7 @@ onMounted(
                                 :value="cover_progress" max="100"></progress>
                             <div class="mt-2 flex items-center gap-3">
                                 <img v-if="form.cover_img_slug" :src="url_prefix.pic_prefix + form.cover_img_slug" alt="cover"
+                                    loading="lazy" decoding="async"
                                     class="h-16 w-24 rounded-lg object-cover ring-1 ring-base-300" />
                                 <input v-model="form.cover_img_slug" placeholder="或直接填图片 slug"
                                     class="input input-bordered flex-1 mt-1" />
@@ -500,7 +550,7 @@ onMounted(
                         </div>
 
                         <!-- 超管专属：指定发布主体与发布时间（普通用户由服务端从 JWT / 当前时间取值） -->
-                        <template v-if="auth_store.is_superuser">
+                        <template v-if="is_superuser">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-base-content/70">
                                 <label>发布主体（作者）
                                     <select v-model="form.user_id" class="select select-bordered w-full mt-1">
@@ -520,13 +570,19 @@ onMounted(
                             关联分类（仅二级，可多选）
                             <div class="mt-2 flex flex-wrap gap-2">
                                 <button v-for="opt in second_level_options" :key="opt.id" type="button"
-                                    class="badge cursor-pointer" :class="form.category_ids.includes(opt.id)
-                                        ? 'badge-primary'
-                                        : 'badge-outline'"
+                                    class="badge"
+                                    :class="[
+                                        form.category_ids.includes(opt.id) ? 'badge-primary' : 'badge-outline',
+                                        can_edit_categories ? 'cursor-pointer' : 'opacity-70 cursor-not-allowed',
+                                    ]"
+                                    :disabled="!can_edit_categories"
                                     @click="toggle_category(opt.id)">
                                     {{ opt.label }}
                                 </button>
                             </div>
+                            <span v-if="!can_edit_categories" class="mt-2 block text-xs text-base-content/40">
+                                普通账号不可修改已有文章的分类，如需调整请联系管理员。
+                            </span>
                         </div>
 
                         <div class="flex flex-row gap-6 text-sm text-base-content/70">
@@ -548,8 +604,8 @@ onMounted(
             </template>
         </AppModal>
 
-        <!-- 批量分类弹窗 -->
-        <AppModal v-model="show_batch_modal" max-width="max-w-lg"
+        <!-- 批量分类弹窗（仅超管渲染） -->
+        <AppModal v-if="is_superuser" v-model="show_batch_modal" max-width="max-w-lg"
             :title="batch_mode === 'add' ? '批量加入分类' : '批量从分类移除'">
             <p class="text-sm text-base-content/60 mb-4">
                 已选 {{ selected.size }} 篇文章，选择目标分类（仅二级）：

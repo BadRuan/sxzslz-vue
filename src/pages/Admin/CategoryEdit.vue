@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import apiService from '@/utils/apiService';
 import { api_error_detail } from '@/utils/apiError';
+import { useAuthStore } from '@/store/auth';
 import AppModal from '@/components/AppModal.vue';
 import {
     type CategoryFlat,
@@ -9,6 +10,12 @@ import {
     build_category_tree,
     flatten_tree,
 } from '@/utils/category';
+
+const auth_store = useAuthStore();
+
+// 路由守卫已拦截普通账号；此处再做一次兜底，避免角色变化/直接调用时误操作
+const is_forbidden = ref(false);
+const is_loading = ref(true);
 
 const categories = ref<CategoryFlat[]>([]);
 const action_error = ref('');
@@ -144,98 +151,118 @@ const remove_category = (row: CategoryTreeNode) => {
     };
 };
 
-onMounted(queryCategoryInfo);
+onMounted(async () => {
+    const user = await auth_store.ensure_user();
+    if (!user?.is_superuser) {
+        is_forbidden.value = true;
+        is_loading.value = false;
+        return;
+    }
+    await queryCategoryInfo();
+    is_loading.value = false;
+});
 </script>
 
 <template>
     <main class="flex-1 overflow-y-auto p-6">
-        <div class="flex items-center justify-end mb-6">
-            <button class="btn btn-main btn-primary" @click="open_create()">
-                + 新增分类
-            </button>
+        <div v-if="is_loading" class="card rounded-box p-12 text-center text-base-content/60">
+            <span class="loading loading-spinner loading-md mx-auto mb-4 block"></span>
+            <p>加载中...</p>
         </div>
 
-        <p v-if="action_error" role="alert" class="alert alert-error mb-4 text-sm">{{ action_error }}</p>
-        <p v-if="list_error" role="alert" class="alert alert-error mb-4 text-sm">{{ list_error }}</p>
-
-        <div class="card rounded-box overflow-x-auto">
-            <table class="table text-sm text-center">
-                <thead class="border-b border-base-300 text-base-content/60">
-                    <tr>
-                        <th class="px-6 py-4 font-medium">分类名称</th>
-                        <th class="px-6 py-4 font-medium">层级</th>
-                        <th class="px-6 py-4 font-medium">排序</th>
-                        <th class="px-6 py-4 font-medium">操作</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-base-300 divide-dashed">
-                    <tr v-if="!list_error && tree_rows.length === 0">
-                        <td colspan="4" class="px-6 py-8 text-center text-base-content/40">暂无分类</td>
-                    </tr>
-                    <tr v-for="{ node, depth } in tree_rows" :key="node.id" class="hover:bg-base-200 link-transition">
-                        <td class="px-6 py-3.5 text-base-content/80 text-left"
-                            :style="{ paddingLeft: `${1.25 + depth * 1.5}rem` }">
-                            {{ node.name }}
-                        </td>
-                        <td class="px-6 py-3.5 text-base-content/60">{{ depth + 1 }}</td>
-                        <td class="px-6 py-3.5 text-base-content/60">{{ node.sort }}</td>
-                        <td class="px-6 py-3.5">
-                            <div class="flex items-center justify-center gap-1">
-                                <!-- 仅一级分类可添加子分类（严格二级） -->
-                                <button v-if="depth === 0" class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
-                                    @click="open_create(node.id)">添加子分类</button>
-                                <button class="btn btn-ghost btn-xs text-primary whitespace-nowrap" @click="open_edit(node)">编辑</button>
-                                <button class="btn btn-ghost btn-xs text-error whitespace-nowrap" @click="remove_category(node)">删除</button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        <div v-else-if="is_forbidden" role="alert" class="alert alert-warning text-sm">
+            仅超级管理员可管理文章分类，当前账号无此权限。
         </div>
 
-        <!-- 新增/编辑弹窗 -->
-        <AppModal v-model="show_modal" max-width="max-w-sm"
-            :title="modal_mode === 'create' ? '新增分类' : '编辑分类'">
-            <div class="flex flex-col gap-3">
-                <label class="text-sm text-base-content/70">名称
-                    <input v-model="form.name"
-                        class="input input-bordered w-full mt-1" />
-                </label>
-                <label class="text-sm text-base-content/70">父分类
-                    <select v-model.number="form.parent_id" :disabled="editing_is_first_level"
-                        class="select select-bordered w-full mt-1 disabled:opacity-60">
-                        <option :value="0">一级分类</option>
-                        <option v-for="opt in parent_options" :key="opt.id" :value="opt.id">{{ opt.label }}</option>
-                    </select>
-                    <span class="block mt-1 text-xs text-base-content/40">
-                        {{ editing_is_first_level
-                            ? '一级分类不可调整父级'
-                            : '分类仅支持二级：子分类只能挂在一级分类下' }}
-                    </span>
-                </label>
-                <label class="text-sm text-base-content/70">排序
-                    <input v-model.number="form.sort" type="number"
-                        class="input input-bordered w-full mt-1" />
-                </label>
-                <p v-if="modal_error" class="text-sm text-error">{{ modal_error }}</p>
-            </div>
-            <template #footer>
-                <button class="btn" @click="show_modal = false">取消</button>
-                <button class="btn btn-main btn-primary" :disabled="saving"
-                    :class="{ 'btn-disabled': saving }"
-                    @click="submit_form">
-                    {{ saving ? '保存中...' : '保存' }}
+        <template v-else>
+            <div class="flex items-center justify-end mb-6">
+                <button class="btn btn-main btn-primary" @click="open_create()">
+                    + 新增分类
                 </button>
-            </template>
-        </AppModal>
+            </div>
 
-        <!-- 删除确认弹窗 -->
-        <AppModal v-model="confirm_dialog.show" title="删除分类">
-            <p class="text-sm text-base-content/70">{{ confirm_dialog.message }}</p>
-            <template #footer>
-                <button class="btn" @click="confirm_dialog.show = false">取消</button>
-                <button class="btn btn-main btn-error" @click="run_confirm">确认删除</button>
-            </template>
-        </AppModal>
+            <p v-if="action_error" role="alert" class="alert alert-error mb-4 text-sm">{{ action_error }}</p>
+            <p v-if="list_error" role="alert" class="alert alert-error mb-4 text-sm">{{ list_error }}</p>
+
+            <div class="card rounded-box overflow-x-auto">
+                <table class="table text-sm text-center">
+                    <thead class="border-b border-base-300 text-base-content/60">
+                        <tr>
+                            <th class="px-6 py-4 font-medium">分类名称</th>
+                            <th class="px-6 py-4 font-medium">层级</th>
+                            <th class="px-6 py-4 font-medium">排序</th>
+                            <th class="px-6 py-4 font-medium">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-base-300 divide-dashed">
+                        <tr v-if="!list_error && tree_rows.length === 0">
+                            <td colspan="4" class="px-6 py-8 text-center text-base-content/40">暂无分类</td>
+                        </tr>
+                        <tr v-for="{ node, depth } in tree_rows" :key="node.id" class="hover:bg-base-200 link-transition">
+                            <td class="px-6 py-3.5 text-base-content/80 text-left"
+                                :style="{ paddingLeft: `${1.25 + depth * 1.5}rem` }">
+                                {{ node.name }}
+                            </td>
+                            <td class="px-6 py-3.5 text-base-content/60">{{ depth + 1 }}</td>
+                            <td class="px-6 py-3.5 text-base-content/60">{{ node.sort }}</td>
+                            <td class="px-6 py-3.5">
+                                <div class="flex items-center justify-center gap-1">
+                                    <!-- 仅一级分类可添加子分类（严格二级） -->
+                                    <button v-if="depth === 0" class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
+                                        @click="open_create(node.id)">添加子分类</button>
+                                    <button class="btn btn-ghost btn-xs text-primary whitespace-nowrap" @click="open_edit(node)">编辑</button>
+                                    <button class="btn btn-ghost btn-xs text-error whitespace-nowrap" @click="remove_category(node)">删除</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 新增/编辑弹窗 -->
+            <AppModal v-model="show_modal" max-width="max-w-sm"
+                :title="modal_mode === 'create' ? '新增分类' : '编辑分类'">
+                <div class="flex flex-col gap-3">
+                    <label class="text-sm text-base-content/70">名称
+                        <input v-model="form.name"
+                            class="input input-bordered w-full mt-1" />
+                    </label>
+                    <label class="text-sm text-base-content/70">父分类
+                        <select v-model.number="form.parent_id" :disabled="editing_is_first_level"
+                            class="select select-bordered w-full mt-1 disabled:opacity-60">
+                            <option :value="0">一级分类</option>
+                            <option v-for="opt in parent_options" :key="opt.id" :value="opt.id">{{ opt.label }}</option>
+                        </select>
+                        <span class="block mt-1 text-xs text-base-content/40">
+                            {{ editing_is_first_level
+                                ? '一级分类不可调整父级'
+                                : '分类仅支持二级：子分类只能挂在一级分类下' }}
+                        </span>
+                    </label>
+                    <label class="text-sm text-base-content/70">排序
+                        <input v-model.number="form.sort" type="number"
+                            class="input input-bordered w-full mt-1" />
+                    </label>
+                    <p v-if="modal_error" class="text-sm text-error">{{ modal_error }}</p>
+                </div>
+                <template #footer>
+                    <button class="btn" @click="show_modal = false">取消</button>
+                    <button class="btn btn-main btn-primary" :disabled="saving"
+                        :class="{ 'btn-disabled': saving }"
+                        @click="submit_form">
+                        {{ saving ? '保存中...' : '保存' }}
+                    </button>
+                </template>
+            </AppModal>
+
+            <!-- 删除确认弹窗 -->
+            <AppModal v-model="confirm_dialog.show" title="删除分类">
+                <p class="text-sm text-base-content/70">{{ confirm_dialog.message }}</p>
+                <template #footer>
+                    <button class="btn" @click="confirm_dialog.show = false">取消</button>
+                    <button class="btn btn-main btn-error" @click="run_confirm">确认删除</button>
+                </template>
+            </AppModal>
+        </template>
     </main>
 </template>

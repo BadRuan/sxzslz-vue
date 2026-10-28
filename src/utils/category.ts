@@ -75,8 +75,8 @@ export const to_second_level_id = (
 };
 
 /** 按名称在树中查找分类（支持多个候选名，命中第一个） */
-export const find_by_name = (tree: CategoryModel[], names: string | string[]): CategoryModel | undefined => {
-    const candidates = Array.isArray(names) ? names : [names];
+export const find_by_name = (tree: CategoryModel[], names: string | readonly string[]): CategoryModel | undefined => {
+    const candidates = typeof names === 'string' ? [names] : names;
     for (const name of candidates) {
         for (const { node } of flatten_categories(tree)) {
             if (node.name === name) return node;
@@ -88,10 +88,10 @@ export const find_by_name = (tree: CategoryModel[], names: string | string[]): C
 const warned_names = new Set<string>();
 
 /** 分类名 → 分类 id。树非空却找不到时告警一次并返回 undefined，供调用方容错 */
-export const name_category_id = (tree: CategoryModel[], names: string | string[]): number | undefined => {
+export const name_category_id = (tree: CategoryModel[], names: string | readonly string[]): number | undefined => {
     const found = find_by_name(tree, names);
     if (!found && tree.length > 0) {
-        const key = Array.isArray(names) ? names.join('/') : names;
+        const key = typeof names === 'string' ? names : names.join('/');
         if (!warned_names.has(key)) {
             warned_names.add(key);
             console.warn(`分类名未找到: ${key}`);

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import apiService from '@/utils/apiService';
 import { useBaseinfoStore } from '@/store/base';
@@ -15,6 +16,9 @@ interface CountModel {
     attachment_count: number,
 };
 
+const route = useRoute();
+const auth_store = useAuthStore();
+
 const count_info = ref<CountModel>({
     total_article: 0,
     image_count: 0,
@@ -22,6 +26,10 @@ const count_info = ref<CountModel>({
 });
 const latest_article = ref<ArticleModel[]>();
 const stats_error = ref('');
+
+// 路由守卫拦截普通账号访问分类管理后的提示（?denied=superuser）
+const is_denied_visible = ref(route.query.denied === 'superuser');
+const dismiss_denied = () => { is_denied_visible.value = false; };
 
 const fetchCountInfo = async () => {
     stats_error.value = '';
@@ -31,6 +39,7 @@ const fetchCountInfo = async () => {
             apiService.get('/image/', { page: 1, page_size: 1 }),
             apiService.get('/document/', { page: 1, page_size: 1 }),
         ]);
+        // 普通账号的数据由后端收敛为本人；超管为全站口径
         count_info.value.total_article = articles_res.total;
         count_info.value.image_count = images_res.total;
         count_info.value.attachment_count = documents_res.total;
@@ -40,14 +49,15 @@ const fetchCountInfo = async () => {
     }
 }
 
-const auth_store = useAuthStore();
-
-// 默认展示登录账户的最新文章（含分类信息）；Layout 的 fetchMe 可能尚未完成，这里自行等待
+// 超管看全站最新文章，普通账号看本人最新文章（后端对普通账号强制收敛）
 const getAdminLatestArticle = async () => {
     try {
-        await auth_store.fetchMe();
-        const user_id = auth_store.user?.id;
-        const res = await articleService.getArticles({ page: 1, page_size: 30, user_id });
+        await auth_store.ensure_user();
+        const res = await articleService.getArticles({
+            page: 1,
+            page_size: 30,
+            ...(auth_store.is_superuser ? {} : { user_id: auth_store.user?.id }),
+        });
         latest_article.value = res.data ?? [];
     } catch (error) {
         console.error('获取管理后台最新文章失败:', error)
@@ -60,21 +70,21 @@ const { users } = storeToRefs(baseinfo_store);
 // 统计卡数据驱动（4 卡结构一致，仅色相/图标/取值不同）
 const stat_items = computed(() => [
     {
-        label: '文章总数',
+        label: auth_store.is_superuser ? '全站文章总数' : '我的文章总数',
         value: count_info.value.total_article,
         color: 'text-info',
         bg: 'bg-info/10',
         icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
     },
     {
-        label: '图片数量',
+        label: auth_store.is_superuser ? '全站图片数量' : '我的图片数量',
         value: count_info.value.image_count,
         color: 'text-secondary',
         bg: 'bg-secondary/10',
         icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
     },
     {
-        label: '附件数量',
+        label: auth_store.is_superuser ? '全站附件数量' : '我的附件数量',
         value: count_info.value.attachment_count,
         color: 'text-warning',
         bg: 'bg-warning/10',
@@ -100,6 +110,11 @@ onMounted(
 
 <template>
     <main class="flex-1 overflow-y-auto p-6 space-y-6">
+        <div v-if="is_denied_visible" role="alert" class="alert alert-warning text-sm">
+            <span>当前账号为普通用户，无权访问分类管理。</span>
+            <button class="btn btn-ghost btn-xs" @click="dismiss_denied">知道了</button>
+        </div>
+
         <p v-if="stats_error" role="alert" class="alert alert-error text-sm">{{ stats_error }}</p>
         <!-- 内容区宽度 = 视口 − 侧栏 192px，lg(1024) 下 4 列仅剩 ~180px/卡，xl 起才 4 列 -->
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
@@ -119,7 +134,9 @@ onMounted(
 
         <div class="card rounded-box">
             <div class="px-5 py-4 border-b border-base-300 flex items-center justify-between">
-                <h3 class="text-sm font-semibold text-base-content">我的最新文章</h3>
+                <h3 class="text-sm font-semibold text-base-content">
+                    {{ auth_store.is_superuser ? '全站最新文章' : '我的最新文章' }}
+                </h3>
                 <RouterLink :to="{ name: 'AdminArticleList' }" class="text-xs text-primary hover:underline">查看更多</RouterLink>
             </div>
             <ul class="divide-y divide-base-300">
