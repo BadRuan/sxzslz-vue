@@ -225,7 +225,8 @@ const renderedHtml = computed(() => {
                         </div>
                     </div>
                 </div>
-                <div class="px-6 sm:px-10 py-12 mx-auto max-w-3xl prose prose-lg
+                <!-- 正文区：加宽到 max-w-5xl（原 768px 在大屏下卡片内两侧留白过多），并保留上下留白 -->
+                <div class="px-6 sm:px-10 py-12 mx-auto max-w-5xl prose prose-lg
                         prose-headings:font-bold prose-headings:text-base-content/90 prose-headings:mb-4 prose-headings:mt-8
                         prose-h1:text-2xl prose-h2:text-2xl prose-h3:text-base
                         prose-p:leading-relaxed prose-p:indent-2em
