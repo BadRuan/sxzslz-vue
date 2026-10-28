@@ -4,7 +4,7 @@ import { usePermissions } from '@/composables/usePermissions';
 
 const link_active_class = 'menu-active !text-primary font-semibold';
 
-const { can_manage_categories } = usePermissions();
+const { is_superuser, can_manage_categories } = usePermissions();
 
 interface NavItem {
     name: string
@@ -12,11 +12,15 @@ interface NavItem {
     visible: boolean
 }
 
-/** 侧边栏菜单：分类管理仅超级管理员可见（普通账号访问路由也会被守卫拦截） */
+/**
+ * 侧边栏菜单：
+ * - 分类管理、账户管理仅超级管理员可见（普通账号访问路由也会被守卫拦截）
+ */
 const nav_items = computed<NavItem[]>(() => [
     { name: 'AdminOverview', label: '数据概览', visible: true },
     { name: 'AdminArticleList', label: '文章管理', visible: true },
     { name: 'AdminCategory', label: '分类管理', visible: can_manage_categories.value },
+    { name: 'AdminUsers', label: '账户管理', visible: can_manage_categories.value },
     { name: 'AdminPhoto', label: '照片管理', visible: true },
     { name: 'AdminDocument', label: '文档管理', visible: true },
 ]);

@@ -61,5 +61,5 @@ export const useBaseinfoStore = defineStore('baseinfo', () => {
         return users.value.find(item => item.id === user_id)?.nickname ?? '';
     }
 
-    return { categories, users, loading, checkBaseinfo, user_nickname }
+    return { categories, users, loading, fetchBaseInfo, checkBaseinfo, user_nickname }
 })

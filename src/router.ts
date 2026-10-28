@@ -75,6 +75,13 @@ const routes: RouteRecordRaw[] = [
                 meta: { title: '分类管理', requires_superuser: true }
             },
             {
+                path: 'users',
+                name: 'AdminUsers',
+                component: () => import("@/pages/Admin/UserAdmin.vue"),
+                // 账户管理仅超级管理员：普通账号侧边栏不展示，直接访问也会被重定向
+                meta: { title: '账户管理', requires_superuser: true }
+            },
+            {
                 path: 'list',
                 name: 'AdminArticleList',
                 component: () => import("@/pages/Admin/ArticleList.vue"),

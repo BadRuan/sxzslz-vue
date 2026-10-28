@@ -24,6 +24,21 @@ export interface PasswordChangeInput {
     new_password: string,
 }
 
+/** 后端默认的普通账户初始密码（对接文档 DEFAULT_USER_PASSWORD） */
+export const DEFAULT_USER_PASSWORD = 'abc123';
+
+/** POST /users/ 请求体：password 可省略，服务端默认 abc123 且至少 6 位 */
+export interface UserCreateInput {
+    username: string,
+    nickname: string,
+    password?: string,
+}
+
+/** POST /users/{id}/reset-password 与 DELETE /users/{id} 的响应体 */
+export interface DetailResponse {
+    detail: string,
+}
+
 /** 登录是公开接口：匿名请求，避免历史失效 token 干扰登录 */
 const request_login = (data: { username: string, password: string }) =>
     apiService.post<TokenModel>('/auth/login', data, { skip_auth: true });
@@ -31,7 +46,18 @@ const request_login = (data: { username: string, password: string }) =>
 const request_me = () => apiService.get<AuthUserModel>('/auth/me');
 
 const request_change_password = (data: PasswordChangeInput) =>
-    apiService.put<{ detail: string }>('/auth/password', data);
+    apiService.put<DetailResponse>('/auth/password', data);
+
+// —— 用户账户管理（仅超管；POST/PATCH/DELETE 均带 JWT） ——
+
+const request_create_user = (data: UserCreateInput) =>
+    apiService.post<AuthUserModel>('/users/', data);
+
+const request_reset_password = (id: number) =>
+    apiService.post<DetailResponse>(`/users/${id}/reset-password`);
+
+const request_delete_user = (id: number) =>
+    apiService.delete<DetailResponse>(`/users/${id}`);
 
 export const useAuthStore = defineStore('auth', () => {
     const user = ref<AuthUserModel | null>(null);
@@ -102,6 +128,47 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    // —— 用户账户管理（仅超管；非超管后端 403） ——
+
+    /**
+     * 创建普通账户。成功返回新账户 UserOut（is_superuser 恒为 false）。
+     * 失败：400 用户名已存在 / 昵称已存在，422 字段缺失或密码不足 6 位。
+     */
+    const create_user = async (data: UserCreateInput): Promise<AuthUserModel> => {
+        try {
+            return await request_create_user(data)
+        } catch (error: any) {
+            throw new Error(api_error_detail(error, '创建账户失败，请稍后重试'))
+        }
+    }
+
+    /**
+     * 重置普通账户密码为 abc123：旧密码立即失效。
+     * 失败：403 不能重置超级管理员密码 / 404 用户不存在。
+     */
+    const reset_user_password = async (id: number) => {
+        try {
+            const res = await request_reset_password(id)
+            return res.detail
+        } catch (error: any) {
+            throw new Error(api_error_detail(error, '重置密码失败，请稍后重试'))
+        }
+    }
+
+    /**
+     * 删除账户（硬删除，无法登录；已签发 token 因「用户不存在」失效）。
+     * 该账户的文章/图片/文档保留，user 关联变 null。
+     * 失败：403 不能删除超级管理员账户 / 404 用户不存在。
+     */
+    const delete_user = async (id: number) => {
+        try {
+            await request_delete_user(id)
+            return true
+        } catch (error: any) {
+            throw new Error(api_error_detail(error, '删除账户失败，请稍后重试'))
+        }
+    }
+
     return {
         user,
         loading,
@@ -113,5 +180,8 @@ export const useAuthStore = defineStore('auth', () => {
         ensure_user,
         logout,
         changePassword,
+        create_user,
+        reset_user_password,
+        delete_user,
     }
 })

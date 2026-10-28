@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import apiService, { type UploadResult } from '@/utils/apiService';
+import apiService, { type UploadResult, MAX_BATCH_FILES } from '@/utils/apiService';
 import { api_error_detail } from '@/utils/apiError';
 import { url_prefix } from '@/utils/baseInfo';
 import { useAuthStore } from '@/store/auth';
@@ -36,14 +36,11 @@ const upload_error = ref('');
 const upload_success = ref('');
 const action_error = ref('');
 
-/** 多图逐个上传进度：overall 综合进度；current 正在传的文件名与单文件百分比 */
+/** 上传进度：单次请求整体进度（批量接口为一次请求，单文件接口同理） */
 const upload_progress = ref({
     is_active: false,
-    current_name: '',
-    current_percent: 0,
-    overall_percent: 0,
-    finished: 0,
-    total: 0,
+    label: '',
+    percent: 0,
 });
 
 /** 改名/删除权限：上传者本人或超管（对接文档 §1 权限边界） */
@@ -88,41 +85,33 @@ const pick_files = async (event: Event) => {
             return;
         }
     }
+    // 批量接口单次上限（服务端 MAX_BATCH_FILES），超出直接拦截
+    if (files.length > MAX_BATCH_FILES) {
+        upload_error.value = `一次最多上传 ${MAX_BATCH_FILES} 张图片，请分批上传`;
+        return;
+    }
 
-    // 综合进度 = 已完成文件字节 + 当前文件已发送字节 / 总字节
-    const total_bytes = files.reduce((sum, f) => sum + f.size, 0);
-    let done_bytes = 0;
+    const is_batch = files.length > 1;
     upload_progress.value = {
         is_active: true,
-        current_name: files[0]?.name ?? '',
-        current_percent: 0,
-        overall_percent: 0,
-        finished: 0,
-        total: files.length,
+        label: is_batch ? `正在上传 ${files.length} 张图片...` : `正在上传：${files[0]?.name ?? ''}`,
+        percent: 0,
     };
 
     try {
-        // 后端为单文件接口，逐个上传
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            if (!file) continue;
-            upload_progress.value.current_name = file.name;
-            upload_progress.value.current_percent = 0;
-            upload_progress.value.finished = i;
-
-            await apiService.uploadWithProgress<UploadResult>('/image/', file, (percent) => {
-                upload_progress.value.current_percent = percent;
-                const overall = total_bytes > 0
-                    ? Math.floor(((done_bytes + file.size * (percent / 100)) / total_bytes) * 100)
-                    : 100;
-                upload_progress.value.overall_percent = Math.min(overall, 99);
-            });
-
-            done_bytes += file.size;
-            upload_progress.value.finished = i + 1;
-            upload_progress.value.overall_percent = Math.floor((done_bytes / total_bytes) * 100);
+        if (is_batch) {
+            // 批量接口：单次请求携带全部文件（字段名 files），整批原子
+            await apiService.uploadBatchWithProgress<UploadResult[]>(
+                '/image/batch/', files,
+                (percent) => { upload_progress.value.percent = Math.min(percent, 99); },
+            );
+        } else {
+            await apiService.uploadWithProgress<UploadResult>(
+                '/image/', files[0] as File,
+                (percent) => { upload_progress.value.percent = Math.min(percent, 99); },
+            );
         }
-        upload_progress.value.overall_percent = 100;
+        upload_progress.value.percent = 100;
         upload_success.value = `已上传 ${files.length} 张图片`;
         page.value = 1;
         await getImageList();
@@ -214,20 +203,17 @@ onMounted(getImageList);
                     :disabled="upload_progress.is_active" @change="pick_files" />
             </label>
         </div>
-        <p class="mb-4 text-xs text-base-content/40">支持 JPG / PNG / GIF / WebP，单张 ≤ 10MB</p>
+        <p class="mb-4 text-xs text-base-content/40">支持 JPG / PNG / GIF / WebP，单张 ≤ 10MB，一次最多选 {{ MAX_BATCH_FILES }} 张（多张时批量上传，整批同时生效）</p>
 
-        <!-- 上传进度：发送到 100% 后服务端仍在生成 WebP 预览，完成前保持进度条可见 -->
+        <!-- 上传进度：批量接口为一次请求，显示整体进度；发送到 100% 后服务端仍在生成 WebP 预览，完成前保持进度条可见 -->
         <div v-if="upload_progress.is_active" class="card bg-base-100 border border-base-300 rounded-box mb-4 px-4 py-3">
             <div class="flex items-center justify-between text-sm mb-2 gap-3">
-                <span class="truncate text-base-content/80" :title="upload_progress.current_name">
-                    正在上传（{{ upload_progress.finished + 1 }}/{{ upload_progress.total }}）：{{ upload_progress.current_name }}
+                <span class="truncate text-base-content/80" :title="upload_progress.label">
+                    {{ upload_progress.label }}
                 </span>
-                <span class="text-base-content/60 whitespace-nowrap">总进度 {{ upload_progress.overall_percent }}%</span>
+                <span class="text-base-content/60 whitespace-nowrap">{{ upload_progress.percent }}%</span>
             </div>
-            <progress class="progress progress-primary w-full" :value="upload_progress.overall_percent" max="100"></progress>
-            <div class="mt-1 text-xs text-base-content/40">
-                当前文件 {{ upload_progress.current_percent }}%
-            </div>
+            <progress class="progress progress-primary w-full" :value="upload_progress.percent" max="100"></progress>
         </div>
 
         <p v-if="upload_error" role="alert" class="alert alert-error mb-4 text-sm">{{ upload_error }}</p>
