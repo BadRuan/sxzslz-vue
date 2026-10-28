@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import apiService from '@/utils/apiService';
-import { api_error_detail } from '@/store/article';
+import { api_error_detail } from '@/utils/apiError';
 import AppModal from '@/components/AppModal.vue';
 import {
     type CategoryFlat,
@@ -12,6 +12,7 @@ import {
 
 const categories = ref<CategoryFlat[]>([]);
 const action_error = ref('');
+const list_error = ref('');
 
 // 自定义确认弹窗（替代 window.confirm/alert）
 const confirm_dialog = ref<{ show: boolean, message: string, on_ok: (() => void) | null }>({
@@ -26,10 +27,12 @@ const run_confirm = () => {
 const tree_rows = computed(() => flatten_tree(build_category_tree(categories.value)));
 
 const queryCategoryInfo = async () => {
+    list_error.value = '';
     try {
         const res = await apiService.get<CategoryFlat[]>('/categories/');
         categories.value = res;
     } catch (error) {
+        list_error.value = api_error_detail(error, '获取分类列表失败');
         console.error('获取分类详细信息失败:', error)
     }
 };
@@ -153,6 +156,7 @@ onMounted(queryCategoryInfo);
         </div>
 
         <p v-if="action_error" role="alert" class="alert alert-error mb-4 text-sm">{{ action_error }}</p>
+        <p v-if="list_error" role="alert" class="alert alert-error mb-4 text-sm">{{ list_error }}</p>
 
         <div class="card rounded-box overflow-x-auto">
             <table class="table text-sm text-center">
@@ -165,7 +169,10 @@ onMounted(queryCategoryInfo);
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-base-300 divide-dashed">
-                    <tr v-for="{ node, depth } in tree_rows" :key="node.id" class="hover:bg-base-300/50 link-transition">
+                    <tr v-if="!list_error && tree_rows.length === 0">
+                        <td colspan="4" class="px-6 py-8 text-center text-base-content/40">暂无分类</td>
+                    </tr>
+                    <tr v-for="{ node, depth } in tree_rows" :key="node.id" class="hover:bg-base-200 link-transition">
                         <td class="px-6 py-3.5 text-base-content/80 text-left"
                             :style="{ paddingLeft: `${1.25 + depth * 1.5}rem` }">
                             {{ node.name }}

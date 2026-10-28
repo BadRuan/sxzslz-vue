@@ -4,14 +4,15 @@ import { storeToRefs } from 'pinia';
 import dayjs from 'dayjs';
 import AppPagination from '@/components/AppPagination.vue';
 import AppModal from '@/components/AppModal.vue';
-import apiService from '@/utils/apiService';
+import apiService, { type UploadResult } from '@/utils/apiService';
 import { useBaseinfoStore } from '@/store/base';
+import { useAuthStore } from '@/store/auth';
 import { flatten_categories } from '@/utils/category';
+import { api_error_detail } from '@/utils/apiError';
 import {
     articleService,
-    api_error_detail,
     type ArticleModel,
-    type ArticleCreateInput,
+    type ArticleUpsertInput,
 } from '@/store/article';
 import { url_prefix } from '@/utils/baseInfo';
 
@@ -44,7 +45,13 @@ const run_confirm = () => {
 };
 
 const baseinfo_store = useBaseinfoStore();
-const { categories } = storeToRefs(baseinfo_store);
+const { categories, users } = storeToRefs(baseinfo_store);
+const auth_store = useAuthStore();
+
+/** 操作权限：超管可管全部；普通用户仅本人文章（后端 403 无权修改/删除/恢复他人文章） */
+const can_manage = (row: ArticleModel) =>
+    auth_store.is_superuser
+    || (auth_store.user !== null && row.user_id === auth_store.user.id);
 
 const fetch_list = async () => {
     list_error.value = '';
@@ -82,6 +89,7 @@ const modal_mode = ref<'create' | 'edit'>('create');
 const modal_error = ref('');
 const saving = ref(false);
 const uploading_cover = ref(false);
+const cover_progress = ref(0);
 const editing_slug = ref<string | null>(null);
 const form = ref<{
     title: string,
@@ -89,12 +97,18 @@ const form = ref<{
     cover_img_slug: string,
     is_recommended: boolean,
     category_ids: number[],
+    /** 仅超管：指定发布主体（空 = 保持/默认当前登录用户） */
+    user_id: number | '',
+    /** 仅超管：发布时间，datetime-local 值（空 = 保持/默认服务器当前时间） */
+    create_at: string,
 }>({
     title: '',
     content: '',
     cover_img_slug: '',
     is_recommended: false,
     category_ids: [],
+    user_id: '',
+    create_at: '',
 });
 
 /** 仅二级分类可挂文章：base 信息是树形（无 parent_id），严格二级下深度 1 即二级分类 */
@@ -110,6 +124,7 @@ const open_create = () => {
     form.value = {
         title: '', content: '', cover_img_slug: '',
         is_recommended: false, category_ids: [],
+        user_id: '', create_at: '',
     };
     modal_error.value = '';
     show_modal.value = true;
@@ -129,6 +144,11 @@ const open_edit = async (row: ArticleModel) => {
             cover_img_slug: detail.cover_img_slug ?? '',
             is_recommended: detail.is_recommended,
             category_ids: (detail.categories ?? []).map(c => c.id),
+            user_id: auth_store.is_superuser ? detail.user_id : '',
+            // 服务端时间为无时区本地时间，datetime-local 同形，直接截到分钟
+            create_at: auth_store.is_superuser
+                ? dayjs(detail.create_at).format('YYYY-MM-DDTHH:mm')
+                : '',
         };
     } catch (error) {
         modal_error.value = api_error_detail(error, '获取文章详情失败');
@@ -149,9 +169,12 @@ const pick_cover = async (event: Event) => {
         return;
     }
     uploading_cover.value = true;
+    cover_progress.value = 0;
     modal_error.value = '';
     try {
-        const res = await apiService.upload<{ slug: string }>('/image/', file);
+        const res = await apiService.uploadWithProgress<UploadResult>('/image/', file, (percent) => {
+            cover_progress.value = percent;
+        });
         form.value.cover_img_slug = res.slug;
     } catch (error) {
         modal_error.value = api_error_detail(error, '封面上传失败');
@@ -175,13 +198,18 @@ const submit_form = async () => {
     }
     saving.value = true;
     try {
-        const payload: ArticleCreateInput = {
+        const payload: ArticleUpsertInput = {
             title: form.value.title.trim(),
             content: form.value.content,
             cover_img_slug: form.value.cover_img_slug || null,
             is_recommended: form.value.is_recommended,
             category_ids: form.value.category_ids,
         };
+        // user_id / create_at 仅超管提交；普通用户传了也会被服务端忽略
+        if (auth_store.is_superuser) {
+            if (form.value.user_id !== '') payload.user_id = form.value.user_id;
+            if (form.value.create_at) payload.create_at = form.value.create_at;
+        }
         if (modal_mode.value === 'create') {
             await articleService.create(payload);
         } else if (editing_slug.value !== null) {
@@ -374,7 +402,7 @@ onMounted(
                             {{ view === 'trash' ? '回收站为空' : '暂无文章' }}
                         </td>
                     </tr>
-                    <tr v-for="article in article_list" :key="article.slug" class="text-center hover:bg-base-300/50 link-transition">
+                    <tr v-for="article in article_list" :key="article.slug" class="text-center hover:bg-base-200 link-transition">
                         <td v-if="view === 'active'" class="px-3 py-3.5">
                             <input type="checkbox" class="checkbox checkbox-primary checkbox-sm"
                                 :checked="selected.has(article.slug)" @change="toggle_select(article.slug)" />
@@ -395,12 +423,13 @@ onMounted(
                             <div class="max-w-[7rem] truncate">{{ article.user?.nickname ?? '—' }}</div>
                         </td>
                         <td class="px-4 py-3">
-                            <button class="btn btn-xs whitespace-nowrap"
+                            <button v-if="can_manage(article)" class="btn btn-xs whitespace-nowrap"
                                 :class="article.is_recommended ? 'btn-primary btn-soft' : 'btn-ghost'"
                                 :disabled="action_slug === article.slug"
                                 @click="toggle_recommended(article)">
                                 {{ article.is_recommended ? '已推荐' : '未推荐' }}
                             </button>
+                            <span v-else class="text-xs text-base-content/30">{{ article.is_recommended ? '已推荐' : '未推荐' }}</span>
                         </td>
                         <td class="px-4 py-3 text-base-content/70 hidden xl:table-cell">{{ article.view_count }}</td>
                         <td class="px-4 py-3 text-base-content/60 whitespace-nowrap">
@@ -409,15 +438,20 @@ onMounted(
                         <td class="px-4 py-3">
                             <div class="flex items-center justify-center gap-1">
                                 <template v-if="view === 'active'">
-                                    <button class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
-                                        @click="open_edit(article)">编辑</button>
-                                    <button class="btn btn-ghost btn-xs text-error whitespace-nowrap"
-                                        :disabled="action_slug === article.slug"
-                                        @click="remove_article(article)">删除</button>
+                                    <!-- 超管可操作全部；普通用户仅本人文章（他人操作后端 403） -->
+                                    <template v-if="can_manage(article)">
+                                        <button class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
+                                            @click="open_edit(article)">编辑</button>
+                                        <button class="btn btn-ghost btn-xs text-error whitespace-nowrap"
+                                            :disabled="action_slug === article.slug"
+                                            @click="remove_article(article)">删除</button>
+                                    </template>
+                                    <span v-else class="text-xs text-base-content/30">—</span>
                                 </template>
-                                <button v-else class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
+                                <button v-else-if="can_manage(article)" class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
                                     :disabled="action_slug === article.slug"
                                     @click="restore_article(article)">恢复</button>
+                                <span v-else class="text-xs text-base-content/30">—</span>
                             </div>
                         </td>
                     </tr>
@@ -449,8 +483,12 @@ onMounted(
                                 <input type="file" accept="image/jpeg,image/png,image/gif,image/webp"
                                     class="text-sm text-base-content/60 file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-primary/90 hover:file:bg-primary/20"
                                     :disabled="uploading_cover" @change="pick_cover" />
-                                <span v-if="uploading_cover" class="text-xs text-base-content/40">上传中...</span>
+                                <span v-if="uploading_cover" class="text-xs text-base-content/60 whitespace-nowrap">
+                                    上传中 {{ cover_progress }}%
+                                </span>
                             </div>
+                            <progress v-if="uploading_cover" class="progress progress-primary w-full mt-2"
+                                :value="cover_progress" max="100"></progress>
                             <div class="mt-2 flex items-center gap-3">
                                 <img v-if="form.cover_img_slug" :src="url_prefix.pic_prefix + form.cover_img_slug" alt="cover"
                                     class="h-16 w-24 rounded-lg object-cover ring-1 ring-base-300" />
@@ -460,6 +498,23 @@ onMounted(
                                     @click="form.cover_img_slug = ''">清除</button>
                             </div>
                         </div>
+
+                        <!-- 超管专属：指定发布主体与发布时间（普通用户由服务端从 JWT / 当前时间取值） -->
+                        <template v-if="auth_store.is_superuser">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-base-content/70">
+                                <label>发布主体（作者）
+                                    <select v-model="form.user_id" class="select select-bordered w-full mt-1">
+                                        <option :value="''">默认：当前登录用户</option>
+                                        <option v-for="u in users" :key="u.id" :value="u.id">{{ u.nickname }}</option>
+                                    </select>
+                                </label>
+                                <label>发布时间
+                                    <input v-model="form.create_at" type="datetime-local"
+                                        class="input input-bordered w-full mt-1" />
+                                    <span class="block mt-1 text-xs text-base-content/40">留空则新增时用服务器当前时间，编辑时保持不变</span>
+                                </label>
+                            </div>
+                        </template>
 
                         <div class="text-sm text-base-content/70">
                             关联分类（仅二级，可多选）

@@ -16,7 +16,7 @@ const baseinfo_store = useBaseinfoStore();
 const article_store = useArticleStore();
 
 const { categories } = storeToRefs(baseinfo_store);
-const { article_list, article_total, article_page, article_has_next, article_list_error } = storeToRefs(article_store);
+const { article_list, article_total, article_page, article_has_next, article_list_error, article_list_error_message } = storeToRefs(article_store);
 
 const loading = ref(true);
 
@@ -160,8 +160,8 @@ const goToNextPage = () => {
                                         <RouterLink v-for="child in parent.children" :key="child.id"
                                             :to="{ name: 'ArticleList', query: { category: child.id } }" :class="[
                                                 active_category === child.id
-                                                    ? 'bg-primary/10 text-primary font-bold'
-                                                    : 'text-base-content/80 hover:bg-base-200 hover:font-bold hover:text-primary/80'
+                                                    ? 'bg-primary/10 text-primary font-semibold'
+                                                    : 'text-base-content/80 hover:bg-base-200 hover:text-primary/80'
                                             ]" class="rounded-lg px-3 py-2 text-sm link-transition"
                                             style="padding-left: 1.5rem"
                                             @click="handleCategoryClick(child.id)">
@@ -182,10 +182,11 @@ const goToNextPage = () => {
 
                         <!-- 正常内容 -->
                         <template v-else>
-                            <!-- 接口失败与空数据区分：失败给出重试指引，而非误报「暂无文章」 -->
+                            <!-- 接口失败与空数据区分：失败给出后端原因与重试，而非误报「暂无文章」 -->
                             <div v-if="article_list_error"
                                 class="card rounded-box p-12 text-center text-base-content/60">
-                                <p class="mb-4">文章加载失败，请检查网络后重试</p>
+                                <p class="mb-2 text-error">{{ article_list_error_message || '文章加载失败' }}</p>
+                                <p class="mb-4">请检查网络后重试</p>
                                 <button type="button" class="btn btn-sm btn-primary"
                                     @click="article_store.getArticleList(active_category, page_number, 30)">
                                     重新加载
@@ -197,11 +198,11 @@ const goToNextPage = () => {
                             </div>
                             <div v-else class="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
                                 <article v-for="(article, index) in article_list" :key="index"
-                                    class="card rounded-box card-hover group hover:-translate-y-1 overflow-hidden">
+                                    class="card rounded-box card-hover group hover:-translate-y-0.5 overflow-hidden">
                                     <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }">
                                         <div class="h-52 w-full overflow-hidden bg-base-300">
                                             <ArticleCover :slug="article.cover_img_slug" alt="news_pic"
-                                                class="transition-transform duration-500 ease-out-soft group-hover:scale-105" />
+                                                class="transition-transform duration-200 ease-out group-hover:scale-105" />
                                         </div>
                                         <div class="p-5 flex flex-col gap-4 divide-y divide-base-200">
                                             <div class="flex flex-row items-center justify-between gap-2">

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import apiService, { type UploadResult } from '@/utils/apiService';
-import { api_error_detail } from '@/store/article';
+import { api_error_detail } from '@/utils/apiError';
 import { url_prefix } from '@/utils/baseInfo';
 import { useAuthStore } from '@/store/auth';
 import dayjs from 'dayjs';
@@ -19,6 +19,7 @@ export interface DocumentModel {
     user_id: number,
     view: number,
     uploaded_at: string,
+    user: { id: number, slug: string, nickname: string, is_superuser: boolean } | null,
 };
 
 const PAGE_SIZE = 30;
@@ -64,6 +65,11 @@ const upload_progress = ref<{
 });
 
 const ext_of = (filename: string) => filename.split('.').pop()?.toLowerCase() ?? '';
+
+/** 改名/删除权限：上传者本人或超管（对接文档 §1 权限边界） */
+const can_manage = (doc: DocumentModel) =>
+    auth_store.is_superuser
+    || (auth_store.user !== null && doc.user_id === auth_store.user.id);
 
 /** 后端按 MIME 精确校验；File.type 为空时无法通过，需提示用户 */
 const is_allowed_doc = (file: File) =>
@@ -273,6 +279,7 @@ onMounted(fetch_list);
                         <th class="px-4 py-4 font-medium">文件名</th>
                         <th class="px-4 py-4 font-medium whitespace-nowrap">类型</th>
                         <th class="px-4 py-4 font-medium whitespace-nowrap">大小</th>
+                        <th v-if="auth_store.is_superuser" class="px-4 py-4 font-medium whitespace-nowrap">上传者</th>
                         <!-- 1024 内容区 784px：浏览量列 xl 起显示，保证上传时间/操作列无需横滚可见 -->
                         <th class="px-4 py-4 font-medium hidden xl:table-cell">浏览量</th>
                         <th class="px-4 py-4 font-medium whitespace-nowrap">上传时间</th>
@@ -281,9 +288,9 @@ onMounted(fetch_list);
                 </thead>
                 <tbody class="divide-y divide-base-300 divide-dashed">
                     <tr v-if="!list_error && document_list.length === 0">
-                        <td colspan="7" class="px-4 py-8 text-center text-base-content/40">暂无文件</td>
+                        <td :colspan="auth_store.is_superuser ? 8 : 7" class="px-4 py-8 text-center text-base-content/40">暂无文件</td>
                     </tr>
-                    <tr v-for="(doc, index) in document_list" :key="doc.id" class="hover:bg-base-300/50 link-transition">
+                    <tr v-for="(doc, index) in document_list" :key="doc.id" class="hover:bg-base-200 link-transition">
                         <td class="px-4 py-3.5 text-base-content/60 whitespace-nowrap">{{ row_index(index) }}</td>
                         <!-- td 上的 max-width 在 auto 表格布局下不可靠：内层 div 限宽截断，悬停看全名 -->
                         <td class="px-4 py-3.5 text-base-content/80" :title="doc.raw_filename">
@@ -291,6 +298,9 @@ onMounted(fetch_list);
                         </td>
                         <td class="px-4 py-3.5 text-base-content/60 whitespace-nowrap">{{ ext_of(doc.raw_filename).toUpperCase() }}</td>
                         <td class="px-4 py-3.5 text-base-content/60 whitespace-nowrap">{{ format_size(doc.size_bytes) }}</td>
+                        <!-- 超管可见上传者（普通用户列表本身只含自己的文件） -->
+                        <td v-if="auth_store.is_superuser" class="px-4 py-3.5 text-base-content/60 max-w-[8rem] truncate"
+                            :title="doc.user?.nickname ?? ''">{{ doc.user?.nickname ?? '—' }}</td>
                         <td class="px-4 py-3.5 text-base-content/60 hidden xl:table-cell">{{ doc.view }}</td>
                         <td class="px-4 py-3.5 text-base-content/60 whitespace-nowrap">{{ dayjs(doc.uploaded_at).format('YYYY-MM-DD HH:mm') }}</td>
                         <td class="px-4 py-3.5">
@@ -299,8 +309,8 @@ onMounted(fetch_list);
                                     class="text-xs text-primary/90 hover:underline">下载</a>
                                 <!-- 详情页会把相对路径 slug 自动补成 /api/document/，MD 里只写 slug 即可生成下载链接 -->
                                 <CopyButton :text="`[${doc.raw_filename}](${doc.slug})`" label="复制 md" />
-                                <!-- 改名/删除仅上传者本人可操作（后端 403） -->
-                                <template v-if="auth_store.user && doc.user_id === auth_store.user.id">
+                                <!-- 改名/删除：上传者本人或超管（后端 403 其他人） -->
+                                <template v-if="can_manage(doc)">
                                     <button type="button" class="text-xs text-primary/90 hover:underline"
                                         @click="open_rename(doc)">改名</button>
                                     <button type="button" class="text-xs text-error/90 hover:underline"

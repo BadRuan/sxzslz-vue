@@ -1,6 +1,7 @@
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import apiService from '@/utils/apiService';
+import { api_error_detail } from '@/utils/apiError';
 
 const TOKEN_KEY = 'access_token';
 
@@ -21,6 +22,7 @@ export interface AuthUserModel {
     id: number,
     slug: string,
     nickname: string,
+    is_superuser: boolean,
 }
 
 /** PUT /auth/password 请求体：new_password 服务端要求至少 6 位 */
@@ -47,6 +49,9 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<AuthUserModel | null>(null);
   const loading = ref(false);
 
+  /** 是否超级管理员：控制后台差异展示（他人文章操作、作者/发布时间指定等） */
+  const is_superuser = computed(() => user.value?.is_superuser === true);
+
   const is_logged_in = () => get_token() !== null;
 
   const login = async (username: string, password: string) => {
@@ -54,12 +59,11 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const res = await authService.login({ username, password });
       set_token(res.access_token);
+      // 立即拉取用户信息（含 is_superuser），避免各页面各自等待 fetchMe
+      await fetchMe();
       return true
     } catch (error: any) {
-      // 401/400 的 detail 为字符串；422 的 detail 为数组取 [0].msg
-      const detail = error?.response?.data?.detail;
-      const message = Array.isArray(detail) ? detail[0]?.msg : detail;
-      throw new Error(message || '登录失败，请稍后重试')
+      throw new Error(api_error_detail(error, '登录失败，请稍后重试'))
     } finally {
       loading.value = false
     }
@@ -88,13 +92,11 @@ export const useAuthStore = defineStore('auth', () => {
       await authService.changePassword({ old_password, new_password })
       return true
     } catch (error: any) {
-      const detail = error?.response?.data?.detail;
-      const message = Array.isArray(detail) ? detail[0]?.msg : detail;
-      throw new Error(message || '密码修改失败，请稍后重试')
+      throw new Error(api_error_detail(error, '密码修改失败，请稍后重试'))
     } finally {
       loading.value = false
     }
   }
 
-  return { user, loading, is_logged_in, login, fetchMe, logout, changePassword }
+  return { user, loading, is_superuser, is_logged_in, login, fetchMe, logout, changePassword }
 })

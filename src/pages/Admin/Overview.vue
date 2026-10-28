@@ -6,6 +6,7 @@ import { useBaseinfoStore } from '@/store/base';
 import { date_text } from '@/utils/formatters';
 import { articleService, type ArticleModel } from '@/store/article';
 import { useAuthStore } from '@/store/auth';
+import { api_error_detail } from '@/utils/apiError';
 
 // 后端无 /admin/ 统计接口，用公开分页接口的 total 与 /base/ 用户列表近似
 interface CountModel {
@@ -20,8 +21,10 @@ const count_info = ref<CountModel>({
     attachment_count: 0,
 });
 const latest_article = ref<ArticleModel[]>();
+const stats_error = ref('');
 
 const fetchCountInfo = async () => {
+    stats_error.value = '';
     try {
         const [articles_res, images_res, documents_res] = await Promise.all([
             articleService.getArticles({ page: 1, page_size: 1 }),
@@ -32,6 +35,7 @@ const fetchCountInfo = async () => {
         count_info.value.image_count = images_res.total;
         count_info.value.attachment_count = documents_res.total;
     } catch (error) {
+        stats_error.value = api_error_detail(error, '获取统计信息失败');
         console.error('获取管理后台统计信息失败:', error)
     }
 }
@@ -96,6 +100,7 @@ onMounted(
 
 <template>
     <main class="flex-1 overflow-y-auto p-6 space-y-6">
+        <p v-if="stats_error" role="alert" class="alert alert-error text-sm">{{ stats_error }}</p>
         <!-- 内容区宽度 = 视口 − 侧栏 192px，lg(1024) 下 4 列仅剩 ~180px/卡，xl 起才 4 列 -->
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
             <div v-for="item in stat_items" :key="item.label"

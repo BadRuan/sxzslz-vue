@@ -16,6 +16,7 @@ export interface UserModel {
     id: number,
     slug: string,
     nickname: string,
+    is_superuser: boolean,
 }
 
 class BaseinfoService{

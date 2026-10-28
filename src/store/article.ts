@@ -5,11 +5,14 @@ import type { CategoryModel } from '@/store/base';
 import { useBaseinfoStore } from '@/store/base';
 import { name_category_id } from '@/utils/category';
 import { CATEGORY_NAMES } from '@/utils/categoryConfig';
+import { api_error_detail } from '@/utils/apiError';
 
+/** UserOut */
 export interface ArticleUserModel {
     id: number,
     slug: string,
     nickname: string,
+    is_superuser: boolean,
 }
 
 /** ArticleOut / ArticleDetailOut */
@@ -24,6 +27,7 @@ export interface ArticleModel {
     create_at: string,
     view_count: number,
     like_count: number,
+    user_id: number,
     categories: CategoryModel[],
     user: ArticleUserModel | null,
     content?: string | null,
@@ -47,30 +51,16 @@ interface ArticleQuery {
     is_deleted?: boolean
 }
 
-/** POST /articles/ 请求体；作者为当前登录用户（服务端从 JWT 解析），DEFAULT_USER_ID 仅 service 层兜底 */
-export interface ArticleCreateInput {
-    title: string,
-    content?: string | null,
-    cover_img_slug?: string | null,
-    is_recommended?: boolean,
-    category_ids?: number[],
-}
-
-/** PATCH /articles/{slug}：只更新传入字段；可空字段显式传 null 表示清空 */
-export interface ArticleUpdateInput {
+/** POST /articles/ / PATCH /articles/{slug}：user_id、create_at 仅超管生效（对接文档 §7） */
+export interface ArticleUpsertInput {
     title?: string | null,
     content?: string | null,
     cover_img_slug?: string | null,
     is_recommended?: boolean | null,
     category_ids?: number[] | null,
+    user_id?: number,
+    create_at?: string,
 }
-
-/** 从 axios 错误提取后端 detail（400/401/404 为字符串，422 为数组取首条 msg） */
-export const api_error_detail = (error: any, fallback: string): string => {
-    const detail = error?.response?.data?.detail;
-    if (Array.isArray(detail)) return detail[0]?.msg || fallback;
-    return detail || fallback;
-};
 
 class ArticleService {
     public getArticles(params: ArticleQuery = {}) {
@@ -79,10 +69,10 @@ class ArticleService {
     public getDetail(slug: string) {
         return apiService.get<ArticleModel>('/articles/' + slug)
     }
-    public create(data: ArticleCreateInput) {
+    public create(data: ArticleUpsertInput) {
         return apiService.post<ArticleModel>('/articles/', data)
     }
-    public update(slug: string, data: ArticleUpdateInput) {
+    public update(slug: string, data: ArticleUpsertInput) {
         return apiService.patch<ArticleModel>('/articles/' + slug, data)
     }
     public remove(slug: string) {
@@ -175,12 +165,14 @@ const article_list = ref<ArticleModel[]>([]);
 const article_total = ref<number>(0);
 const article_page = ref<number>(1);
 const article_has_next = ref<boolean>(false);
-// 列表接口失败标记：界面据此区分「加载失败」与「暂无文章」
+// 列表接口失败标记 + 后端 detail：界面据此区分「加载失败」与「暂无文章」并展示原因
 const article_list_error = ref(false);
+const article_list_error_message = ref('');
 
 const getArticleList = async (category_id: number, page: number, page_size: number) => {
     loading.value = true
     article_list_error.value = false
+    article_list_error_message.value = ''
     try {
       const res = await articleService.getArticles({ category_id, page, page_size })
       // 后端已过滤回收站文章，total 与展示条目一致
@@ -190,6 +182,7 @@ const getArticleList = async (category_id: number, page: number, page_size: numb
       article_has_next.value = res.has_next
     } catch (error) {
       article_list_error.value = true
+      article_list_error_message.value = api_error_detail(error, '文章列表加载失败')
       console.error('获取文章分类列表失败:', error)
     } finally {
       loading.value = false
@@ -209,5 +202,5 @@ const getArticleList = async (category_id: number, page: number, page_size: numb
     }
   }
 
-  return { article_obj, checkHomeArticle, article_list, article_total, article_page, article_has_next, article_list_error, page_number, getArticleList, article_detail, getDetail, loading }
+  return { article_obj, checkHomeArticle, article_list, article_total, article_page, article_has_next, article_list_error, article_list_error_message, page_number, getArticleList, article_detail, getDetail, loading }
 })
