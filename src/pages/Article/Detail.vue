@@ -8,6 +8,7 @@ import mark from 'markdown-it-mark';
 import DOMPurify from 'dompurify';
 import dayjs from 'dayjs';
 import { useArticleStore, articleService } from '@/store/article';
+import { api_error_detail } from '@/utils/apiError';
 import { useBaseinfoStore } from '@/store/base';
 import { url_prefix } from '@/utils/baseInfo';
 import 'github-markdown-css/github-markdown.css';
@@ -18,7 +19,7 @@ const slug = route.params.slug;
 const article_store = useArticleStore();
 const baseinfo_store = useBaseinfoStore();
 
-const { article_detail } = storeToRefs(article_store);
+const { article_detail, article_detail_error } = storeToRefs(article_store);
 
 /** 面包屑只显示文章自身的二级分类名（不显示一级分类）；分类树/详情到达后才有值 */
 const category_crumb = computed(() => {
@@ -41,7 +42,8 @@ onMounted(async () => {
     baseinfo_store.checkBaseinfo();
     const result = await article_store.getDetail(slug);
     if (result == undefined) {
-        error.value = '文章不存在或已被删除';
+        // store 已解析后端 detail（404「文章不存在」/ 401/网络异常等），优先展示具体原因
+        error.value = article_detail_error.value || '文章不存在或已被删除';
     }
 
     loading.value = false;
@@ -78,7 +80,7 @@ const handle_like = async () => {
         like_message.value = '感谢点赞！';
     } catch (error) {
         console.error('点赞失败:', error);
-        like_message.value = '点赞失败，请稍后重试';
+        like_message.value = api_error_detail(error, '点赞失败，请稍后重试');
     } finally {
         liking.value = false;
         setTimeout(() => { like_message.value = ''; }, 2000);
@@ -160,7 +162,7 @@ const renderedHtml = computed(() => {
                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
                 <h2 class="text-xl font-semibold text-base-content/80 mb-2">{{ error }}</h2>
-                <p class="text-base-content/60 mb-6">请检查文章链接是否正确，或返回其他页面</p>
+                <p class="text-base-content/60 mb-6">请检查文章链接或网络后重试，也可返回其他页面</p>
                 <div class="flex justify-center gap-4">
                     <RouterLink :to="{ name: 'ArticleList' }" class="btn btn-primary">
                         返回列表

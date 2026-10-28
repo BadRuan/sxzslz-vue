@@ -27,6 +27,8 @@ const count_info = ref<CountModel>({
 });
 const latest_article = ref<ArticleModel[]>();
 const stats_error = ref('');
+// 最新文章加载失败：与「暂无文章」区分开，避免静默误报为空
+const latest_error = ref('');
 
 // 路由守卫拦截普通账号访问分类管理后的提示（?denied=superuser）；读取后清掉 query，刷新/超管不会误提示
 const is_denied_visible = ref(false);
@@ -66,6 +68,7 @@ const getAdminLatestArticle = async () => {
         });
         latest_article.value = res.data ?? [];
     } catch (error) {
+        latest_error.value = api_error_detail(error, '获取最新文章失败');
         console.error('获取管理后台最新文章失败:', error)
     }
 }
@@ -147,7 +150,10 @@ onMounted(
                 <RouterLink :to="{ name: 'AdminArticleList' }" class="text-xs text-primary hover:underline">查看更多</RouterLink>
             </div>
             <ul class="divide-y divide-base-300">
-                <li v-if="!latest_article?.length" class="px-5 py-8 text-center text-sm text-base-content/40">
+                <li v-if="latest_error" class="px-5 py-8 text-center text-sm text-error">
+                    {{ latest_error }}
+                </li>
+                <li v-else-if="!latest_article?.length" class="px-5 py-8 text-center text-sm text-base-content/40">
                     暂无文章
                 </li>
                 <li v-for="(article, index) in latest_article" :key="index"

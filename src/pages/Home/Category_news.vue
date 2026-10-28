@@ -11,8 +11,8 @@ import type { ArticleModel } from '@/store/article';
 
 const article_store = useArticleStore();
 const baseinfo_store = useBaseinfoStore();
-const { article_obj } = storeToRefs(article_store);
-const { categories } = storeToRefs(baseinfo_store);
+const { article_obj, home_error } = storeToRefs(article_store);
+const { categories, error_message: baseinfo_error } = storeToRefs(baseinfo_store);
 
 // 「更多」跳列表页：名称命中一级分类时取其第一个子分类（文章只挂二级）
 const meeting_category_id = computed(() => to_second_level_id(categories.value, name_category_id(categories.value, CATEGORY_NAMES.meeting)));
@@ -41,6 +41,11 @@ const columns = computed(() => [
                 <template #first>分类资讯</template>
                 <template #second>Category News</template>
             </TitleComponent>
+
+            <!-- 接口失败：展示后端 detail，避免分类/文章拉取失败时静默空栏 -->
+            <p v-if="baseinfo_error || home_error" role="alert" class="alert alert-error mt-4 text-sm">
+                {{ baseinfo_error || home_error }}
+            </p>
 
             <div class="grid gap-6 mt-6 md:grid-cols-2 xl:grid-cols-3">
                 <div v-for="col in columns" :key="col.key" class="card rounded-box p-6 divide-y divide-base-300">

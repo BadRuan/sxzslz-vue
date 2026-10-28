@@ -130,6 +130,9 @@ export const useArticleStore = defineStore('article', () => {
         hr_job: hr_job // 人事通知（原人事动态栏）
     })
 
+    /** 首页栏目加载失败原因：接口异常时给出提示，而不是静默展示空栏目 */
+    const home_error = ref('');
+
     /** 按分类名称拉取首页栏目文章；名称在分类树中缺失时跳过该栏目 */
     const fill_by_name = async (target: Ref<ArticleModel[]>, names: readonly string[], page_size: number, tree: CategoryModel[]) => {
         if (target.value.length > 0) return;
@@ -150,6 +153,7 @@ export const useArticleStore = defineStore('article', () => {
 
     const doCheckHomeArticle = async () => {
         loading.value = true
+        home_error.value = ''
         try {
             const baseinfo_store = useBaseinfoStore();
             await baseinfo_store.checkBaseinfo();
@@ -172,6 +176,7 @@ export const useArticleStore = defineStore('article', () => {
             await fill_by_name(finance_article, CATEGORY_NAMES.finance, 6, tree);
             await fill_by_name(hr_job, CATEGORY_NAMES.hr, 6, tree);
         } catch (error) {
+            home_error.value = api_error_detail(error, '首页资讯加载失败，请稍后重试')
             console.error('获取最新文章列表失败:', error)
         } finally {
             loading.value = false
@@ -212,13 +217,19 @@ export const useArticleStore = defineStore('article', () => {
     }
 
     const article_detail = ref<ArticleModel>();
+    /** 前台详情加载失败原因：区分「文章不存在/已删除（404）」与网络、服务端异常 */
+    const article_detail_error = ref('');
     /** 前台文章详情（公开数据）：匿名请求，任何作者的文章都可访问 */
     const getDetail = async (slug: string) => {
         loading.value = true
+        article_detail_error.value = ''
         try {
             const res = await articleService.getDetail(slug, { anonymous: true })
             return article_detail.value = res
         } catch (error) {
+            article_detail.value = undefined
+            article_detail_error.value = api_error_detail(error, '文章加载失败，请稍后重试')
+            console.error('获取文章详情失败:', error)
             return undefined
         } finally {
             loading.value = false
@@ -237,6 +248,8 @@ export const useArticleStore = defineStore('article', () => {
         page_number,
         getArticleList,
         article_detail,
+        article_detail_error,
+        home_error,
         getDetail,
         loading,
     }

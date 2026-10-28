@@ -15,7 +15,7 @@ const baseinfo_store = useBaseinfoStore();
 const article_store = useArticleStore();
 
 const { categories } = storeToRefs(baseinfo_store);
-const { article_obj, loading } = storeToRefs(article_store);
+const { article_obj, loading, home_error } = storeToRefs(article_store);
 
 // 跳列表页：名称命中一级分类时取其第一个子分类（文章只挂二级）
 const notice_category_id = computed(() => to_second_level_id(categories.value, name_category_id(categories.value, CATEGORY_NAMES.notice)));
@@ -52,6 +52,14 @@ onMounted(async () => {
             <div v-if="loading" class="card rounded-box border border-base-300 p-12 text-center">
                 <span class="loading loading-spinner loading-md mx-auto mb-4 block"></span>
                 <p class="text-base-content/60">加载中...</p>
+            </div>
+
+            <!-- 接口失败：展示后端 detail 并提供重试，避免首页静默空白 -->
+            <div v-else-if="home_error" class="card rounded-box border border-base-300 p-12 text-center">
+                <p class="text-error mb-4">{{ home_error }}</p>
+                <button type="button" class="btn btn-sm btn-primary" @click="article_store.checkHomeArticle()">
+                    重新加载
+                </button>
             </div>
 
             <!-- lg 起轮播 3/5 + 通知卡 2/5 分栏；窄视口纵向堆叠，避免 720+560 固定宽在 1366 下也溢出 -->

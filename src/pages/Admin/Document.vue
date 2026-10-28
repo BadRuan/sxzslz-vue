@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import apiService, { type UploadResult, MAX_BATCH_FILES } from '@/utils/apiService';
+import apiService from '@/utils/apiService';
 import { api_error_detail } from '@/utils/apiError';
 import { useAuthStore } from '@/store/auth';
 import dayjs from 'dayjs';
 import AppPagination from '@/components/AppPagination.vue';
 import AppModal from '@/components/AppModal.vue';
 import CopyButton from '@/components/CopyButton.vue';
+import { useUpload } from '@/composables/useUpload';
+import {
+    DOCUMENT_ACCEPT,
+    DOCUMENT_LIMIT_HINT,
+    format_bytes,
+    validate_documents,
+} from '@/utils/upload';
 
 /** 文件列表项，字段与 GET /document/ 一致 */
 export interface DocumentModel {
@@ -22,19 +29,6 @@ export interface DocumentModel {
 };
 
 const PAGE_SIZE = 30;
-// 与后端 allow_type.document 白名单保持一致（后端按 part 的 Content-Type 精确匹配）
-const DOC_MIME_WHITELIST = [
-    'text/plain',
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'application/vnd.ms-powerpoint',
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    'application/zip',
-];
-const MAX_DOC_SIZE = 50 * 1024 * 1024;
 
 const auth_store = useAuthStore();
 const document_list = ref<DocumentModel[]>([]);
@@ -42,16 +36,16 @@ const total = ref(0);
 const page = ref(1);
 const has_next = ref(false);
 const list_error = ref('');
-const upload_error = ref('');
-const upload_success = ref('');
 const action_error = ref('');
 
-/** 上传进度：单次请求整体进度（批量接口为一次请求，单文件接口同理） */
-const upload_progress = ref({
-    is_active: false,
-    label: '',
-    percent: 0,
-});
+/** 上传进度 / 错误 / 取消：与照片管理共用同一套组合式逻辑 */
+const {
+    progress: upload_progress,
+    error_message: upload_error,
+    success_message: upload_success,
+    run: run_upload,
+    cancel: cancel_upload,
+} = useUpload();
 
 const ext_of = (filename: string) => filename.split('.').pop()?.toLowerCase() ?? '';
 
@@ -59,10 +53,6 @@ const ext_of = (filename: string) => filename.split('.').pop()?.toLowerCase() ??
 const can_manage = (doc: DocumentModel) =>
     auth_store.is_superuser
     || (auth_store.user !== null && doc.user_id === auth_store.user.id);
-
-/** 后端按 MIME 精确校验；File.type 为空时无法通过，需提示用户 */
-const is_allowed_doc = (file: File) =>
-    file.type !== '' && DOC_MIME_WHITELIST.includes(file.type);
 
 /** 表格行序号：跨页连续编号 */
 const row_index = (index: number) => (page.value - 1) * PAGE_SIZE + index + 1;
@@ -92,61 +82,27 @@ const pick_files = async (event: Event) => {
     input.value = '';
     if (files.length === 0) return;
 
-    upload_error.value = '';
-    upload_success.value = '';
-    for (const file of files) {
-        if (file.type === '') {
-            upload_error.value = `「${file.name}」无法识别文件类型，请改用标准扩展名的文件`;
-            return;
-        }
-        if (!is_allowed_doc(file)) {
-            upload_error.value = `「${file.name}」格式不支持，仅支持 txt/pdf/doc/docx/xls/xlsx/ppt/pptx/zip`;
-            return;
-        }
-        if (file.size > MAX_DOC_SIZE) {
-            upload_error.value = `「${file.name}」超过 50MB`;
-            return;
-        }
-        if (file.size === 0) {
-            upload_error.value = `「${file.name}」文件内容为空`;
-            return;
-        }
-    }
-    // 批量接口单次上限（服务端 MAX_BATCH_FILES），超出直接拦截
-    if (files.length > MAX_BATCH_FILES) {
-        upload_error.value = `一次最多上传 ${MAX_BATCH_FILES} 个文件，请分批上传`;
+    // 预检：MIME 白名单 → 单文件 ≤ 50MB → 空文件 → 批量 ≤ 20 个（与后端限制一致，避免白传）
+    const validation_error = validate_documents(files);
+    if (validation_error) {
+        upload_error.value = validation_error;
+        upload_success.value = '';
         return;
     }
 
-    const is_batch = files.length > 1;
-    upload_progress.value = {
-        is_active: true,
-        label: is_batch ? `正在上传 ${files.length} 个文件...` : `正在上传：${files[0]?.name ?? ''}`,
-        percent: 0,
-    };
+    const is_uploaded = await run_upload({
+        files,
+        single_url: '/document/',
+        batch_url: '/document/batch/',
+        single_label: `正在上传：${files[0]?.name ?? ''}`,
+        batch_label: `正在上传 ${files.length} 个文件...`,
+        processing_label: '已发送，服务器正在保存文件...',
+        success_text: `已上传 ${files.length} 个文件`,
+    });
+    if (!is_uploaded) return;
 
-    try {
-        if (is_batch) {
-            // 批量接口：单次请求携带全部文件（字段名 files），整批原子
-            await apiService.uploadBatchWithProgress<UploadResult[]>(
-                '/document/batch/', files,
-                (percent) => { upload_progress.value.percent = Math.min(percent, 99); },
-            );
-        } else {
-            await apiService.uploadWithProgress<UploadResult>(
-                '/document/', files[0] as File,
-                (percent) => { upload_progress.value.percent = Math.min(percent, 99); },
-            );
-        }
-        upload_progress.value.percent = 100;
-        upload_success.value = `已上传 ${files.length} 个文件`;
-        page.value = 1;
-        await fetch_list();
-    } catch (error) {
-        upload_error.value = api_error_detail(error, '上传失败，请稍后重试');
-    } finally {
-        upload_progress.value.is_active = false;
-    }
+    page.value = 1;
+    await fetch_list();
 };
 
 // —— 改名（PATCH /document/{slug}，仅上传者本人）——
@@ -234,12 +190,6 @@ const download_document = async (doc: DocumentModel) => {
     }
 };
 
-const format_size = (bytes: number) => {
-    if (bytes >= 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + ' MB';
-    if (bytes >= 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return bytes + ' B';
-};
-
 onMounted(fetch_list);
 </script>
 
@@ -250,19 +200,24 @@ onMounted(fetch_list);
                 :class="upload_progress.is_active ? 'opacity-60 cursor-not-allowed' : ''">
                 {{ upload_progress.is_active ? '上传中...' : '+ 上传文档' }}
                 <input type="file" multiple class="hidden"
-                    accept=".txt,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip"
+                    :accept="DOCUMENT_ACCEPT"
                     :disabled="upload_progress.is_active" @change="pick_files" />
             </label>
         </div>
-        <p class="mb-4 text-xs text-base-content/40">支持 txt / pdf / doc / docx / xls / xlsx / ppt / pptx / zip，单个 ≤ 50MB，一次最多选 {{ MAX_BATCH_FILES }} 个（多份时批量上传，整批同时生效）</p>
+        <p class="mb-4 text-xs text-base-content/40">{{ DOCUMENT_LIMIT_HINT }}</p>
 
-        <!-- 上传进度：批量接口为一次请求，显示整体进度；发送到 100% 后服务端仍在落盘，完成前保持进度条可见 -->
+        <!-- 上传进度：字节发完后切「服务器处理中」，并给出取消入口，避免大文件长时间无反馈 -->
         <div v-if="upload_progress.is_active" class="card bg-base-100 border border-base-300 rounded-box mb-4 px-4 py-3">
             <div class="flex items-center justify-between text-sm mb-2 gap-3">
-                <span class="truncate text-base-content/80" :title="upload_progress.label">
-                    {{ upload_progress.label }}
+                <span class="flex items-center gap-2 min-w-0 text-base-content/80" :title="upload_progress.label">
+                    <span v-if="upload_progress.phase === 'processing'"
+                        class="loading loading-spinner loading-xs shrink-0"></span>
+                    <span class="truncate">{{ upload_progress.label }}</span>
                 </span>
-                <span class="text-base-content/60 whitespace-nowrap">{{ upload_progress.percent }}%</span>
+                <span class="flex items-center gap-2 whitespace-nowrap">
+                    <span class="text-base-content/60">{{ upload_progress.percent }}%</span>
+                    <button type="button" class="btn btn-ghost btn-xs" @click="cancel_upload">取消</button>
+                </span>
             </div>
             <progress class="progress progress-primary w-full" :value="upload_progress.percent" max="100"></progress>
         </div>
@@ -298,7 +253,7 @@ onMounted(fetch_list);
                             <div class="max-w-[16rem] truncate">{{ doc.raw_filename }}</div>
                         </td>
                         <td class="px-4 py-3.5 text-base-content/60 whitespace-nowrap">{{ ext_of(doc.raw_filename).toUpperCase() }}</td>
-                        <td class="px-4 py-3.5 text-base-content/60 whitespace-nowrap">{{ format_size(doc.size_bytes) }}</td>
+                        <td class="px-4 py-3.5 text-base-content/60 whitespace-nowrap">{{ format_bytes(doc.size_bytes) }}</td>
                         <!-- 超管可见上传者（普通用户列表本身只含自己的文件） -->
                         <td v-if="auth_store.is_superuser" class="px-4 py-3.5 text-base-content/60 max-w-[8rem] truncate"
                             :title="doc.user?.nickname ?? ''">{{ doc.user?.nickname ?? '—' }}</td>

@@ -5,6 +5,7 @@ import { useRoute } from 'vue-router';
 import { useBaseinfoStore } from '@/store/base';
 import { date_text } from '@/utils/formatters';
 import { categories_compact } from '@/utils/category';
+import { api_error_detail } from '@/utils/apiError';
 import { articleService, type ArticleModel } from '@/store/article';
 import { url_prefix } from '@/utils/baseInfo';
 import AppPagination from '@/components/AppPagination.vue';
@@ -22,6 +23,8 @@ const latest_article = ref<ArticleModel[]>([]);
 const page = ref(1);
 const total = ref(0);
 const has_next = ref(false);
+// 列表加载失败：与「暂无文章」区分开，避免静默误报为空
+const list_error = ref('');
 const getArticles = async () => {
     if (user_id === undefined) {
         latest_article.value = [];
@@ -29,6 +32,7 @@ const getArticles = async () => {
         has_next.value = false;
         return;
     }
+    list_error.value = '';
     try {
         const res = await articleService.getArticles(
             { page: page.value, page_size: PAGE_SIZE, user_id },
@@ -38,6 +42,7 @@ const getArticles = async () => {
         total.value = res.total;
         has_next.value = res.has_next;
     } catch (error) {
+        list_error.value = api_error_detail(error, '文章列表加载失败');
         console.error('获取失败:', error)
     }
 }
@@ -115,7 +120,10 @@ onMounted(
             <div class="card rounded-box py-8 px-6 sm:px-10">
             <div class="font-bold mx-2">文章动态</div>
             <ul class="divide-y divide-base-300 divide-dashed">
-                <li v-if="latest_article.length === 0" class="px-5 py-8 text-center text-sm text-base-content/40">
+                <li v-if="list_error" class="px-5 py-8 text-center text-sm text-error">
+                    {{ list_error }}
+                </li>
+                <li v-else-if="latest_article.length === 0" class="px-5 py-8 text-center text-sm text-base-content/40">
                     暂无文章
                 </li>
                 <li v-for="(article, index) in latest_article" :key="index"

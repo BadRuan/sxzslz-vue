@@ -15,7 +15,7 @@ const router = useRouter();
 const baseinfo_store = useBaseinfoStore();
 const article_store = useArticleStore();
 
-const { categories } = storeToRefs(baseinfo_store);
+const { categories, error_message: categories_error } = storeToRefs(baseinfo_store);
 const { article_list, article_total, article_page, article_has_next, article_list_error, article_list_error_message } = storeToRefs(article_store);
 
 const loading = ref(true);
@@ -176,6 +176,12 @@ const reload_articles = () => {
                                     </template>
                                 </template>
                             </nav>
+                            <!-- 分类树加载失败：给出后端原因与重试，而不是静默展示空侧栏 -->
+                            <div v-if="categories_error" class="mt-3">
+                                <p class="alert alert-error text-xs">{{ categories_error }}</p>
+                                <button type="button" class="btn btn-xs btn-primary mt-2"
+                                    @click="baseinfo_store.checkBaseinfo()">重新加载分类</button>
+                            </div>
                         </div>
                     </aside>
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import apiService, { type UploadResult, MAX_BATCH_FILES } from '@/utils/apiService';
+import apiService from '@/utils/apiService';
 import { api_error_detail } from '@/utils/apiError';
 import { url_prefix } from '@/utils/baseInfo';
 import { useAuthStore } from '@/store/auth';
@@ -8,6 +8,13 @@ import dayjs from 'dayjs';
 import AppPagination from '@/components/AppPagination.vue';
 import AppModal from '@/components/AppModal.vue';
 import CopyButton from '@/components/CopyButton.vue';
+import { useUpload } from '@/composables/useUpload';
+import {
+    IMAGE_ACCEPT,
+    IMAGE_LIMIT_HINT,
+    format_bytes,
+    validate_images,
+} from '@/utils/upload';
 
 /** 图片列表项，字段与 GET /image/ 一致 */
 export interface ImageModel {
@@ -23,8 +30,6 @@ export interface ImageModel {
 };
 
 const PAGE_SIZE = 30;
-const IMAGE_MIME_WHITELIST = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
 const auth_store = useAuthStore();
 const image_list = ref<ImageModel[]>([]);
@@ -32,16 +37,16 @@ const total = ref(0);
 const page = ref(1);
 const has_next = ref(false);
 const list_error = ref('');
-const upload_error = ref('');
-const upload_success = ref('');
 const action_error = ref('');
 
-/** 上传进度：单次请求整体进度（批量接口为一次请求，单文件接口同理） */
-const upload_progress = ref({
-    is_active: false,
-    label: '',
-    percent: 0,
-});
+/** 上传进度 / 错误 / 取消：与文档管理共用同一套组合式逻辑 */
+const {
+    progress: upload_progress,
+    error_message: upload_error,
+    success_message: upload_success,
+    run: run_upload,
+    cancel: cancel_upload,
+} = useUpload();
 
 /** 改名/删除权限：上传者本人或超管（对接文档 §1 权限边界） */
 const can_manage = (image: ImageModel) =>
@@ -72,54 +77,27 @@ const pick_files = async (event: Event) => {
     input.value = '';
     if (files.length === 0) return;
 
-    upload_error.value = '';
-    upload_success.value = '';
-    // 前端自行限制：图片 ≤ 10MB，格式白名单同后端
-    for (const file of files) {
-        if (!IMAGE_MIME_WHITELIST.includes(file.type)) {
-            upload_error.value = `「${file.name}」格式不支持，仅支持 JPG/PNG/GIF/WebP`;
-            return;
-        }
-        if (file.size > MAX_IMAGE_SIZE) {
-            upload_error.value = `「${file.name}」超过 10MB`;
-            return;
-        }
-    }
-    // 批量接口单次上限（服务端 MAX_BATCH_FILES），超出直接拦截
-    if (files.length > MAX_BATCH_FILES) {
-        upload_error.value = `一次最多上传 ${MAX_BATCH_FILES} 张图片，请分批上传`;
+    // 预检：格式白名单 → 单张 ≤ 10MB → 空文件 → 批量 ≤ 20 张（与后端限制一致，避免白传）
+    const validation_error = validate_images(files);
+    if (validation_error) {
+        upload_error.value = validation_error;
+        upload_success.value = '';
         return;
     }
 
-    const is_batch = files.length > 1;
-    upload_progress.value = {
-        is_active: true,
-        label: is_batch ? `正在上传 ${files.length} 张图片...` : `正在上传：${files[0]?.name ?? ''}`,
-        percent: 0,
-    };
+    const is_uploaded = await run_upload({
+        files,
+        single_url: '/image/',
+        batch_url: '/image/batch/',
+        single_label: `正在上传：${files[0]?.name ?? ''}`,
+        batch_label: `正在上传 ${files.length} 张图片...`,
+        processing_label: '已发送，服务器正在生成 WebP 预览图...',
+        success_text: `已上传 ${files.length} 张图片`,
+    });
+    if (!is_uploaded) return;
 
-    try {
-        if (is_batch) {
-            // 批量接口：单次请求携带全部文件（字段名 files），整批原子
-            await apiService.uploadBatchWithProgress<UploadResult[]>(
-                '/image/batch/', files,
-                (percent) => { upload_progress.value.percent = Math.min(percent, 99); },
-            );
-        } else {
-            await apiService.uploadWithProgress<UploadResult>(
-                '/image/', files[0] as File,
-                (percent) => { upload_progress.value.percent = Math.min(percent, 99); },
-            );
-        }
-        upload_progress.value.percent = 100;
-        upload_success.value = `已上传 ${files.length} 张图片`;
-        page.value = 1;
-        await getImageList();
-    } catch (error) {
-        upload_error.value = api_error_detail(error, '上传失败，请稍后重试');
-    } finally {
-        upload_progress.value.is_active = false;
-    }
+    page.value = 1;
+    await getImageList();
 };
 
 // —— 改名（PATCH /image/{slug}，本人或超管）——
@@ -184,12 +162,6 @@ const remove_image = (image: ImageModel) => {
     );
 };
 
-const format_size = (bytes: number) => {
-    if (bytes >= 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + ' MB';
-    if (bytes >= 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return bytes + ' B';
-};
-
 onMounted(getImageList);
 </script>
 
@@ -199,19 +171,24 @@ onMounted(getImageList);
             <label class="btn btn-main btn-primary cursor-pointer"
                 :class="upload_progress.is_active ? 'opacity-60 cursor-not-allowed' : ''">
                 {{ upload_progress.is_active ? '上传中...' : '+ 上传照片' }}
-                <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" multiple class="hidden"
+                <input type="file" :accept="IMAGE_ACCEPT" multiple class="hidden"
                     :disabled="upload_progress.is_active" @change="pick_files" />
             </label>
         </div>
-        <p class="mb-4 text-xs text-base-content/40">支持 JPG / PNG / GIF / WebP，单张 ≤ 10MB，一次最多选 {{ MAX_BATCH_FILES }} 张（多张时批量上传，整批同时生效）</p>
+        <p class="mb-4 text-xs text-base-content/40">{{ IMAGE_LIMIT_HINT }}</p>
 
-        <!-- 上传进度：批量接口为一次请求，显示整体进度；发送到 100% 后服务端仍在生成 WebP 预览，完成前保持进度条可见 -->
+        <!-- 上传进度：字节发完后切「服务器处理中」，并给出取消入口，避免大文件长时间无反馈 -->
         <div v-if="upload_progress.is_active" class="card bg-base-100 border border-base-300 rounded-box mb-4 px-4 py-3">
             <div class="flex items-center justify-between text-sm mb-2 gap-3">
-                <span class="truncate text-base-content/80" :title="upload_progress.label">
-                    {{ upload_progress.label }}
+                <span class="flex items-center gap-2 min-w-0 text-base-content/80" :title="upload_progress.label">
+                    <span v-if="upload_progress.phase === 'processing'"
+                        class="loading loading-spinner loading-xs shrink-0"></span>
+                    <span class="truncate">{{ upload_progress.label }}</span>
                 </span>
-                <span class="text-base-content/60 whitespace-nowrap">{{ upload_progress.percent }}%</span>
+                <span class="flex items-center gap-2 whitespace-nowrap">
+                    <span class="text-base-content/60">{{ upload_progress.percent }}%</span>
+                    <button type="button" class="btn btn-ghost btn-xs" @click="cancel_upload">取消</button>
+                </span>
             </div>
             <progress class="progress progress-primary w-full" :value="upload_progress.percent" max="100"></progress>
         </div>
@@ -232,7 +209,7 @@ onMounted(getImageList);
                 </div>
                 <div class="p-3">
                     <p class="text-sm my-1 font-medium text-base-content truncate" :title="image.raw_filename">{{ image.raw_filename }}</p>
-                    <p class="text-xs text-base-content/60">{{ format_size(image.size_bytes) }} · 浏览 {{ image.view }}</p>
+                    <p class="text-xs text-base-content/60">{{ format_bytes(image.size_bytes) }} · 浏览 {{ image.view }}</p>
                     <!-- 超管可见上传者（普通用户列表本身只含自己的图片） -->
                     <p v-if="auth_store.is_superuser" class="text-xs text-base-content/40 truncate"
                         :title="image.user?.nickname ?? ''">上传者：{{ image.user?.nickname ?? '—' }}</p>

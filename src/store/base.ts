@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import apiService from '@/utils/apiService';
+import { api_error_detail } from '@/utils/apiError';
 
 /** CategoryTree：/base/ 与文章 categories 使用的树节点（严格二级，children 恒为下级数组） */
 export interface CategoryModel {
@@ -32,17 +33,26 @@ export const useBaseinfoStore = defineStore('baseinfo', () => {
     const categories = ref<CategoryModel[]>([]);
     const users = ref<UserModel[]>([]);
     const loading = ref(false);
+    /** 基础信息加载失败原因（后端 detail）：前台页面据此提示，避免分类导航静默为空 */
+    const error_message = ref('');
     // in-flight 锁：多组件并发调用 checkBaseinfo 时只发一次 /base/
     let inflight: Promise<void> | null = null;
 
+    /**
+     * 强制拉取基础信息。失败时向上抛出，让需要感知的页面（如账户管理）展示后端错误；
+     * 前台等只需数据的调用方请用 checkBaseinfo（内部兜底，不抛错）。
+     */
     const fetchBaseInfo = async () => {
         loading.value = true
         try {
             const res = await request_base_info();
             users.value = res.user ?? [];
             categories.value = res.category ?? [];
+            error_message.value = '';
         } catch (error) {
+            error_message.value = api_error_detail(error, '基础信息加载失败');
             console.error('获取基础信息失败:', error)
+            throw error
         } finally {
             loading.value = false
         }
@@ -51,7 +61,8 @@ export const useBaseinfoStore = defineStore('baseinfo', () => {
     const checkBaseinfo = async () => {
         if (categories.value.length > 0) return;
         if (inflight) return inflight;
-        inflight = fetchBaseInfo().finally(() => { inflight = null; });
+        // 前台兜底：失败不向上抛，避免各组件 unhandled rejection（页面各自按数据是否为空展示）
+        inflight = fetchBaseInfo().catch(() => undefined).finally(() => { inflight = null; });
         return inflight;
     }
 
@@ -61,5 +72,5 @@ export const useBaseinfoStore = defineStore('baseinfo', () => {
         return users.value.find(item => item.id === user_id)?.nickname ?? '';
     }
 
-    return { categories, users, loading, fetchBaseInfo, checkBaseinfo, user_nickname }
+    return { categories, users, loading, error_message, fetchBaseInfo, checkBaseinfo, user_nickname }
 })

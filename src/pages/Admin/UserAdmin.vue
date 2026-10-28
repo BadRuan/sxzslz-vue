@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import AppModal from '@/components/AppModal.vue';
 import { useBaseinfoStore } from '@/store/base';
 import { useAuthStore, DEFAULT_USER_PASSWORD } from '@/store/auth';
+import { api_error_detail } from '@/utils/apiError';
 
 const auth_store = useAuthStore();
 const baseinfo_store = useBaseinfoStore();
@@ -53,8 +54,14 @@ const submit_create = async () => {
             ...(password ? { password } : {}),
         });
         show_create_modal.value = false;
-        await baseinfo_store.fetchBaseInfo();
-        flash_success(`已创建账户「${created.nickname}」，登录名 ${created.slug}，初始密码 ${DEFAULT_USER_PASSWORD}`);
+        // 账户已创建成功：刷新失败只影响列表滞后，不能误报成「创建失败」
+        let refresh_note = '';
+        try {
+            await baseinfo_store.fetchBaseInfo();
+        } catch {
+            refresh_note = '（列表刷新失败，可刷新页面查看）';
+        }
+        flash_success(`已创建账户「${created.nickname}」，登录名 ${created.slug}，初始密码 ${DEFAULT_USER_PASSWORD}${refresh_note}`);
     } catch (error: any) {
         create_error.value = error?.message || '创建账户失败，请稍后重试';
     } finally {
@@ -117,8 +124,14 @@ const remove_user = (id: number, nickname: string) => {
             action_error.value = '';
             try {
                 await auth_store.delete_user(id);
-                await baseinfo_store.fetchBaseInfo();
-                flash_success(`已删除账户「${nickname}」`);
+                // 账户已删除成功：刷新失败只影响列表滞后，不能误报成「删除失败」
+                let refresh_note = '';
+                try {
+                    await baseinfo_store.fetchBaseInfo();
+                } catch {
+                    refresh_note = '（列表刷新失败，可刷新页面查看）';
+                }
+                flash_success(`已删除账户「${nickname}」${refresh_note}`);
             } catch (error: any) {
                 action_error.value = error?.message || '删除账户失败，请稍后重试';
             } finally {
@@ -136,8 +149,9 @@ const load_users = async () => {
     list_error.value = '';
     try {
         await baseinfo_store.fetchBaseInfo();
-    } catch {
-        list_error.value = '获取账户列表失败';
+    } catch (error) {
+        // 透传后端 detail（如 401 登录失效），而不是笼统的「获取账户列表失败」
+        list_error.value = api_error_detail(error, '获取账户列表失败');
     }
 };
 

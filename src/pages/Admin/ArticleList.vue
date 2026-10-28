@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia';
 import dayjs from 'dayjs';
 import AppPagination from '@/components/AppPagination.vue';
 import AppModal from '@/components/AppModal.vue';
-import apiService, { type UploadResult } from '@/utils/apiService';
+import apiService, { type UploadPhase } from '@/utils/apiService';
 import { useBaseinfoStore } from '@/store/base';
 import { usePermissions } from '@/composables/usePermissions';
 import { flatten_categories } from '@/utils/category';
@@ -15,10 +15,9 @@ import {
     type ArticleUpsertInput,
 } from '@/store/article';
 import { url_prefix } from '@/utils/baseInfo';
+import { IMAGE_ACCEPT, validate_images } from '@/utils/upload';
 
 const PAGE_SIZE = 20;
-const IMAGE_MIME_WHITELIST = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
 const { is_superuser, is_normal_user, can_manage_categories, can_manage_article } = usePermissions();
 
@@ -93,6 +92,7 @@ const modal_error = ref('');
 const saving = ref(false);
 const uploading_cover = ref(false);
 const cover_progress = ref(0);
+const cover_phase = ref<UploadPhase>('uploading');
 const editing_slug = ref<string | null>(null);
 /** 编辑时的原始发布时间（截到分钟）：未修改则不提交，避免每次保存把秒/微秒截断 */
 const original_create_at = ref('');
@@ -183,20 +183,23 @@ const pick_cover = async (event: Event) => {
     const file = input.files?.[0];
     input.value = '';
     if (!file) return;
-    if (!IMAGE_MIME_WHITELIST.includes(file.type)) {
-        modal_error.value = '仅支持 JPG, PNG, GIF, WebP 格式的图片';
-        return;
-    }
-    if (file.size > MAX_IMAGE_SIZE) {
-        modal_error.value = '封面图不能超过 10MB';
+    // 预检与 Photo 页共用同一套白名单/大小限制（图片 ≤ 10MB）
+    const validation_error = validate_images([file]);
+    if (validation_error) {
+        modal_error.value = validation_error;
         return;
     }
     uploading_cover.value = true;
     cover_progress.value = 0;
+    cover_phase.value = 'uploading';
     modal_error.value = '';
     try {
-        const res = await apiService.uploadWithProgress<UploadResult>('/image/', file, (percent) => {
-            cover_progress.value = percent;
+        const res = await apiService.uploadWithProgress('/image/', file, {
+            on_progress: (percent) => { cover_progress.value = Math.min(percent, 99); },
+            on_phase: (phase) => {
+                cover_phase.value = phase;
+                if (phase === 'processing') cover_progress.value = 99;
+            },
         });
         form.value.cover_img_slug = res.slug;
     } catch (error) {
@@ -545,11 +548,11 @@ onMounted(
                         <div class="text-sm text-base-content/70">
                             封面图
                             <div class="mt-1 flex items-center gap-3">
-                                <input type="file" accept="image/jpeg,image/png,image/gif,image/webp"
+                                <input type="file" :accept="IMAGE_ACCEPT"
                                     class="text-sm text-base-content/60 file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-primary/90 hover:file:bg-primary/20"
                                     :disabled="uploading_cover" @change="pick_cover" />
                                 <span v-if="uploading_cover" class="text-xs text-base-content/60 whitespace-nowrap">
-                                    上传中 {{ cover_progress }}%
+                                    {{ cover_phase === 'processing' ? '服务器处理中...' : `上传中 ${cover_progress}%` }}
                                 </span>
                             </div>
                             <progress v-if="uploading_cover" class="progress progress-primary w-full mt-2"
