@@ -94,6 +94,10 @@ const saving = ref(false);
 const uploading_cover = ref(false);
 const cover_progress = ref(0);
 const editing_slug = ref<string | null>(null);
+/** 编辑时的原始发布时间（截到分钟）：未修改则不提交，避免每次保存把秒/微秒截断 */
+const original_create_at = ref('');
+/** 编辑详情请求序号：连续点击不同文章时丢弃乱序返回，避免上一篇表单覆盖当前文章 */
+let edit_request_seq = 0;
 const form = ref<{
     title: string,
     content: string,
@@ -129,11 +133,16 @@ const second_level_options = computed(() =>
 const can_edit_categories = computed(() => is_superuser.value || modal_mode.value === 'create');
 
 const open_create = () => {
+    edit_request_seq++;
     modal_mode.value = 'create';
     editing_slug.value = null;
+    original_create_at.value = '';
+    // 公开列表均按分类过滤：未分类文章前台不可见，新建时默认选中第一个二级分类（可再调整）
+    const default_category = second_level_options.value[0];
     form.value = {
         title: '', content: '', cover_img_slug: '',
-        is_recommended: false, category_ids: [],
+        is_recommended: false,
+        category_ids: default_category ? [default_category.id] : [],
         user_id: '', create_at: '',
     };
     modal_error.value = '';
@@ -141,13 +150,17 @@ const open_create = () => {
 };
 
 const open_edit = async (row: ArticleModel) => {
-    modal_mode.value = 'edit';
-    editing_slug.value = row.slug;
+    // 先拉详情再开窗：失败/乱序时不展示上一条文章的表单内容（避免误保存覆盖他人文章）
+    const request_seq = ++edit_request_seq;
     modal_error.value = '';
-    show_modal.value = true;
+    action_error.value = '';
     try {
         // 列表不含 content，编辑前拉详情
         const detail = await articleService.getDetail(row.slug);
+        if (request_seq !== edit_request_seq) return;
+        modal_mode.value = 'edit';
+        editing_slug.value = row.slug;
+        original_create_at.value = dayjs(detail.create_at).format('YYYY-MM-DDTHH:mm');
         form.value = {
             title: detail.title,
             content: detail.content ?? '',
@@ -156,12 +169,12 @@ const open_edit = async (row: ArticleModel) => {
             category_ids: (detail.categories ?? []).map(c => c.id),
             user_id: is_superuser.value ? detail.user_id : '',
             // 服务端时间为无时区本地时间，datetime-local 同形，直接截到分钟
-            create_at: is_superuser.value
-                ? dayjs(detail.create_at).format('YYYY-MM-DDTHH:mm')
-                : '',
+            create_at: is_superuser.value ? original_create_at.value : '',
         };
+        show_modal.value = true;
     } catch (error) {
-        modal_error.value = api_error_detail(error, '获取文章详情失败');
+        if (request_seq !== edit_request_seq) return;
+        action_error.value = api_error_detail(error, '获取文章详情失败，请重试');
     }
 };
 
@@ -219,10 +232,13 @@ const submit_form = async () => {
         if (can_edit_categories.value) {
             payload.category_ids = form.value.category_ids;
         }
-        // user_id / create_at 仅超管提交；普通用户传了也会被服务端忽略
+        // user_id / create_at 仅超管提交；普通用户传了也会被服务端忽略。
+        // create_at 仅在用户实际改动时提交，避免把后端秒/微秒精度截断成 :00。
         if (is_superuser.value) {
             if (form.value.user_id !== '') payload.user_id = form.value.user_id;
-            if (form.value.create_at) payload.create_at = form.value.create_at;
+            if (form.value.create_at && form.value.create_at !== original_create_at.value) {
+                payload.create_at = form.value.create_at;
+            }
         }
         if (modal_mode.value === 'create') {
             await articleService.create(payload);

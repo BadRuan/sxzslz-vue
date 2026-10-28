@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 import apiService from '@/utils/apiService';
 import { api_error_detail } from '@/utils/apiError';
 import { useAuthStore } from '@/store/auth';
+import { get_token } from '@/utils/token';
 import AppModal from '@/components/AppModal.vue';
 import {
     type CategoryFlat,
@@ -15,6 +16,8 @@ const auth_store = useAuthStore();
 
 // 路由守卫已拦截普通账号；此处再做一次兜底，避免角色变化/直接调用时误操作
 const is_forbidden = ref(false);
+/** 账号信息拉取失败（网络/服务端异常）且 token 仍有效：提示重试，而非误判为无权限 */
+const is_unavailable = ref(false);
 const is_loading = ref(true);
 
 const categories = ref<CategoryFlat[]>([]);
@@ -151,16 +154,34 @@ const remove_category = (row: CategoryTreeNode) => {
     };
 };
 
-onMounted(async () => {
+const load_category_page = async () => {
+    is_loading.value = true;
+    is_forbidden.value = false;
+    is_unavailable.value = false;
     const user = await auth_store.ensure_user();
-    if (!user?.is_superuser) {
+    if (user === null) {
+        is_unavailable.value = get_token() !== null;
+        is_loading.value = false;
+        return;
+    }
+    if (!user.is_superuser) {
         is_forbidden.value = true;
         is_loading.value = false;
         return;
     }
     await queryCategoryInfo();
     is_loading.value = false;
-});
+};
+
+const retry_load = async () => {
+    is_loading.value = true;
+    is_unavailable.value = false;
+    // 强制重新拉取账号信息（ensure_user 在缓存存在时直接返回）
+    await auth_store.fetchMe();
+    await load_category_page();
+};
+
+onMounted(load_category_page);
 </script>
 
 <template>
@@ -172,6 +193,11 @@ onMounted(async () => {
 
         <div v-else-if="is_forbidden" role="alert" class="alert alert-warning text-sm">
             仅超级管理员可管理文章分类，当前账号无此权限。
+        </div>
+
+        <div v-else-if="is_unavailable" role="alert" class="alert alert-error text-sm">
+            <span>账号信息加载失败，请检查网络后重试。</span>
+            <button type="button" class="btn btn-xs" @click="retry_load">重试</button>
         </div>
 
         <template v-else>

@@ -187,10 +187,12 @@ const renderedHtml = computed(() => {
                                 <path stroke="currentColor" stroke-width="1" stroke-linejoin="bevel"
                                     d="M22 22C22 16.4772 17.5228 12 12 12C6.47715 12 2 16.4772 2 22"></path>
                             </svg>
-                            <RouterLink :to="{ name: 'Profile', params: { id: article_detail?.user?.id } }"
+                            <RouterLink v-if="article_detail?.user"
+                                :to="{ name: 'Profile', params: { id: article_detail.user.id } }"
                                 class="text-base text-base-content/60 hover:text-primary truncate">
-                                <span>{{ article_detail?.user?.nickname }}</span>
+                                <span>{{ article_detail.user.nickname }}</span>
                             </RouterLink>
+                            <span v-else class="text-base text-base-content/60">佚名</span>
                         </div>
                         <div class="flex flex-row items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"

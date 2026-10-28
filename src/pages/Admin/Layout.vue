@@ -8,8 +8,8 @@ import { useAuthStore } from '@/store/auth';
 const auth_store = useAuthStore();
 
 onMounted(() => {
-    // 进入后台拉取当前登录用户（路由守卫已提前 ensure_user，此处保证刷新后角色信息最新）
-    auth_store.fetchMe();
+    // 路由守卫已 ensure_user；这里仅在缓存缺失时补拉，避免每次进后台都重复请求 /auth/me
+    auth_store.ensure_user();
 });
 </script>
 

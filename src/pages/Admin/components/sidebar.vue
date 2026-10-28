@@ -4,7 +4,7 @@ import { usePermissions } from '@/composables/usePermissions';
 
 const link_active_class = 'menu-active !text-primary font-semibold';
 
-const { is_superuser, can_manage_categories } = usePermissions();
+const { is_superuser, is_user_ready, can_manage_categories } = usePermissions();
 
 interface NavItem {
     name: string
@@ -40,10 +40,12 @@ const nav_items = computed<NavItem[]>(() => [
                 <div class="px-2 pb-2 text-xs">
                     <span class="badge badge-sm"
                         :class="is_superuser ? 'badge-primary' : 'badge-ghost'">
-                        {{ is_superuser ? '超级管理员' : '普通账号' }}
+                        {{ !is_user_ready ? '账号加载中' : (is_superuser ? '超级管理员' : '普通账号') }}
                     </span>
                     <p class="mt-2 leading-relaxed text-base-content/40">
-                        {{ is_superuser ? '可管理全站文章与分类' : '仅显示并管理本人文章' }}
+                        {{ !is_user_ready
+                            ? '账号信息加载中...'
+                            : (is_superuser ? '可管理全站文章与分类' : '仅显示并管理本人文章') }}
                     </p>
                 </div>
             </li>

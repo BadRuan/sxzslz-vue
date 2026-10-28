@@ -12,6 +12,8 @@ import { useAuthStore } from '@/store/auth';
 export const usePermissions = () => {
     const auth_store = useAuthStore();
 
+    const auth_user = computed(() => auth_store.user);
+    const is_user_ready = computed(() => auth_user.value !== null);
     const is_superuser = computed(() => auth_store.is_superuser);
     const is_normal_user = computed(() => auth_store.is_normal_user);
 
@@ -26,6 +28,8 @@ export const usePermissions = () => {
         is_superuser.value || (owner_id != null && owner_id === auth_store.user?.id);
 
     return {
+        auth_user,
+        is_user_ready,
         is_superuser,
         is_normal_user,
         can_manage_categories,

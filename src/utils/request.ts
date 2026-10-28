@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
 import { url_prefix } from '@/utils/baseInfo';
-import { get_token, clear_token } from '@/store/auth';
+import { get_token, clear_token } from '@/utils/token';
 
 const service: AxiosInstance = axios.create({
     baseURL: url_prefix.api_prefix,
@@ -29,7 +29,9 @@ service.interceptors.response.use(
         if (error.response?.status === 401 && !error.config?.skip_auth) {
             clear_token();
             if (!window.location.pathname.startsWith('/admin/login')) {
-                window.location.href = '/admin/login';
+                // 带上当前地址，登录后可回跳（与路由守卫的 redirect 约定一致）
+                const redirect = `${window.location.pathname}${window.location.search}`;
+                window.location.href = `/admin/login?redirect=${encodeURIComponent(redirect)}`;
             }
         }
         console.error('请求失败:', error.message);

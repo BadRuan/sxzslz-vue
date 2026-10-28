@@ -23,7 +23,8 @@ const can_submit = computed(() =>
 );
 
 onMounted(() => {
-    auth_store.fetchMe();
+    // 守卫已加载用户；仅在缓存缺失时补拉，避免重复 /auth/me
+    auth_store.ensure_user();
 });
 
 const reset_form = () => {

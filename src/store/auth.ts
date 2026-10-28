@@ -1,15 +1,8 @@
 import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import apiService from '@/utils/apiService';
-import { api_error_detail } from '@/utils/apiError';
-
-const TOKEN_KEY = 'access_token';
-
-export const get_token = (): string | null => localStorage.getItem(TOKEN_KEY);
-
-export const set_token = (token: string) => localStorage.setItem(TOKEN_KEY, token);
-
-export const clear_token = () => localStorage.removeItem(TOKEN_KEY);
+import { api_error_detail, api_error_status } from '@/utils/apiError';
+import { get_token, set_token, clear_token } from '@/utils/token';
 
 /** TokenOut */
 export interface TokenModel {
@@ -67,17 +60,21 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-    /** 拉取当前用户；token 失效时清空本地登录态并返回 null */
+    /** 拉取当前用户；仅 401（token 失效）才清空登录态，网络抖动/5xx 保留缓存用户可重试 */
     const fetchMe = async (): Promise<AuthUserModel | null> => {
         if (!is_logged_in()) return null
         try {
             user.value = await request_me()
             return user.value
-        } catch {
-            // token 无效或过期：清掉避免后续写接口持续 401
-            clear_token()
-            user.value = null
-            return null
+        } catch (error) {
+            if (api_error_status(error) === 401) {
+                // token 无效或过期：清掉避免后续写接口持续 401
+                clear_token()
+                user.value = null
+                return null
+            }
+            // 断网/超时/服务端 5xx：不清 token、不清 user，保留已登录状态
+            return user.value
         }
     }
 

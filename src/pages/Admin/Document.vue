@@ -2,7 +2,6 @@
 import { onMounted, ref } from 'vue';
 import apiService, { type UploadResult } from '@/utils/apiService';
 import { api_error_detail } from '@/utils/apiError';
-import { url_prefix } from '@/utils/baseInfo';
 import { useAuthStore } from '@/store/auth';
 import dayjs from 'dayjs';
 import AppPagination from '@/components/AppPagination.vue';
@@ -231,6 +230,27 @@ const remove_document = (doc: DocumentModel) => {
     );
 };
 
+/**
+ * 下载需登录（仅上传者本人或超管），`<a href>` 无法携带 Authorization 会 401，
+ * 因此用 axios 取 Blob 后再触发浏览器下载。
+ */
+const download_document = async (doc: DocumentModel) => {
+    action_error.value = '';
+    try {
+        const blob = await apiService.download(`/document/${doc.slug}`);
+        const object_url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = object_url;
+        link.download = doc.raw_filename || doc.slug;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(object_url);
+    } catch (error) {
+        action_error.value = api_error_detail(error, '下载失败，请稍后重试');
+    }
+};
+
 const format_size = (bytes: number) => {
     if (bytes >= 1024 * 1024) return (bytes / 1024 / 1024).toFixed(1) + ' MB';
     if (bytes >= 1024) return (bytes / 1024).toFixed(1) + ' KB';
@@ -306,8 +326,9 @@ onMounted(fetch_list);
                         <td class="px-4 py-3.5 text-base-content/60 whitespace-nowrap">{{ dayjs(doc.uploaded_at).format('YYYY-MM-DD HH:mm') }}</td>
                         <td class="px-4 py-3.5">
                             <div class="flex flex-wrap items-center gap-x-2 gap-y-1 whitespace-nowrap">
-                                <a :href="url_prefix.document_prefix + doc.slug" target="_blank" rel="noopener"
-                                    class="text-xs text-primary/90 hover:underline">下载</a>
+                                <button type="button"
+                                    class="text-xs text-primary/90 hover:underline"
+                                    @click="download_document(doc)">下载</button>
                                 <!-- 详情页会把相对路径 slug 自动补成 /api/document/，MD 里只写 slug 即可生成下载链接 -->
                                 <CopyButton :text="`[${doc.raw_filename}](${doc.slug})`" label="复制 md" />
                                 <!-- 改名/删除：上传者本人或超管（后端 403 其他人） -->

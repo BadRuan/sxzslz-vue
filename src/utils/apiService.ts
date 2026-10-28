@@ -1,7 +1,7 @@
 import type { AxiosRequestConfig } from 'axios';
 import service from './request';
 import { url_prefix } from './baseInfo';
-import { get_token, clear_token } from '@/store/auth';
+import { get_token, clear_token } from '@/utils/token';
 
 /** UploadResult：POST /image/、POST /document/ 统一响应 */
 export interface UploadResult {
@@ -46,10 +46,13 @@ export const apiService = {
     upload<T = any>(url: string, file: File): Promise<T> {
         const form = new FormData();
         form.append('file', file);
-        return service.post<T, T>(url, form, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-            timeout: 60000,
-        });
+        // 不要手动设置 Content-Type：浏览器才会带 boundary，手写会丢 boundary 导致后端 422
+        return service.post<T, T>(url, form, { timeout: 60000 });
+    },
+
+    /** 需要登录的文件下载：axios 携带 JWT 返回 Blob（<a href> 无法带 Authorization） */
+    download(url: string): Promise<Blob> {
+        return service.get<Blob, Blob>(url, { responseType: 'blob' });
     },
 
     /**

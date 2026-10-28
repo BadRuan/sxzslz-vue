@@ -8,7 +8,7 @@ import 'axios';
  * 前台携带登录态会错误地缩小公开数据范围（普通账号登录后看不到全站文章）。
  */
 declare module 'axios' {
-    interface AxiosRequestConfig {
+    interface AxiosRequestConfig<D = any> {
         skip_auth?: boolean;
     }
 }

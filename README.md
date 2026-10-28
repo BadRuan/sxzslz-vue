@@ -180,6 +180,7 @@ npm run preview
 | 批量分类（加入/移出） | 可用 | 入口不渲染，接口本身也返回 403 |
 | 照片/文档列表 | 全部，多一列「上传者」 | 仅自己上传的 |
 | 照片/文档 改名/删除 | 全部 | 仅本人上传的 |
+| 文档下载 | 全部 | 仅本人上传的（下载走 Blob 请求携带 JWT） |
 
 > 前台（首页/文章列表/详情/作者主页）固定以**匿名身份**读取公开数据：后端对普通账号
 > token 会强制只返回本人文章，若前台沿用登录态，普通账号登录后前台将只剩自己的文章。
@@ -188,6 +189,7 @@ npm run preview
 
 - **路由懒加载 + Suspense**：路由组件均为动态 import，`MainLayout` / 后台 `Layout` 用
   `<Suspense>` 包裹 `RouterView`，异步阶段展示 `PageLoading` fallback。
+- **首屏骨架**：`index.html` 内联加载动画，JS 加载/挂载前不白屏（Vue mount 时自动替换）。
 - **封面懒加载**：`ArticleCover` 默认 `loading="lazy"` + `decoding="async"`，首屏外封面不阻塞 LCP。
 - **构建分块**（`vite.config.ts` 的 `build.rollupOptions.output.manualChunks`）：`vue-core` /
   `markdown` / `http` / `date` / `carousel` / `animation` / `vendor` 独立 chunk，便于长期缓存与按需并行加载。

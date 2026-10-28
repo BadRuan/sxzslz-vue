@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
-import { get_token, useAuthStore } from '@/store/auth';
+import { get_token } from '@/utils/token';
+import { useAuthStore } from '@/store/auth';
 
 const routes: RouteRecordRaw[] = [
     {
@@ -119,6 +120,7 @@ export const router = createRouter({
  * 1. 未登录 → 登录页（记录 redirect，登录后回跳）；
  * 2. 已登录但用户信息未加载 → 先拉 /auth/me 判断角色；
  * 3. requires_superuser 路由（分类管理）→ 普通账号重定向到概览并提示无权访问。
+ * 注意：账号信息因网络/服务端异常拉不到时放行，由页面展示错误与重试，避免误判角色或静默登出。
  */
 router.beforeEach(async (to) => {
     if (!to.path.startsWith('/admin') || to.path === '/admin/login') {
@@ -130,11 +132,16 @@ router.beforeEach(async (to) => {
     }
 
     const auth_store = useAuthStore()
-    await auth_store.ensure_user()
+    const user = await auth_store.ensure_user()
 
     // token 无效：fetchMe 已清空本地 token，重新走登录页
     if (!get_token()) {
         return { name: 'AdminLogin', query: { redirect: to.fullPath } }
+    }
+
+    // 网络抖动/服务端异常导致角色暂不可知：放行，页面自身提示重试（不按普通账号误判）
+    if (user === null) {
+        return true
     }
 
     if (to.meta.requires_superuser && !auth_store.is_superuser) {

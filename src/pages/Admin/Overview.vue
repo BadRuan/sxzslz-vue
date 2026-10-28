@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import apiService from '@/utils/apiService';
 import { useBaseinfoStore } from '@/store/base';
@@ -17,6 +17,7 @@ interface CountModel {
 };
 
 const route = useRoute();
+const router = useRouter();
 const auth_store = useAuthStore();
 
 const count_info = ref<CountModel>({
@@ -27,9 +28,14 @@ const count_info = ref<CountModel>({
 const latest_article = ref<ArticleModel[]>();
 const stats_error = ref('');
 
-// 路由守卫拦截普通账号访问分类管理后的提示（?denied=superuser）
-const is_denied_visible = ref(route.query.denied === 'superuser');
+// 路由守卫拦截普通账号访问分类管理后的提示（?denied=superuser）；读取后清掉 query，刷新/超管不会误提示
+const is_denied_visible = ref(false);
 const dismiss_denied = () => { is_denied_visible.value = false; };
+const consume_denied_query = () => {
+    if (route.query.denied !== 'superuser') return;
+    if (!auth_store.is_superuser) is_denied_visible.value = true;
+    router.replace({ name: 'AdminOverview' });
+};
 
 const fetchCountInfo = async () => {
     stats_error.value = '';
@@ -101,6 +107,7 @@ const stat_items = computed(() => [
 
 onMounted(
     async () => {
+        consume_denied_query();
         fetchCountInfo();
         getAdminLatestArticle();
         baseinfo_store.checkBaseinfo();

@@ -10,7 +10,9 @@ import { url_prefix } from '@/utils/baseInfo';
 import AppPagination from '@/components/AppPagination.vue';
 
 const route = useRoute();
-const user_id = Number(route.params.id);
+const raw_user_id = Number(route.params.id);
+/** 非法作者 id（NaN / 0 / 负数）不发请求，按「暂无文章」展示 */
+const user_id = Number.isInteger(raw_user_id) && raw_user_id > 0 ? raw_user_id : undefined;
 const head_img = '192878a6502947989a25d49d55f39266.jpg';
 
 // 后端无 /profile/ 专用接口：用 GET /articles/?user_id= 服务端过滤作者文章。
@@ -21,6 +23,12 @@ const page = ref(1);
 const total = ref(0);
 const has_next = ref(false);
 const getArticles = async () => {
+    if (user_id === undefined) {
+        latest_article.value = [];
+        total.value = 0;
+        has_next.value = false;
+        return;
+    }
     try {
         const res = await articleService.getArticles(
             { page: page.value, page_size: PAGE_SIZE, user_id },
@@ -107,6 +115,9 @@ onMounted(
             <div class="card rounded-box py-8 px-6 sm:px-10">
             <div class="font-bold mx-2">文章动态</div>
             <ul class="divide-y divide-base-300 divide-dashed">
+                <li v-if="latest_article.length === 0" class="px-5 py-8 text-center text-sm text-base-content/40">
+                    暂无文章
+                </li>
                 <li v-for="(article, index) in latest_article" :key="index"
                     class="px-5 py-3 flex items-center justify-between">
                     <div class="flex flex-row items-center min-w-0">

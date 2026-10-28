@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useAuthStore, get_token } from '@/store/auth';
+import { useAuthStore } from '@/store/auth';
+import { get_token } from '@/utils/token';
 
 const route = useRoute();
 const router = useRouter();
