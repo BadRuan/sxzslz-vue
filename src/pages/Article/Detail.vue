@@ -235,7 +235,7 @@ const renderedHtml = computed(() => {
                         prose-ul:list-disc prose-ul:mx-8 prose-ul:my-4 prose-ul:text-base-content/80
                         prose-ol:list-decimal prose-ol:mx-8 prose-ol:my-4 prose-ol:text-base-content/80
                         prose-a:text-primary prose-a:underline prose-a:underline-offset-2 prose-a:font-bold
-                        prose-img:w-full prose-img:shadow prose-img:rounded-sm prose-img:my-6 prose-img:mx-auto
+                        prose-img:w-2/3 prose-img:max-w-full prose-img:block prose-img:shadow prose-img:rounded-sm prose-img:my-6 prose-img:mx-auto
                         " v-html="renderedHtml">
 
                 </div>
