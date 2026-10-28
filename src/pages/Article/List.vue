@@ -251,8 +251,9 @@ const reload_articles = () => {
                                                     </time>
                                                 </div>
                                             </div>
+                                            <!-- 标题最多展示 4 行（至少预留 3 行高度）：公文类长标题 2 行会被截断，不满足阅读需要 -->
                                             <h2
-                                                class="text-base font-semibold text-base-content/70 group-hover:text-primary line-clamp-2 min-h-12">
+                                                class="text-base font-semibold text-base-content/70 group-hover:text-primary line-clamp-4 min-h-[4.5rem]">
                                                 {{ article.title }}
                                             </h2>
                                         </div>
