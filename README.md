@@ -56,8 +56,6 @@ src/
 ├── utils/                # request、apiService、apiError（detail 统一解析）、baseInfo、category、clipboard、formatters
 ├── MainLayout.vue        # 前台主布局
 └── router.ts             # 路由与后台鉴权守卫
-
-frontend-api.md           # 后端对接文档（字段/错误/权限契约以它为准）
 ```
 
 ## 快速开始
@@ -119,13 +117,15 @@ npm run preview
   - 文档：`/api/document/<slug>`
 - 开发环境由 vite 代理转发到后端（`vite.config.ts` 的 `server.proxy`）；生产环境由部署层（nginx 等）将 `/api/` 反向代理到后端。
 
-### 后端接口文档
+### 后端接口约定
 
-根目录 [`frontend-api.md`](frontend-api.md) 为前后端字段契约，主要包括：
+后端为 FastAPI 服务，联调时可直接访问其 `/docs`（Swagger）查看接口字段与示例；前端各接口封装见 `src/store`、`src/utils/apiService.ts`。主要约定：
 
 - 集合路径**必须带尾斜杠**（`/articles/`、`/image/` 等），否则 307
+- 分页参数 `page` / `page_size`，响应统一为 `{ data, total, page, page_size, has_next }`
 - 错误响应统一为 `detail`：400/401/403/404/500 为字符串，422 为数组（取 `detail[0].msg`）
-- `UserOut.is_superuser` 区分超级管理员与普通用户，权限边界见该文档 §1
+- 鉴权使用 `Authorization: Bearer <token>`；`is_superuser` 区分超级管理员与普通用户（权限边界见「账户与权限」）
+- 上传接口为 `multipart/form-data`，文件字段名固定为 `file`；图片 ≤ 10MB、文档 ≤ 50MB
 
 ### 正文 Markdown 约定
 
