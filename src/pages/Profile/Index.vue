@@ -75,8 +75,8 @@ onMounted(
         <div class="page-container">
             <div class="card rounded-box flex flex-col sm:flex-row sm:justify-between gap-6 p-6 sm:p-10">
             <div class="flex flex-row gap-6 sm:gap-8 min-w-0">
-                <div class="w-24 h-24 rounded-2xl shrink-0">
-                    <img class="w-full h-full object-cover rounded-2xl" :src="url_prefix.pic_prefix + head_img" alt="head_img">
+                <div class="w-24 h-24 rounded-xl shrink-0">
+                    <img class="w-full h-full object-cover rounded-xl" :src="url_prefix.pic_prefix + head_img" alt="head_img">
                 </div>
                 <div class="flex flex-col min-w-0">
                     <div class="flex flex-row items-center min-w-0">
@@ -107,7 +107,7 @@ onMounted(
                     class="px-5 py-3 flex items-center justify-between">
                     <div class="flex flex-row items-center min-w-0">
                         <div class="bg-base-300 w-1 h-1 rounded-xl shrink-0"></div>
-                        <div class="px-4 py-2 mr-4 text-sm font-bold rounded-2xl text-base-content/80 shrink-0 max-w-[8em] truncate"
+                        <div class="px-4 py-2 mr-4 text-sm font-medium rounded-lg text-base-content/80 shrink-0 max-w-[8em] truncate"
                             :title="article_categories(article).title">
                             {{ article_categories(article).label }}
                             <span v-if="article_categories(article).extra > 0"

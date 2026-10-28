@@ -20,8 +20,8 @@ const txt_class = 'font-bold text-base-content/90';
 
 <template>
     <section class="bg-base-200 py-8">
-        <div class="page-container bg-base-100 shadow rounded px-4 md:px-8 pb-12">
-            <h1 class="py-8 font-bold text-center text-2xl text-primary border-b border-base-300">{{
+        <div class="page-container bg-white shadow-sm border border-gray-200 rounded-xl px-4 md:px-8 pb-12">
+            <h1 class="py-8 font-semibold tracking-tight text-center text-2xl text-primary border-b border-gray-200">{{
                 station_array[indexValue]?.station_name }}</h1>
 
             <TitleComponent class="px-4 md:px-8 py-6 md:py-8">
@@ -29,7 +29,7 @@ const txt_class = 'font-bold text-base-content/90';
                 <template #second>Base Infomation</template>
             </TitleComponent>
 
-            <div class="flex flex-col md:flex-row md:flex-wrap gap-x-8 gap-y-2">
+            <div class="flex px-8 flex-col md:flex-row md:flex-wrap gap-x-8 gap-y-2">
                 <div class="flex flex-col justify-center md:flex-1">
                     <div class="flex flex-col">
                         <div class="min-h-12 flex flex-row py-1">
@@ -67,7 +67,7 @@ const txt_class = 'font-bold text-base-content/90';
             </TitleComponent>
 
 
-            <div class="flex flex-col md:flex-row md:flex-wrap gap-x-8 gap-y-2 items-start">
+            <div class="flex px-8 flex-col md:flex-row md:flex-wrap gap-x-8 gap-y-2 items-start">
                 <div class="flex flex-col justify-center md:flex-1">
                     <div class="flex flex-col">
                         <div class="min-h-12 flex flex-row py-1">
@@ -290,7 +290,7 @@ const txt_class = 'font-bold text-base-content/90';
                         <div class="flex flex-col">
                             <div class="overflow-hidden ">
                                 <img alt="gallery"
-                                    class="w-full h-full object-cover object-center hover:scale-105 ease-in-out transition-all duration-500"
+                                    class="w-full h-full object-cover object-center hover:scale-105 transition-all duration-200 ease-out"
                                     :src="url_prefix.pic_prefix + item.src">
                             </div>
                             <div class="flex flex-row items-center justify-between px-8 py-4">
@@ -299,7 +299,7 @@ const txt_class = 'font-bold text-base-content/90';
                                     <div class="text-base-content/60 text-sm">2025年08月04日 09:05:10</div>
                                 </div>
                                 <div class="font-medium text-base-content/70">{{ item.title
-                                    }}
+                                }}
                                 </div>
                             </div>
                         </div>

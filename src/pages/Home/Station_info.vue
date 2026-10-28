@@ -17,9 +17,9 @@ const { station_array } = storeToRefs(station_store);
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mt-6">
             <RouterLink v-for="(station, index) in station_array" :key="index"
                 :to="{ name: 'Station', query: { index: index } }"
-                class="card rounded-box card-hover group flex flex-col overflow-hidden hover:-translate-y-1 hover:shadow-md">
+                class="card rounded-box card-hover group flex flex-col overflow-hidden hover:-translate-y-0.5 hover:shadow-md">
                 <div class="overflow-hidden h-52">
-                    <img class="w-full h-full object-cover transition-transform duration-500 ease-out-soft group-hover:scale-105"
+                    <img class="w-full h-full object-cover transition-transform duration-200 ease-out group-hover:scale-105"
                         :src="url_prefix.pic_prefix + station.thumb" alt="pic">
                 </div>
                 <div class="p-5 flex flex-col gap-2">

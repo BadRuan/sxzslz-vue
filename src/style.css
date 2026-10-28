@@ -16,18 +16,19 @@
   name: "brand";
   default: true;
   color-scheme: light;
+  /* Corporate Clean：浅灰页面底 + 灰边框；主色保留项目橙 #f25807 */
   --color-base-100: #ffffff;
-  --color-base-200: #f5f6f8;
-  --color-base-300: #e4e4e7;
-  --color-base-content: #101118;
+  --color-base-200: #f8fafc;
+  --color-base-300: #e2e8f0;
+  --color-base-content: #111827;
   --color-primary: #f25807;
   --color-primary-content: #ffffff;
-  --color-secondary: #303841;
+  --color-secondary: #334155;
   --color-secondary-content: #ffffff;
   --color-accent: #fabc9c;
   --color-accent-content: #612303;
-  --color-neutral: #1a1a1a;
-  --color-neutral-content: #a1a1aa;
+  --color-neutral: #1f2937;
+  --color-neutral-content: #d1d5db;
   --color-info: #0284c7;
   --color-info-content: #ffffff;
   --color-success: #16a34a;
@@ -36,9 +37,10 @@
   --color-warning-content: #ffffff;
   --color-error: #dc2626;
   --color-error-content: #ffffff;
-  --radius-selector: 1rem;
+  /* 圆角对齐 rounded-lg(0.5rem) / rounded-xl(0.75rem) */
+  --radius-selector: 0.5rem;
   --radius-field: 0.5rem;
-  --radius-box: 1rem;
+  --radius-box: 0.75rem;
   --size-selector: 0.25rem;
   --size-field: 0.3125rem;
   --border: 1px;
@@ -48,16 +50,17 @@
 
 @theme {
     --font-sans: "GoogleSansCode", "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif;
-    --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @utility indent-2em {
     text-indent: 2em;
 }
 
-/* daisyUI 的 card 不自带底色：全站卡片统一 base-100，避免透出灰色画布 */
+/* daisyUI 的 card 不自带底色：全站卡片统一白底 + 灰边框 + 轻阴影（Corporate Clean 卡片规格） */
 @utility card {
     background-color: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    box-shadow: var(--shadow-sm);
 }
 
 /* 菜单激活项：默认随 neutral（近黑）显脏，改品牌橙轻底，与主题统一 */
@@ -99,28 +102,27 @@
     padding-bottom: clamp(2rem, 4vw, 3.5rem);
 }
 
-/* 可交互卡片：轻抬升 + 阴影过渡（含 translate：Tailwind v4 位移工具类走 CSS translate 属性） */
+/* 可交互卡片：轻抬升 + 阴影过渡（≤200ms，企业 UI 利落不飘逸） */
 @utility card-hover {
     transition-property: transform, translate, scale, rotate, box-shadow, border-color;
-    transition-duration: 300ms;
-    transition-timing-function: var(--ease-out-soft);
+    transition-duration: 200ms;
+    transition-timing-function: ease-out;
 }
 
 /* 链接/按钮颜色过渡 */
 @utility link-transition {
     transition-property: color, background-color, border-color, opacity, transform;
     transition-duration: 200ms;
-    transition-timing-function: var(--ease-out-soft);
+    transition-timing-function: ease-out;
 }
 
-/* 页面切换：淡入上滑（Motion.Lab fade-in-up 思路）
-   进场 320ms 从下方 16px 上浮淡入；出场 180ms 略快上移淡出，避免拖沓 */
+/* 页面切换：淡入上滑，出场略快 */
 .page-enter-active {
-    transition: opacity 320ms var(--ease-out-soft), transform 320ms var(--ease-out-soft);
+    transition: opacity 200ms ease-out, transform 200ms ease-out;
 }
 
 .page-leave-active {
-    transition: opacity 180ms var(--ease-out-soft), transform 180ms var(--ease-out-soft);
+    transition: opacity 150ms ease-out, transform 150ms ease-out;
 }
 
 .page-enter-from {
@@ -136,7 +138,7 @@
 /* 弹层 */
 .fade-enter-active,
 .fade-leave-active {
-    transition: opacity 200ms var(--ease-out-soft);
+    transition: opacity 200ms ease-out;
 }
 
 .fade-enter-from,
@@ -146,12 +148,12 @@
 
 .modal-enter-active,
 .modal-leave-active {
-    transition: opacity 220ms var(--ease-out-soft);
+    transition: opacity 200ms ease-out;
 }
 
 .modal-enter-active .modal-box,
 .modal-leave-active .modal-box {
-    transition: transform 220ms var(--ease-out-soft), opacity 220ms var(--ease-out-soft);
+    transition: transform 200ms ease-out, opacity 200ms ease-out;
 }
 
 .modal-enter-from,
@@ -168,7 +170,7 @@
 /* 列表项进入，轻量不抢戏 */
 .list-enter-active,
 .list-leave-active {
-    transition: opacity 200ms var(--ease-out-soft), transform 200ms var(--ease-out-soft);
+    transition: opacity 200ms ease-out, transform 200ms ease-out;
 }
 
 .list-enter-from,
@@ -177,23 +179,46 @@
     transform: translateY(6px);
 }
 
-/* 键盘可达性 */
+/* 键盘可达性：焦点环 + 偏移（WCAG，等价 focus:ring-2 + focus:ring-offset-2） */
 :focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
 }
 
-/* 全局交互元素默认过渡（放 base 层：utilities 层的 card-hover 等才能覆盖它，
-   否则无层样式会压过带 translate 的卡片过渡，链接类卡片 hover 变瞬间生硬） */
+/* 全局交互元素默认过渡（放 base 层：utilities 层的 card-hover 等才能覆盖它） */
 @layer base {
     a,
     button,
     input,
     select,
     textarea {
-        transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+        transition-property: color, background-color, border-color, box-shadow, opacity, transform, translate;
         transition-duration: 200ms;
-        transition-timing-function: var(--ease-out-soft);
+        transition-timing-function: ease-out;
+    }
+
+    /* 按钮触觉确认：hover 轻浮 + active 微缩（缺 active 反馈按钮像装饰品） */
+    .btn:not(:disabled):not(:active):hover {
+        translate: 0 -2px;
+    }
+
+    .btn:not(:disabled):active {
+        translate: 0 0;
+        transform: scale(0.98);
+    }
+
+    .btn:disabled {
+        translate: 0 0;
+        transform: none;
+    }
+
+    /* 表单控件焦点：ring + 白底分离环（ring-offset 效果） */
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 2px var(--color-base-100), 0 0 0 4px var(--color-primary);
+        border-color: var(--color-primary);
     }
 }
 

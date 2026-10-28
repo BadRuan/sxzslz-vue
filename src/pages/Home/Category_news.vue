@@ -59,7 +59,7 @@ const columns = computed(() => [
                                     <div class="bg-base-300 w-1 h-1 rounded-xl shrink-0"></div>
 
                                     <div
-                                        class="text-base-content hover:text-primary hover:font-bold text-sm py-2 px-2 truncate">
+                                        class="text-base-content hover:text-primary text-sm py-2 px-2 truncate">
                                         {{ item.title }}</div>
                                 </div>
                                 <div class="text-base-content/40 text-right text-sm px-4 shrink-0">{{ easy_date_text(item.create_at) }}

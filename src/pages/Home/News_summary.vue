@@ -49,8 +49,7 @@ onMounted(async () => {
                 </TitleComponent>
             </div>
 
-            <div v-if="loading"
-                class="card rounded-box border border-base-300 p-12 text-center">
+            <div v-if="loading" class="card rounded-box border border-base-300 p-12 text-center">
                 <span class="loading loading-spinner loading-md mx-auto mb-4 block"></span>
                 <p class="text-base-content/60">加载中...</p>
             </div>
@@ -58,21 +57,23 @@ onMounted(async () => {
             <!-- lg 起轮播 3/5 + 通知卡 2/5 分栏；窄视口纵向堆叠，避免 720+560 固定宽在 1366 下也溢出 -->
             <div v-else class="grid gap-6 mt-6 lg:grid-cols-5 items-stretch">
 
-                <Splide :options="options" class="overflow-hidden rounded-box shadow-sm w-full lg:col-span-3">
+                <Splide :options="options"
+                    class="overflow-hidden rounded-box shadow-sm border border-base-300 w-full lg:col-span-3">
                     <SplideSlide v-for="(article, index) in article_obj.recommended" :key="index">
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
                             class="relative block aspect-[3/2] w-full overflow-hidden rounded-box">
                             <ArticleCover :slug="article.cover_img_slug" alt="new_pic" />
+                            <!-- 中部过渡遮罩：底部深、向上渐隐，保证叠字可读 -->
                             <div
-                                class="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none">
+                                class="absolute bottom-0 left-0 right-0 h-1/5 bg-gradient-to-t from-black/35 via-black/20 to-transparent pointer-events-none">
                             </div>
 
                             <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
-                                <span
-                                    class="badge badge-primary badge-sm mb-3 tracking-wider uppercase">
+                                <span class="badge badge-primary badge-sm mb-3">
                                     {{ categories_label(article.categories) }}
                                 </span>
-                                <h2 class="mb-2 font-bold leading-tight line-clamp-2">{{ article.title }}</h2>
+                                <h2 class="mb-2 font-semibold tracking-tight leading-snug line-clamp-2">{{ article.title
+                                    }}</h2>
                             </div>
                         </RouterLink>
                     </SplideSlide>
@@ -93,12 +94,13 @@ onMounted(async () => {
                                 <div class="flex flex-row items-center min-w-0 flex-1">
                                     <div class="bg-base-300 w-1 h-1 rounded-xl shrink-0"></div>
 
-                                    <div class="text-base-content hover:text-primary hover:font-bold text-sm py-2 px-2 truncate">
+                                    <div class="text-base-content hover:text-primary text-sm py-2 px-2 truncate">
                                         {{
                                             item.title
                                         }}</div>
                                 </div>
-                                <div class="text-base-content/40 text-right text-sm px-4">{{ easy_date_text(item.create_at) }}
+                                <div class="text-base-content/40 text-right text-sm px-4">{{
+                                    easy_date_text(item.create_at) }}
                                 </div>
                             </li>
                         </RouterLink>

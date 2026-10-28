@@ -188,7 +188,7 @@ const renderedHtml = computed(() => {
                                     d="M22 22C22 16.4772 17.5228 12 12 12C6.47715 12 2 16.4772 2 22"></path>
                             </svg>
                             <RouterLink :to="{ name: 'Profile', params: { id: article_detail?.user?.id } }"
-                                class="text-base text-base-content/60 hover:text-primary hover:font-bold truncate">
+                                class="text-base text-base-content/60 hover:text-primary truncate">
                                 <span>{{ article_detail?.user?.nickname }}</span>
                             </RouterLink>
                         </div>
@@ -228,7 +228,7 @@ const renderedHtml = computed(() => {
                         prose-h1:text-2xl prose-h2:text-2xl prose-h3:text-base
                         prose-p:leading-relaxed prose-p:indent-2em
                         prose-strong:text-base-content/80 prose-strong:font-semibold
-                        prose-blockquote:border-l-primary prose-blockquote:bg-error/10 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded
+                        prose-blockquote:border-l-primary prose-blockquote:bg-error/10 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-lg
                         prose-ul:list-disc prose-ul:mx-8 prose-ul:my-4 prose-ul:text-base-content/80
                         prose-ol:list-decimal prose-ol:mx-8 prose-ol:my-4 prose-ol:text-base-content/80
                         prose-a:text-primary prose-a:underline prose-a:underline-offset-2 prose-a:font-bold

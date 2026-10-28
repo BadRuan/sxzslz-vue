@@ -16,10 +16,10 @@ import TitleComponent from '@/components/TitleComponent.vue';
                     <div class="p-4 md:w-1/2 lg:w-1/3">
                         <RouterLink class="group block" :to="{ name: 'ArticleDetail', params: { slug: '3fae1fcd32904f40' } }">
                             <div
-                                class="h-full card rounded-box overflow-hidden text-center relative card-hover hover:-translate-y-1 hover:shadow-md">
+                                class="h-full card rounded-box overflow-hidden text-center relative card-hover hover:-translate-y-0.5 hover:shadow-md">
                                 <img :src="url_prefix.pic_prefix + 'b4c701117a514224988b936e51aa8867.jpg'" alt="">
                                 <div class="m-6 lg:m-8 text-left">
-                                    <p class="tracking-widest text-base title-font font-medium text-base-content/50 my-4 ">
+                                    <p class="text-sm font-medium text-gray-500 my-4">
                                         运管养护</p>
                                     <h2 class="title-font sm:text-2xl text-xl font-medium text-base-content/80 mb-3">
                                         坚持月度安全检制度，筑牢常态化安全防线</h2>
@@ -39,10 +39,10 @@ import TitleComponent from '@/components/TitleComponent.vue';
                     <div class="p-4 md:w-1/2 lg:w-1/3">
                         <RouterLink class="group block" :to="{ name: 'ArticleDetail', params: { slug: 'c2efcff95b2c48be' } }">
                             <div
-                                class="h-full card rounded-box overflow-hidden text-center relative card-hover hover:-translate-y-1 hover:shadow-md">
+                                class="h-full card rounded-box overflow-hidden text-center relative card-hover hover:-translate-y-0.5 hover:shadow-md">
                                 <img :src="url_prefix.pic_prefix + '5a0605d992e944eab6c8b623e6465337.png'" alt="">
                                 <div class="m-6 lg:m-8 text-left">
-                                    <p class="tracking-widest text-base title-font font-medium text-base-content/50 my-4 ">
+                                    <p class="text-sm font-medium text-gray-500 my-4">
                                         安全生产</p>
                                     <h2 class="title-font sm:text-2xl text-xl font-medium text-base-content/80 mb-3">
                                         泵站电气设备操作“五防”：筑牢水利枢纽的安全防线</h2>
@@ -62,10 +62,10 @@ import TitleComponent from '@/components/TitleComponent.vue';
                     <div class="p-4 md:w-1/2 lg:w-1/3">
                         <RouterLink class="group block" :to="{ name: 'ArticleDetail', params: { slug: '2b23b332f0af406a' } }">
                             <div
-                                class="h-full card rounded-box overflow-hidden text-center relative card-hover hover:-translate-y-1 hover:shadow-md">
+                                class="h-full card rounded-box overflow-hidden text-center relative card-hover hover:-translate-y-0.5 hover:shadow-md">
                                 <img :src="url_prefix.pic_prefix + '52491d5c35d04dfc91157c59da600639.JPG'" alt="">
                                 <div class="m-6 lg:m-8 text-left">
-                                    <p class="tracking-widest text-base title-font font-medium text-base-content/50 my-4 ">
+                                    <p class="text-sm font-medium text-gray-500 my-4">
                                         标准化运行</p>
                                     <h2 class="title-font sm:text-2xl text-xl font-medium text-base-content/80 mb-3">
                                         泵站运行管理：从传统值守迈向智慧运维的新跨越</h2>
