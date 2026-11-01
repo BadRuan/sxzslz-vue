@@ -8,6 +8,7 @@ import AppPagination from '@/components/AppPagination.vue';
 import AppModal from '@/components/AppModal.vue';
 import CopyButton from '@/components/CopyButton.vue';
 import { useUpload } from '@/composables/useUpload';
+import { doc_icon_for } from '@/utils/docIcon';
 import {
     DOCUMENT_ACCEPT,
     DOCUMENT_LIMIT_HINT,
@@ -252,7 +253,11 @@ onMounted(fetch_list);
                         <td class="px-4 py-3.5 text-base-content/80" :title="doc.raw_filename">
                             <div class="max-w-[16rem] truncate">{{ doc.raw_filename }}</div>
                         </td>
-                        <td class="px-4 py-3.5 text-base-content/60 whitespace-nowrap">{{ ext_of(doc.raw_filename).toUpperCase() }}</td>
+                        <td class="px-4 py-3.5 text-base-content/60 whitespace-nowrap">
+                            <img :src="doc_icon_for(doc.raw_filename)" alt=""
+                                class="doc-icon inline-block w-4 h-4 mr-1.5 align-middle" />
+                            {{ ext_of(doc.raw_filename).toUpperCase() }}
+                        </td>
                         <td class="px-4 py-3.5 text-base-content/60 whitespace-nowrap">{{ format_bytes(doc.size_bytes) }}</td>
                         <!-- 超管可见上传者（普通用户列表本身只含自己的文件） -->
                         <td v-if="auth_store.is_superuser" class="px-4 py-3.5 text-base-content/60 max-w-[8rem] truncate"

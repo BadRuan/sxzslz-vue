@@ -11,6 +11,7 @@ import { useArticleStore, articleService } from '@/store/article';
 import { api_error_detail } from '@/utils/apiError';
 import { useBaseinfoStore } from '@/store/base';
 import { url_prefix } from '@/utils/baseInfo';
+import { doc_icon_for, is_doc_extension } from '@/utils/docIcon';
 import 'github-markdown-css/github-markdown.css';
 
 const route = useRoute();
@@ -29,6 +30,13 @@ const category_crumb = computed(() => {
 
 const error = ref<string | null>(null);
 const loading = ref(true);
+
+// —— 正文字号切换：小 / 中 / 大 ——
+type FontSize = 'sm' | 'md' | 'lg';
+const font_size = ref<FontSize>('md');
+const font_size_class = computed(() => {
+    return font_size.value === 'sm' ? 'prose-sm' : font_size.value === 'lg' ? 'prose-lg' : 'prose-base';
+});
 
 onMounted(async () => {
     if (slug == undefined || typeof slug !== 'string') {
@@ -99,6 +107,7 @@ const md = new MarkdownIt({
     }
 }).use(mark);
 
+// —— 文档类型图标：根据链接扩展名选择对应图标 ——
 const renderedHtml = computed(() => {
     if (!article_detail.value) {
         return '';
@@ -121,8 +130,18 @@ const renderedHtml = computed(() => {
             return `[${text}](${url_prefix.document_prefix}${href})`;
         });
 
-        return DOMPurify.sanitize(md.render(content), {
-            ADD_ATTR: ['target']
+        let html = md.render(content);
+        // 为指向文档的链接在文件名前插入类型图标
+        html = html.replace(/<a([^>]*href="([^"]+)"[^>]*)>([^<]*)<\/a>/g, (match, attrs, href, text) => {
+            if (is_doc_extension(href)) {
+                return `<a${attrs}><img src="${doc_icon_for(href)}" class="doc-icon inline-block w-4 h-4 mr-1 align-middle" alt="" />${text}</a>`;
+            }
+            return match;
+        });
+
+        return DOMPurify.sanitize(html, {
+            ADD_ATTR: ['target', 'class'],
+            ADD_TAGS: ['span']
         });
     }
 })
@@ -181,6 +200,12 @@ const renderedHtml = computed(() => {
                     </h1>
 
                     <div class="flex flex-wrap items-center justify-center gap-6 md:gap-12 text-sm text-base-content/60">
+                        <div class="flex flex-row items-center gap-1 text-sm">
+                            <span class="text-base-content/60 mr-1">字号</span>
+                            <button type="button" class="btn btn-xs" :class="font_size==='sm'?'btn-primary':'btn-ghost'" @click="font_size='sm'">小</button>
+                            <button type="button" class="btn btn-xs" :class="font_size==='md'?'btn-primary':'btn-ghost'" @click="font_size='md'">中</button>
+                            <button type="button" class="btn btn-xs" :class="font_size==='lg'?'btn-primary':'btn-ghost'" @click="font_size='lg'">大</button>
+                        </div>
                         <div class="flex flex-row items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="text-base-content/60 mr-2" width="20" height="20"
                                 viewBox="0 0 24 24" fill="none">
@@ -228,17 +253,8 @@ const renderedHtml = computed(() => {
                     </div>
                 </div>
                 <!-- 正文区：加宽到 max-w-5xl（原 768px 在大屏下卡片内两侧留白过多），并保留上下留白 -->
-                <div class="px-6 sm:px-10 py-12 mx-auto max-w-5xl prose prose-lg
-                        prose-headings:font-bold prose-headings:text-base-content/90 prose-headings:mb-4 prose-headings:mt-8
-                        prose-h1:text-2xl prose-h2:text-2xl prose-h3:text-base
-                        prose-p:leading-relaxed prose-p:indent-2em
-                        prose-strong:text-base-content/80 prose-strong:font-semibold
-                        prose-blockquote:border-l-primary prose-blockquote:bg-error/10 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-lg
-                        prose-ul:list-disc prose-ul:mx-8 prose-ul:my-4 prose-ul:text-base-content/80
-                        prose-ol:list-decimal prose-ol:mx-8 prose-ol:my-4 prose-ol:text-base-content/80
-                        prose-a:text-primary prose-a:underline prose-a:underline-offset-2 prose-a:font-bold
-                        prose-img:w-2/3 prose-img:max-w-full prose-img:block prose-img:shadow prose-img:rounded-sm prose-img:my-6 prose-img:mx-auto
-                        " v-html="renderedHtml">
+                <div class="px-6 sm:px-10 py-12 mx-auto max-w-5xl prose prose-headings:font-bold prose-headings:text-base-content/90 prose-headings:mb-4 prose-headings:mt-8 prose-h1:text-2xl prose-h2:text-2xl prose-h3:text-base prose-p:leading-relaxed prose-p:indent-2em prose-strong:text-base-content/80 prose-strong:font-semibold prose-blockquote:border-l-primary prose-blockquote:bg-error/10 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-lg prose-ul:list-disc prose-ul:mx-8 prose-ul:my-4 prose-ul:text-base-content/80 prose-ol:list-decimal prose-ol:mx-8 prose-ol:my-4 prose-ol:text-base-content/80 prose-a:text-primary prose-a:underline prose-a:underline-offset-2 prose-a:font-bold prose-img:w-2/3 prose-img:max-w-full prose-img:block prose-img:shadow prose-img:rounded-sm prose-img:my-6 prose-img:mx-auto"
+                        :class="font_size_class" v-html="renderedHtml">
 
                 </div>
 
@@ -268,10 +284,21 @@ const renderedHtml = computed(() => {
 
 <style scoped>
 :deep(.prose mark) {
-    background-color: #fce852;
-    color: #1b1b1b;
+    background-color: var(--color-accent);
+    color: var(--color-accent-content);
     padding-left: 0.25rem;
     padding-right: 0.25rem;
     border-radius: 0.125rem;
+}
+
+/* 文档图标：prose-img:block 会把图标也压成独占一行，这里强制回行内并贴合基线 */
+:deep(.prose img.doc-icon) {
+    display: inline-block;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin: 0 0.25rem 0 0;
+    vertical-align: -0.15em;
+    border: none;
+    border-radius: 0.25rem;
 }
 </style>

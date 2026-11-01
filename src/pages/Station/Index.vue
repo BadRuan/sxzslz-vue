@@ -20,8 +20,8 @@ const txt_class = 'font-bold text-base-content/90';
 
 <template>
     <section class="bg-base-200 py-8">
-        <div class="page-container bg-white shadow-sm border border-gray-200 rounded-xl px-4 md:px-8 pb-12">
-            <h1 class="py-8 font-semibold tracking-tight text-center text-2xl text-primary border-b border-gray-200">{{
+        <div class="page-container bg-base-100 shadow-sm border border-base-300 rounded-xl px-4 md:px-8 pb-12">
+            <h1 class="py-8 font-semibold tracking-tight text-center text-2xl text-primary border-b border-base-300">{{
                 station_array[indexValue]?.station_name }}</h1>
 
             <TitleComponent class="px-4 md:px-8 py-6 md:py-8">

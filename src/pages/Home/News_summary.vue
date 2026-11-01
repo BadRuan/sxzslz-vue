@@ -73,10 +73,10 @@ onMounted(async () => {
                             <ArticleCover :slug="article.cover_img_slug" alt="new_pic" />
                             <!-- 中部过渡遮罩：底部深、向上渐隐，保证叠字可读 -->
                             <div
-                                class="absolute bottom-0 left-0 right-0 h-1/5 bg-gradient-to-t from-black/35 via-black/20 to-transparent pointer-events-none">
+                                class="absolute bottom-0 left-0 right-0 h-1/5 bg-base-content/30 pointer-events-none">
                             </div>
 
-                            <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+                            <div class="absolute bottom-0 left-0 right-0 p-6 text-base-100">
                                 <span class="badge badge-primary badge-sm mb-3">
                                     {{ categories_label(article.categories) }}
                                 </span>

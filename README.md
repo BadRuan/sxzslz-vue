@@ -7,7 +7,8 @@
 - **泵站信息展示** - 展示辖区内各泵站的详细信息，包括设备参数、地理位置、工程规模等
 - **新闻资讯** - 按分类（泵站动态/区级通知/人事通知/财务通知等，分类可在后台维护）展示文章列表与详情
 - **文章封面** - 列表卡片与首页轮播以完整高度展示（适配红头文件等竖版公文，宽度按比例收窄，浅灰衬底）
-- **文章详情** - 支持 Markdown 渲染，带 XSS 安全防护与匿名点赞；正文内相对路径图片/附件自动补全前缀
+- **文章详情** - 支持 Markdown 渲染，带 XSS 安全防护与匿名点赞；正文内相对路径图片/附件自动补全前缀；附件链接在文件名前显示**类型图标**（Word/Excel/PPT/PDF 等，映射见 `src/utils/docIcon.ts`）；正文支持**大/中/小三档字号切换**
+- **文档类型图标** - 前台正文附件与后台文档管理「类型」列共用 `public/icon/doc-*.svg` 图标（`src/utils/docIcon.ts` 按扩展名映射，未知类型回退通用图标）
 - **个人主页** - 按作者聚合文章与阅读统计
 - **后台管理** - 登录鉴权（JWT）、修改密码、数据概览、文章管理（回收站/批量分类/推荐/按作者筛选）、分类管理（两级树，仅超管）、账户管理（仅超管）、照片/文档上传管理；照片与文档均支持**多文件批量上传**（一次最多 20 个，单次请求整批生效）、**上传进度条（含「服务器处理中」阶段）**、**随时取消上传**、**改名/删除**（上传者本人或超管）与一键复制 Markdown 片段（HTTP 局域网下也可一键复制，无弹窗）
 - **上传限制** - 图片单张 ≤ 10MB、文档单个 ≤ 50MB、单次最多 20 个（与后端 `MAX_IMAGE_SIZE_MB` / `MAX_DOCUMENT_SIZE_MB` / `MAX_BATCH_FILES` 一致）；选择文件后立即用 `file.size` 预检并提示超限文件与当前体积，避免大文件白传
@@ -55,7 +56,7 @@ src/
 │   └── NotFound.vue      # 404
 ├── store/                # Pinia：base（分类/用户）、article、station、auth
 ├── types/                # 全局类型增强（axios.skip_auth、路由 meta）
-├── utils/                # request、apiService、apiError（detail 统一解析）、upload（大小/格式预检）、baseInfo、category、clipboard、formatters
+├── utils/                # request、apiService、apiError（detail 统一解析）、upload（大小/格式预检）、docIcon（文档类型图标映射）、baseInfo、category、clipboard、formatters
 ├── MainLayout.vue        # 前台主布局
 └── router.ts             # 路由与后台鉴权守卫
 ```
@@ -164,6 +165,10 @@ npm run preview
 | 附件 | `[原文件名](slug)` | `/api/document/slug` |
 
 `http(s)://` 开头的绝对地址保持原样，不会被改写。
+
+附件链接按扩展名（`doc/xls/ppt/pdf/txt/zip/rar` 及其新格式）在文件名前显示类型图标，
+图标资源在 `public/icon/doc-*.svg`，映射与判断逻辑统一在 `src/utils/docIcon.ts`；
+详情页顶部提供「字号 小/中/大」切换（`prose-sm` / `prose-base` / `prose-lg`）。
 
 ## 数据说明
 
