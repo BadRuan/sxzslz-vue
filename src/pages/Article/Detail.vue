@@ -2,16 +2,11 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import MarkdownIt from 'markdown-it';
-import linkAttributes from 'markdown-it-link-attributes';
-import mark from 'markdown-it-mark';
-import DOMPurify from 'dompurify';
 import dayjs from 'dayjs';
 import { useArticleStore, articleService } from '@/store/article';
 import { api_error_detail } from '@/utils/apiError';
 import { useBaseinfoStore } from '@/store/base';
-import { url_prefix } from '@/utils/baseInfo';
-import { doc_icon_for, is_doc_extension } from '@/utils/docIcon';
+import { render_markdown } from '@/utils/markdown';
 import 'github-markdown-css/github-markdown.css';
 
 const route = useRoute();
@@ -95,56 +90,11 @@ const handle_like = async () => {
     }
 };
 
-const md = new MarkdownIt({
-    html: false,
-    breaks: true,
-    linkify: true,
-    typographer: true
-}).use(linkAttributes, {
-    attrs: {
-        target: '_blank',
-        rel: 'noopener noreferrer'
-    }
-}).use(mark);
-
-// —— 文档类型图标：根据链接扩展名选择对应图标 ——
+// —— 正文渲染：与后台编辑器预览共用同一条管线（src/utils/markdown.ts）——
 const renderedHtml = computed(() => {
-    if (!article_detail.value) {
-        return '';
-    } else {
-        let content = article_detail.value.content ?? '';
-
-        content = content.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, src) => {
-            if (src.startsWith('http') || src.startsWith('//')) {
-                return match;
-            }
-            return `![${alt}](${url_prefix.pic_prefix}${src})`;
-        });
-
-        content = content.replace(/(?<!!)\[([^\]]+)\]\(([^)]+)\)/g, (match, text, href) => {
-            // 如果是绝对地址或协议相对地址，直接返回原内容
-            if (href.startsWith('http') || href.startsWith('//')) {
-                return match;
-            }
-            // 如果是相对地址，自动添加 document_prefix 前缀
-            return `[${text}](${url_prefix.document_prefix}${href})`;
-        });
-
-        let html = md.render(content);
-        // 为指向文档的链接在文件名前插入类型图标
-        html = html.replace(/<a([^>]*href="([^"]+)"[^>]*)>([^<]*)<\/a>/g, (match, attrs, href, text) => {
-            if (is_doc_extension(href)) {
-                return `<a${attrs}><img src="${doc_icon_for(href)}" class="doc-icon inline-block w-4 h-4 mr-1 align-middle" alt="" />${text}</a>`;
-            }
-            return match;
-        });
-
-        return DOMPurify.sanitize(html, {
-            ADD_ATTR: ['target', 'class'],
-            ADD_TAGS: ['span']
-        });
-    }
-})
+    if (!article_detail.value) return '';
+    return render_markdown(article_detail.value.content ?? '');
+});
 
 
 </script>

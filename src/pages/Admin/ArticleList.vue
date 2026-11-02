@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia';
 import dayjs from 'dayjs';
 import AppPagination from '@/components/AppPagination.vue';
 import AppModal from '@/components/AppModal.vue';
+import MarkdownEditor from '@/components/MarkdownEditor.vue';
 import apiService, { type UploadPhase } from '@/utils/apiService';
 import { useBaseinfoStore } from '@/store/base';
 import { usePermissions } from '@/composables/usePermissions';
@@ -532,7 +533,7 @@ onMounted(
             :total="total" unit="条" @change="go_page" />
 
         <!-- 新增/编辑弹窗 -->
-        <AppModal v-model="show_modal" max-width="max-w-3xl"
+        <AppModal v-model="show_modal" max-width="max-w-5xl"
             :title="modal_mode === 'create' ? '新增文章' : '编辑文章'">
                     <div class="flex flex-col gap-4">
                         <label class="text-sm text-base-content/70">标题
@@ -540,10 +541,12 @@ onMounted(
                                 class="input input-bordered w-full mt-1" />
                         </label>
 
-                        <label class="text-sm text-base-content/70">正文（Markdown）
-                            <textarea v-model="form.content" rows="10"
-                                class="textarea textarea-bordered w-full mt-1 font-mono"></textarea>
-                        </label>
+                        <div class="text-sm text-base-content/70">
+                            正文（Markdown）
+                            <div class="mt-1">
+                                <MarkdownEditor v-model="form.content" />
+                            </div>
+                        </div>
 
                         <div class="text-sm text-base-content/70">
                             封面图
