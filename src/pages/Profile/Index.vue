@@ -35,7 +35,8 @@ const getArticles = async () => {
     list_error.value = '';
     try {
         const res = await articleService.getArticles(
-            { page: page.value, page_size: PAGE_SIZE, user_id },
+            // 作者主页按发布时间倒序（显式传 sort，不依赖后端匿名默认值）
+            { page: page.value, page_size: PAGE_SIZE, user_id, sort: 'create_at' },
             { anonymous: true },
         );
         latest_article.value = res.data ?? [];

@@ -13,6 +13,7 @@ import { api_error_detail } from '@/utils/apiError';
 import {
     articleService,
     type ArticleModel,
+    type ArticleSort,
     type ArticleUpsertInput,
 } from '@/store/article';
 import { url_prefix } from '@/utils/baseInfo';
@@ -35,6 +36,16 @@ const action_slug = ref<string | null>(null); // 正在操作（删除/恢复/�
 
 /** 作者筛选：仅超管可用（服务端仅对超管生效 user_id；普通账号被强制收敛为本人） */
 const filter_user_id = ref<number | ''>('');
+
+/**
+ * 列表排序：后端 `sort` 参数，均为倒序（对接文档 §7）。
+ * 后台默认 `id`（最新创建在前），可切换为 `create_at`（发布时间最新在前，超管可指定发布时间时两者会分叉）。
+ */
+const sort = ref<ArticleSort>('id');
+const SORT_OPTIONS: ReadonlyArray<{ value: ArticleSort, label: string }> = [
+    { value: 'id', label: 'ID 倒序（最新创建）' },
+    { value: 'create_at', label: '发布时间倒序（最新发布）' },
+];
 
 // —— 自定义确认弹窗（替代 window.confirm/alert，与 daisyUI 体系一致）——
 const confirm_dialog = ref<{ show: boolean, title: string, message: string, on_ok: (() => void) | null }>({
@@ -59,6 +70,8 @@ const fetch_list = async () => {
             page: page.value,
             page_size: PAGE_SIZE,
             is_deleted: view.value === 'trash',
+            // 显式传排序：后台默认 id 倒序，可切换为发布时间倒序
+            sort: sort.value,
             // 普通账号不传 user_id：服务端固定只返回本人文章
             ...(is_superuser.value && filter_user_id.value !== ''
                 ? { user_id: filter_user_id.value }
@@ -380,6 +393,13 @@ watch(filter_user_id, () => {
     fetch_list();
 });
 
+// 切换排序：回到第一页并清空选择（排序变了，原页码与勾选不再对应同一批文章）
+watch(sort, () => {
+    page.value = 1;
+    clear_selection();
+    fetch_list();
+});
+
 /** 表格列数随「是否显示勾选列」变化 */
 const column_count = computed(() => (is_superuser.value && view.value === 'active' ? 8 : 7));
 
@@ -393,7 +413,7 @@ onMounted(
 
 <template>
     <main class="flex-1 overflow-y-auto p-6">
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div class="flex items-center gap-4">
                 <div role="tablist" class="tabs tabs-box tabs-sm">
                     <button role="tab" class="tab" :class="{ 'tab-active': view === 'active' }"
@@ -406,7 +426,17 @@ onMounted(
                     </button>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
+                <!-- 排序方式：后端 sort 均为倒序，默认 ID 倒序，可切换为发布时间倒序 -->
+                <label class="flex items-center gap-2 text-sm text-base-content/60 whitespace-nowrap">
+                    <span class="hidden sm:inline">排序</span>
+                    <select v-model="sort" aria-label="文章列表排序方式"
+                        class="select select-bordered select-sm w-56 max-w-full">
+                        <option v-for="opt in SORT_OPTIONS" :key="opt.value" :value="opt.value">
+                            {{ opt.label }}
+                        </option>
+                    </select>
+                </label>
                 <!-- 超管：按发布主体筛选（普通账号由后端固定收敛为本人，无需筛选） -->
                 <select v-if="is_superuser" v-model="filter_user_id"
                     class="select select-bordered select-sm w-48">

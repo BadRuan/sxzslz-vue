@@ -42,6 +42,14 @@ export interface PageResponse<T> {
     has_next: boolean,
 }
 
+/**
+ * 列表排序字段（均为倒序，对接文档 §7）：
+ * - `create_at`：按发布时间倒序（前台新闻列表默认）
+ * - `id`：按发布 id 倒序（后台管理默认，最新创建在前）
+ * 不传时后端按调用者取默认：匿名 → create_at，登录（后台）→ id；显式传参优先。
+ */
+export type ArticleSort = 'create_at' | 'id'
+
 export interface ArticleQuery {
     page?: number
     page_size?: number
@@ -50,6 +58,8 @@ export interface ArticleQuery {
     user_id?: number
     /** true 只返回回收站文章（后台），默认只返回未删除文章 */
     is_deleted?: boolean
+    /** 排序字段（均倒序）；不传时匿名默认 create_at、登录默认 id */
+    sort?: ArticleSort
 }
 
 /** POST /articles/ / PATCH /articles/{slug}：user_id、create_at 仅超管生效（对接文档 §7） */
@@ -138,7 +148,10 @@ export const useArticleStore = defineStore('article', () => {
         if (target.value.length > 0) return;
         const category_id = name_category_id(tree, [...names]);
         if (category_id === undefined) return;
-        const res = await articleService.getArticles({ category_id, page: 1, page_size }, { anonymous: true });
+        const res = await articleService.getArticles(
+            { category_id, page: 1, page_size, sort: 'create_at' },
+            { anonymous: true },
+        );
         target.value = res.data ?? [];
     }
 
@@ -162,7 +175,10 @@ export const useArticleStore = defineStore('article', () => {
             if (recommended_article.value.length == 0) {
                 // 后端无独立推荐接口：取列表后按 is_recommended 过滤，失败不阻塞分类栏目
                 try {
-                    const res = await articleService.getArticles({ page: 1, page_size: 100 }, { anonymous: true });
+                    const res = await articleService.getArticles(
+                        { page: 1, page_size: 100, sort: 'create_at' },
+                        { anonymous: true },
+                    );
                     recommended_article.value = (res.data ?? [])
                         .filter((item) => item.is_recommended)
                         .slice(0, 8);
@@ -199,7 +215,8 @@ export const useArticleStore = defineStore('article', () => {
         article_list_error_message.value = ''
         try {
             const res = await articleService.getArticles(
-                { category_id, page, page_size },
+                // 前台固定按发布时间倒序，不依赖后端「匿名默认 create_at」的隐式约定
+                { category_id, page, page_size, sort: 'create_at' },
                 { anonymous: true },
             )
             // 后端已过滤回收站文章，total 与展示条目一致
