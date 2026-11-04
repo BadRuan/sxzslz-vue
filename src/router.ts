@@ -43,6 +43,12 @@ const routes: RouteRecordRaw[] = [
                 ]
             },
             {
+                path: '/search',
+                name: 'Search',
+                component: () => import('@/pages/Search/Index.vue'),
+                meta: { title: '站内搜索' }
+            },
+            {
                 path: '/profile/:id',
                 name: 'Profile',
                 component: () => import("@/pages/Profile/Index.vue"),

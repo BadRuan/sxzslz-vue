@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
 import { useBaseinfoStore } from '@/store/base';
 import { name_category_id, to_second_level_id } from '@/utils/category';
 import { CATEGORY_NAMES } from '@/utils/categoryConfig';
@@ -12,6 +13,16 @@ const { categories } = storeToRefs(baseinfo_store);
 // 文章只挂二级分类：名称命中一级分类（如"新闻动态"）时取其第一个子分类，否则列表页会按一级 id 查不到文章
 const news_category_id = computed(() =>
     to_second_level_id(categories.value, name_category_id(categories.value, CATEGORY_NAMES.news)));
+
+// —— 导航栏快捷搜索：只负责跳转到站内搜索页，具体检索与高亮在 Search 页 ——
+const router = useRouter();
+const search_keyword = ref('');
+
+const submit_search = () => {
+    const keyword = search_keyword.value.trim();
+    // 空关键词也进入搜索页（由页面给出输入引导），按钮始终可用，避免灰态被误认为不可用
+    router.push({ name: 'Search', query: keyword ? { keyword } : {} });
+};
 
 onMounted(() => {
     // 导航栏在所有前台页面常驻，由此统一拉取分类树（store 内部有空缓存判断，不会重复请求）
@@ -32,6 +43,36 @@ onMounted(() => {
             </div>
 
             <nav class="navbar-end hidden sm:flex">
+                <!-- ≥1280：完整搜索框；1024~1279：仅图标入口（导航项 + 超宽 logo 已占满一行） -->
+                <form role="search"
+                    class="mr-1 hidden items-center gap-2 xl:flex"
+                    @submit.prevent="submit_search">
+                    <label
+                        class="input input-sm input-bordered flex w-48 items-center gap-2 focus-within:ring-2 focus-within:ring-primary/40 focus-within:ring-offset-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            class="shrink-0 text-base-content/50" aria-hidden="true">
+                            <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.5"></circle>
+                            <path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                            </path>
+                        </svg>
+                        <input v-model="search_keyword" type="search" class="grow min-w-0" maxlength="50"
+                            autocomplete="off" placeholder="搜索标题/正文" aria-label="站内搜索关键词" />
+                    </label>
+                    <button type="submit"
+                        class="btn btn-sm btn-primary active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+                        搜索
+                    </button>
+                </form>
+                <RouterLink :to="{ name: 'Search' }"
+                    class="btn btn-ghost btn-sm btn-circle mr-1 hidden lg:inline-flex xl:hidden"
+                    aria-label="站内搜索" title="站内搜索">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        aria-hidden="true">
+                        <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.5"></circle>
+                        <path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                        </path>
+                    </svg>
+                </RouterLink>
                 <ul class="menu menu-horizontal px-1">
                     <li>
                         <RouterLink :to="{ name: 'Home' }" :active-class="active_class">

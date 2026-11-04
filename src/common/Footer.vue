@@ -65,6 +65,9 @@ const notice_category_id = computed(() => to_second_level_id(categories.value, n
                                 class="hover:text-primary link-transition">通知公告</RouterLink>
                         </li>
                         <li><a href="#" class="hover:text-primary link-transition">政策法规</a></li>
+                        <li>
+                            <RouterLink :to="{ name: 'Search' }" class="hover:text-primary link-transition">站内搜索</RouterLink>
+                        </li>
                     </ul>
                 </div>
 

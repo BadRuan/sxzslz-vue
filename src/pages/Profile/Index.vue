@@ -149,7 +149,7 @@ onMounted(
             </ul>
             </div>
             <AppPagination class="mt-4" :page="page" :has-next="has_next"
-                :total="total" unit="条" @change="go_page" />
+                :total="total" unit="条" :page-size="PAGE_SIZE" @change="go_page" />
         </div>
     </main>
 </template>

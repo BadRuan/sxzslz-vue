@@ -560,7 +560,7 @@ onMounted(
 
         <!-- 分页放横滚容器外：表格溢出时翻页按钮不被卷入横向滚动 -->
         <AppPagination class="mt-4" :page="page" :has-next="has_next"
-            :total="total" unit="条" @change="go_page" />
+            :total="total" unit="条" :page-size="PAGE_SIZE" @change="go_page" />
 
         <!-- 新增/编辑弹窗 -->
         <AppModal v-model="show_modal" max-width="max-w-5xl"

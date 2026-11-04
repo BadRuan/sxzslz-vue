@@ -43,6 +43,39 @@ export interface PageResponse<T> {
 }
 
 /**
+ * 搜索范围（对接文档 §7 GET /articles/search）：
+ * - `all`：标题 + 正文（默认）
+ * - `title`：仅标题
+ * - `content`：仅正文
+ */
+export type ArticleSearchScope = 'all' | 'title' | 'content'
+
+/** 实际命中的字段：用于结果项展示「标题命中 / 正文命中」标签 */
+export type ArticleSearchField = 'title' | 'content'
+
+/** ArticleSearchOut：继承 ArticleOut，额外返回正文片段与命中信息 */
+export interface ArticleSearchModel extends ArticleModel {
+    /** 正文命中片段（纯文本、已剥 HTML；首尾「…」表示截断）；仅标题命中或 scope=title 时为 null */
+    content_snippet: string | null,
+    /** 后端拆分并去重后的关键词，前端据此高亮（不返回高亮 HTML） */
+    matched_terms: string[],
+    /** 实际命中字段，如 ['title', 'content'] */
+    matched_fields: ArticleSearchField[],
+}
+
+export interface ArticleSearchQuery {
+    /** 必填，1~50 字；空格分隔多个词（词之间 AND） */
+    keyword: string,
+    /** 默认 all */
+    scope?: ArticleSearchScope,
+    page?: number,
+    /** 1~100，默认 20 */
+    page_size?: number,
+    /** 按二级分类 id 精确过滤（可选） */
+    category_id?: number,
+}
+
+/**
  * 列表排序字段（均为倒序，对接文档 §7）：
  * - `create_at`：按发布时间倒序（前台新闻列表默认）
  * - `id`：按发布 id 倒序（后台管理默认，最新创建在前）
@@ -88,6 +121,15 @@ const read_config = (options: ArticleReadOptions = {}) =>
 export const articleService = {
     getArticles(params: ArticleQuery = {}, options: ArticleReadOptions = {}) {
         return apiService.get<PageResponse<ArticleModel>>('/articles/', { ...params }, read_config(options));
+    },
+
+    /**
+     * 站内搜索（公开全量：仅排除已删文章，不随登录态收敛为本人文章）：
+     * 关键词按空白拆分为多个词（AND），结果统一按发布时间倒序，不按相关度加权。
+     * 后端只返回纯文本与 matched_terms，高亮由前端完成（见 src/utils/highlight.ts）。
+     */
+    search(params: ArticleSearchQuery) {
+        return apiService.get<PageResponse<ArticleSearchModel>>('/articles/search', { ...params }, read_config({ anonymous: true }));
     },
 
     getDetail(slug: string, options: ArticleReadOptions = {}) {

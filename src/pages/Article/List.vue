@@ -15,6 +15,9 @@ const router = useRouter();
 const baseinfo_store = useBaseinfoStore();
 const article_store = useArticleStore();
 
+/** 每页文章数：同时用于取数与分页条显示总页数，避免两处数字不一致 */
+const PAGE_SIZE = 30;
+
 const { categories, error_message: categories_error } = storeToRefs(baseinfo_store);
 const { article_list, article_total, article_page, article_has_next, article_list_error, article_list_error_message } = storeToRefs(article_store);
 
@@ -77,7 +80,7 @@ const toggle_group = (parent: CategoryModel) => {
 // 监听计算属性而非 route.query：分类树异步到达时也能自动补一次取数
 watch([active_category, page_number], ([categoryId, pageNum]) => {
     if (categoryId) {
-        article_store.getArticleList(categoryId, pageNum, 30);
+        article_store.getArticleList(categoryId, pageNum, PAGE_SIZE);
     }
 }, { immediate: true });
 
@@ -96,7 +99,7 @@ const article_categories = (article: ArticleModel) =>
 const handleCategoryClick = (categoryId: number) => {
     // 点击当前已激活的分类：路由不变不会再触发导航，直接重新拉取
     if (active_category.value === categoryId) {
-        article_store.getArticleList(categoryId, page_number.value, 30);
+        article_store.getArticleList(categoryId, page_number.value, PAGE_SIZE);
     }
 };
 
@@ -268,7 +271,7 @@ const reload_articles = () => {
                             </div>
 
                             <AppPagination class="m-8" :page="article_page" :has-next="article_has_next"
-                                :total="article_total" unit="条" @change="goToPage" />
+                                :total="article_total" unit="条" :page-size="PAGE_SIZE" @change="goToPage" />
                         </template>
                     </div>
                 </div>

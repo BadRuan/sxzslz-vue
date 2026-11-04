@@ -232,7 +232,7 @@ onMounted(getImageList);
         <p v-if="!list_error && image_list.length === 0" class="py-16 text-center text-base-content/40">暂无图片</p>
 
         <AppPagination class="mt-8" :page="page" :has-next="has_next"
-            :total="total" unit="张" @change="go_page" />
+            :total="total" unit="张" :page-size="PAGE_SIZE" @change="go_page" />
 
         <AppModal v-model="show_rename_modal" title="重命名图片" max-width="max-w-md">
             <label class="form-control w-full">
