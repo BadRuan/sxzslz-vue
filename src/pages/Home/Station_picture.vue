@@ -1,53 +1,58 @@
 <script setup lang="ts">
+import { computed } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useStationStore } from '@/store/station';
 import { url_prefix } from '@/utils/baseInfo';
 import TitleComponent from '@/components/TitleComponent.vue';
+
+const station_store = useStationStore();
+const { station_array } = storeToRefs(station_store);
+
+/**
+ * 影像取自带标题的站区图集（数据里本来就有 title，不另造文案）：
+ * 优先取第一座有图集的泵站，够 6 张就用，不足则用其余泵站补位。
+ */
+const gallery = computed(() => {
+    const pictures = station_array.value
+        .flatMap((station) => (station.station_pic_list ?? []).map((pic) => ({
+            ...pic,
+            station_name: station.station_name,
+        })))
+        .filter((pic) => Boolean(pic.src))
+        .slice(0, 6);
+    return pictures;
+});
 </script>
 
 <template>
-    <div class="section-y">
-        <section class="page-container">
-            <TitleComponent>
+    <section class="bg-neutral py-16 sm:py-20">
+        <div class="page-container">
+            <TitleComponent invert>
                 <template #first>泵站风光</template>
                 <template #second>Station Picture</template>
+                <template #action>
+                    <span class="text-sm text-white/40">站区实景影像</span>
+                </template>
             </TitleComponent>
 
-            <div class="flex mt-6 flex-wrap md:-m-2 -m-1">
-                <div class="flex flex-wrap w-1/2">
-                    <div class="md:p-2 p-1 w-1/2">
-                        <img alt="gallery"
-                            class="w-full object-cover h-full object-center block rounded-box shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 ease-out"
-                            :src="url_prefix.pic_prefix + 'f4b1736834f24101bf8e57b509af9933.JPG'">
+            <div v-if="gallery.length" class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+                <figure v-for="(pic, index) in gallery" :key="pic.src"
+                    class="group relative overflow-hidden rounded-xl bg-white/5"
+                    :class="index === 0 ? 'col-span-2 aspect-[16/10] sm:col-span-2' : 'aspect-[4/3]'">
+                    <img :src="url_prefix.pic_prefix + pic.src" :alt="pic.title"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover opacity-90 transition duration-500 ease-out group-hover:scale-[1.04] group-hover:opacity-100" />
+                    <!-- 底部渐隐 + 标题：静态时干净，悬浮时给出图注 -->
+                    <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral/85 via-transparent to-transparent opacity-90">
                     </div>
-                    <div class="md:p-2 p-1 w-1/2">
-                        <img alt="gallery"
-                            class="w-full object-cover h-full object-center block rounded-box shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 ease-out"
-                            :src="url_prefix.pic_prefix + '6809a9860845474e86516b55233c09b0.JPG'">
-                    </div>
-                    <div class="md:p-2 p-1 w-full">
-                        <img alt="gallery"
-                            class="w-full h-full object-cover object-center block rounded-box shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 ease-out"
-                            :src="url_prefix.pic_prefix + '045f78ab69b94a5ca242ea9caf40d770.JPG'">
-                    </div>
-                </div>
-                <div class="p-4 flex flex-wrap w-1/2">
-                    <div class="md:p-2 p-1 w-full">
-                        <img alt="gallery"
-                            class="w-full h-full object-cover object-center block rounded-box shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 ease-out"
-                            :src="url_prefix.pic_prefix + '7d40922d9eb1434d86b85aa39991dda5.JPG'">
-                    </div>
-                    <div class="md:p-2 p-1 w-1/2">
-                        <img alt="gallery"
-                            class="w-full object-cover h-full object-center block rounded-box shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 ease-out"
-                            :src="url_prefix.pic_prefix + 'f61c97c382244114a16bea01416a29d8.JPG'">
-                    </div>
-                    <div class="md:p-2 p-1 w-1/2">
-                        <img alt="gallery"
-                            class="w-full object-cover h-full object-center block rounded-box shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 ease-out"
-                            :src="url_prefix.pic_prefix + '4a1efd84fbe44ed484f3a7ef83270645.JPG'">
-                    </div>
-                </div>
+                    <figcaption class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4">
+                        <span class="text-sm font-medium text-white">{{ pic.title }}</span>
+                        <span class="hidden text-[0.6875rem] text-white/45 sm:block">{{ pic.station_name }}</span>
+                    </figcaption>
+                </figure>
             </div>
 
-        </section>
-    </div>
+            <p v-else class="mt-8 text-sm text-white/40">暂无站区影像</p>
+        </div>
+    </section>
 </template>

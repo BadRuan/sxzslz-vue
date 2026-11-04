@@ -119,54 +119,68 @@ onMounted(
 </script>
 
 <template>
-    <main class="flex-1 overflow-y-auto p-6 space-y-6">
+    <main class="flex-1 space-y-5 overflow-y-auto p-4 sm:p-6">
         <div v-if="is_denied_visible" role="alert" class="alert alert-warning text-sm">
             <span>当前账号为普通用户，无权访问分类管理。</span>
             <button class="btn btn-ghost btn-xs" @click="dismiss_denied">知道了</button>
         </div>
 
         <p v-if="stats_error" role="alert" class="alert alert-error text-sm">{{ stats_error }}</p>
-        <!-- 内容区宽度 = 视口 − 侧栏 192px，lg(1024) 下 4 列仅剩 ~180px/卡，xl 起才 4 列 -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+        <!-- 内容区宽度 = 视口 − 侧栏 240px，lg(1024) 下 4 列偏挤，xl 起才排 4 列 -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <div v-for="item in stat_items" :key="item.label"
-                class="card rounded-box p-5 flex flex-row items-center gap-4">
-                <div class="w-10 h-10 rounded-box flex items-center justify-center shrink-0" :class="item.bg">
-                    <svg class="w-5 h-5" :class="item.color" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
+                class="card card-hover flex items-center gap-4 rounded-box p-5 hover:shadow-lift">
+                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl" :class="item.bg">
+                    <svg class="h-5 w-5" :class="item.color" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" :d="item.icon" />
                     </svg>
                 </div>
-                <div>
-                    <div class="text-sm text-base-content/60">{{ item.label }}</div>
-                    <div class="text-2xl font-bold text-base-content mt-1">{{ item.value }}</div>
+                <div class="min-w-0">
+                    <p class="truncate text-xs text-base-content/45">{{ item.label }}</p>
+                    <p class="num mt-1.5 text-2xl font-semibold leading-none tracking-tight text-base-content">
+                        {{ item.value }}
+                    </p>
                 </div>
             </div>
         </div>
 
-        <div class="card rounded-box">
-            <div class="px-5 py-4 border-b border-base-300 flex items-center justify-between">
+        <div class="card overflow-hidden rounded-box">
+            <div class="flex items-center justify-between gap-3 border-b border-base-300 px-5 py-4">
                 <h3 class="text-sm font-semibold text-base-content">
                     {{ auth_store.is_superuser ? '全站最新文章' : '我的最新文章' }}
                 </h3>
-                <RouterLink :to="{ name: 'AdminArticleList' }" class="text-xs text-primary hover:underline">查看更多</RouterLink>
+                <RouterLink :to="{ name: 'AdminArticleList' }"
+                    class="group inline-flex items-center gap-1 text-xs text-primary">
+                    查看更多
+                    <svg class="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        aria-hidden="true">
+                        <path d="M9 6l6 6-6 6" />
+                    </svg>
+                </RouterLink>
             </div>
             <ul class="divide-y divide-base-300">
-                <li v-if="latest_error" class="px-5 py-8 text-center text-sm text-error">
+                <li v-if="latest_error" class="px-5 py-10 text-center text-sm text-error">
                     {{ latest_error }}
                 </li>
-                <li v-else-if="!latest_article?.length" class="px-5 py-8 text-center text-sm text-base-content/40">
+                <li v-else-if="!latest_article?.length" class="px-5 py-12 text-center text-sm text-base-content/40">
                     暂无文章
                 </li>
-                <li v-for="(article, index) in latest_article" :key="index"
-                    class="px-5 py-3 flex items-center justify-between gap-4">
-                    <div class="flex flex-row items-center min-w-0 flex-1">
-                        <div class="badge badge-ghost mr-4 shrink-0">{{
-                            article.categories?.[0]?.name || '—' }}</div>
-                        <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
-                            class="text-sm text-base-content/80 hover:text-primary truncate min-w-0 flex-1">
-                            <span class="font-semibold">{{ article.title }}</span>
-                        </RouterLink>
-                    </div>
-                    <time class="shrink-0 text-xs text-base-content/40">{{ date_text(article.create_at) }}</time>
+                <li v-for="(article, index) in latest_article" :key="index">
+                    <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
+                        class="group flex items-center justify-between gap-4 px-5 py-3 transition-colors duration-200 hover:bg-base-200/60">
+                        <div class="flex min-w-0 flex-1 items-center gap-3">
+                            <span
+                                class="shrink-0 rounded-md bg-base-200 px-2 py-1 text-[0.6875rem] font-medium text-base-content/50 transition-colors duration-200 group-hover:bg-primary/10 group-hover:text-primary">
+                                {{ article.categories?.[0]?.name || '—' }}
+                            </span>
+                            <span class="min-w-0 flex-1 truncate text-sm text-base-content/80 transition-colors duration-200 group-hover:text-primary">
+                                {{ article.title }}
+                            </span>
+                        </div>
+                        <time class="num shrink-0 text-xs text-base-content/35">{{ date_text(article.create_at) }}</time>
+                    </RouterLink>
                 </li>
             </ul>
         </div>

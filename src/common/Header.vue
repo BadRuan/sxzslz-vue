@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useBaseinfoStore } from '@/store/base';
 import { name_category_id, to_second_level_id } from '@/utils/category';
 import { CATEGORY_NAMES } from '@/utils/categoryConfig';
-
-const active_class = 'menu-active !text-primary font-semibold'
 
 const baseinfo_store = useBaseinfoStore();
 const { categories } = storeToRefs(baseinfo_store);
@@ -16,107 +14,231 @@ const news_category_id = computed(() =>
 
 // —— 导航栏快捷搜索：只负责跳转到站内搜索页，具体检索与高亮在 Search 页 ——
 const router = useRouter();
+const route = useRoute();
 const search_keyword = ref('');
+const mobile_open = ref(false);
+const scrolled = ref(false);
 
 const submit_search = () => {
     const keyword = search_keyword.value.trim();
     // 空关键词也进入搜索页（由页面给出输入引导），按钮始终可用，避免灰态被误认为不可用
     router.push({ name: 'Search', query: keyword ? { keyword } : {} });
+    mobile_open.value = false;
 };
+
+// 移动端抽屉：切换路由后自动收起，避免遮住新页面
+watch(() => route.fullPath, () => { mobile_open.value = false; });
+
+// 滚动后给导航条加一层描边阴影，让“吸顶”状态有明确边界
+const handle_scroll = () => { scrolled.value = window.scrollY > 8; };
 
 onMounted(() => {
     // 导航栏在所有前台页面常驻，由此统一拉取分类树（store 内部有空缓存判断，不会重复请求）
     baseinfo_store.checkBaseinfo();
+    handle_scroll();
+    window.addEventListener('scroll', handle_scroll, { passive: true });
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener('scroll', handle_scroll);
 });
 </script>
 
 <template>
-    <header class="bg-base-100 border-b border-base-300">
-        <div class="navbar mx-auto max-w-7xl min-h-16">
-            <div class="navbar-start">
+    <header class="sticky top-0 z-40">
+        <!-- 顶部条：单位归属与快捷入口，给门户一个“抬头” -->
+        <div class="hidden border-b border-white/10 bg-neutral text-neutral-content lg:block">
+            <div class="page-container flex h-9 items-center justify-between text-xs">
+                <p class="flex items-center gap-2 text-neutral-content/70">
+                    <span class="inline-block size-1.5 rounded-full bg-accent"></span>
+                    芜湖市鸠江区沈巷镇水利站 · 防汛抗旱 · 灌溉排涝
+                </p>
+                <div class="flex items-center gap-5 text-neutral-content/70">
+                    <RouterLink :to="{ name: 'Search' }" class="link-transition hover:text-white">站内搜索</RouterLink>
+                    <span class="h-3 w-px bg-white/15" aria-hidden="true"></span>
+                    <RouterLink :to="{ name: 'AdminLogin' }" class="link-transition hover:text-white">管理入口</RouterLink>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主导航 -->
+        <div class="border-b bg-base-100/85 backdrop-blur-md transition-shadow duration-300"
+            :class="scrolled ? 'border-base-300 shadow-[0_8px_24px_-18px_rgba(15,27,42,0.45)]' : 'border-transparent'">
+            <div class="page-container flex h-16 items-center justify-between gap-6 lg:h-[4.5rem]">
+                <!-- 品牌区 -->
+                <RouterLink :to="{ name: 'Home' }" class="group flex shrink-0 items-center gap-3"
+                    aria-label="返回首页">
+                    <img src="/icon/water-logo.svg" class="h-9 w-auto transition-transform duration-300 group-hover:scale-105"
+                        alt="沈巷镇水利站标识" />
+                    <img src="/icon/logo-text.svg" class="hidden h-[1.35rem] w-auto sm:block" alt="沈巷镇水利站" />
+                    <span class="text-[0.95rem] font-semibold tracking-tight text-base-content sm:hidden">沈巷镇水利站</span>
+                </RouterLink>
+
+                <!-- 桌面导航 -->
+                <nav class="hidden items-center md:flex" aria-label="主导航">
+                    <ul class="flex items-center gap-1">
+                        <li>
+                            <RouterLink :to="{ name: 'Home' }" class="nav-link">
+                                网站首页
+                            </RouterLink>
+                        </li>
+                        <li>
+                            <RouterLink :to="{ name: 'ArticleList', query: { category: news_category_id, page: 1 } }"
+                                class="nav-link">
+                                新闻列表
+                            </RouterLink>
+                        </li>
+                        <li>
+                            <RouterLink :to="{ name: 'About' }" class="nav-link">
+                                关于我们
+                            </RouterLink>
+                        </li>
+                    </ul>
+                </nav>
+
+                <!-- 右侧操作区 -->
                 <div class="flex items-center gap-2">
-                    <img src="/icon/water-logo.svg" class="h-8 w-8" alt="logo" />
-                    <RouterLink :to="{ name: 'Home' }">
-                        <img src="/icon/logo-text.svg" class="h-6" alt="logo-text" />
+                    <form role="search" class="hidden items-center xl:flex" @submit.prevent="submit_search">
+                        <label
+                            class="flex h-9 w-56 items-center gap-2 rounded-full border border-base-300 bg-base-200/70 px-3 text-sm link-transition focus-within:border-primary/40 focus-within:bg-base-100 focus-within:shadow-[0_0_0_3px_rgba(18,94,143,0.10)]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                class="shrink-0 text-base-content/40" aria-hidden="true">
+                                <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.8"></circle>
+                                <path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linecap="round"></path>
+                            </svg>
+                            <input v-model="search_keyword" type="search" class="min-w-0 grow bg-transparent text-[0.8125rem]"
+                                maxlength="50" autocomplete="off" placeholder="搜索标题 / 正文"
+                                aria-label="站内搜索关键词" />
+                        </label>
+                    </form>
+
+                    <RouterLink :to="{ name: 'Search' }"
+                        class="btn btn-ghost btn-sm btn-circle hidden text-base-content/70 hover:text-primary lg:inline-flex xl:hidden"
+                        aria-label="站内搜索" title="站内搜索">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            aria-hidden="true">
+                            <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.8"></circle>
+                            <path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round"></path>
+                        </svg>
                     </RouterLink>
+
+                    <!-- 移动端菜单开关 -->
+                    <button type="button" class="btn btn-ghost btn-sm btn-circle md:hidden" aria-label="打开导航菜单"
+                        :aria-expanded="mobile_open" aria-controls="mobile-nav" @click="mobile_open = !mobile_open">
+                        <svg v-if="!mobile_open" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                            viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round"></path>
+                        </svg>
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                            fill="none" aria-hidden="true">
+                            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
-            <nav class="navbar-end hidden sm:flex">
-                <!-- ≥1280：完整搜索框；1024~1279：仅图标入口（导航项 + 超宽 logo 已占满一行） -->
-                <form role="search"
-                    class="mr-1 hidden items-center gap-2 xl:flex"
-                    @submit.prevent="submit_search">
-                    <label
-                        class="input input-sm input-bordered flex w-48 items-center gap-2 focus-within:ring-2 focus-within:ring-primary/40 focus-within:ring-offset-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            class="shrink-0 text-base-content/50" aria-hidden="true">
-                            <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.5"></circle>
-                            <path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-                            </path>
-                        </svg>
-                        <input v-model="search_keyword" type="search" class="grow min-w-0" maxlength="50"
-                            autocomplete="off" placeholder="搜索标题/正文" aria-label="站内搜索关键词" />
-                    </label>
-                    <button type="submit"
-                        class="btn btn-sm btn-primary active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
-                        搜索
-                    </button>
-                </form>
-                <RouterLink :to="{ name: 'Search' }"
-                    class="btn btn-ghost btn-sm btn-circle mr-1 hidden lg:inline-flex xl:hidden"
-                    aria-label="站内搜索" title="站内搜索">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                        aria-hidden="true">
-                        <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.5"></circle>
-                        <path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-                        </path>
-                    </svg>
-                </RouterLink>
-                <ul class="menu menu-horizontal px-1">
-                    <li>
-                        <RouterLink :to="{ name: 'Home' }" :active-class="active_class">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                class="mr-1">
-                            <path fill="currentColor"
-                                d="M3.61325 7.99024L10.6132 3.32358Q11.2431 2.9037 12 2.9037Q12.7569 2.9037 13.3868 3.32358L20.3867 7.99024Q20.9084 8.33799 21.2042 8.89072Q21.5 9.44345 21.5 10.0704L21.5 19C21.5 20.3807 20.3807 21.5 19 21.5L15 21.5C14.7239 21.5 14.5 21.2761 14.5 21L14.5 16C14.5 15.1716 13.8284 14.5 13 14.5L11 14.5C10.1716 14.5 9.5 15.1716 9.5 16L9.5 21C9.5 21.2761 9.27614 21.5 9 21.5L5 21.5C3.61929 21.5 2.5 20.3807 2.5 19L2.5 10.0704Q2.5 9.44346 2.79581 8.89072Q3.09163 8.33799 3.61325 7.99024L3.61325 7.99024ZM4.16795 8.82229Q3.85498 9.03094 3.67749 9.36258Q3.5 9.69422 3.5 10.0704L3.5 19C3.5 19.8284 4.17157 20.5 5 20.5L9 20.5L9 21L8.5 21L8.5 16C8.5 14.6193 9.61929 13.5 11 13.5L13 13.5C14.3807 13.5 15.5 14.6193 15.5 16L15.5 21L15 21L15 20.5L19 20.5C19.8284 20.5 20.5 19.8284 20.5 19L20.5 10.0704Q20.5 9.69422 20.3225 9.36258Q20.145 9.03094 19.8321 8.82229L12.8321 4.15563Q12.4542 3.9037 12 3.9037Q11.5458 3.9037 11.1679 4.15563L4.16795 8.82229Z">
-                            </path>
-                        </svg>
-                            网站首页
-                        </RouterLink>
-                    </li>
-
-                    <li>
-                        <RouterLink :to="{ name: 'ArticleList', query: { category: news_category_id, page: 1 } }"
-                            :active-class="active_class">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                class="mr-1">
-                                <path
-                                    d="M2 3.90476L8.19048 3.90476L10.0952 6.7619L22 6.7619L22 20.0952L2 20.0952L2 3.90476Z"
-                                    stroke="currentColor" stroke-width="1" stroke-linejoin="round"></path>
-                            </svg>
-                            新闻列表
-                        </RouterLink>
-                    </li>
-
-                    <li>
-                        <RouterLink :to="{ name: 'About' }" :active-class="active_class">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                class="mr-1">
-                                <path d="M2 4.5L22 4.5L22 16.5L2 16.5L2 4.5Z" stroke="currentColor" stroke-width="1"
-                                    stroke-linejoin="round"></path>
-                                <path stroke="currentColor" stroke-width="1" stroke-linejoin="round"
-                                    d="M21 21L12 19.5L3 21"></path>
-                                <path d="M12 19.5L15 20L14 16.5L10 16.5L9 20L12 19.5Z" stroke="currentColor"
-                                    stroke-width="1" stroke-linejoin="round"></path>
-                                <path stroke="currentColor" stroke-width="1" stroke-linejoin="round" d="M10.5 14L13.5 14">
-                                </path>
-                            </svg>
-                            关于我们
-                        </RouterLink>
-                    </li>
-                </ul>
-            </nav>
+            <!-- 移动端抽屉 -->
+            <Transition name="fade">
+                <div v-show="mobile_open" id="mobile-nav" class="border-t border-base-300 bg-base-100 md:hidden">
+                    <div class="page-container py-4">
+                        <form role="search" class="mb-3 flex items-center gap-2" @submit.prevent="submit_search">
+                            <label class="input input-sm flex grow items-center gap-2 border-base-300 bg-base-200/60">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                    fill="none" class="shrink-0 text-base-content/40" aria-hidden="true">
+                                    <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.8"></circle>
+                                    <path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.8"
+                                        stroke-linecap="round"></path>
+                                </svg>
+                                <input v-model="search_keyword" type="search" class="grow bg-transparent" maxlength="50"
+                                    autocomplete="off" placeholder="搜索标题 / 正文" aria-label="站内搜索关键词" />
+                            </label>
+                            <button type="submit" class="btn btn-primary btn-sm shrink-0">搜索</button>
+                        </form>
+                        <nav aria-label="移动端导航">
+                            <ul class="divide-y divide-base-300">
+                                <li>
+                                    <RouterLink :to="{ name: 'Home' }" class="mobile-link">
+                                        <span>网站首页</span>
+                                        <span class="text-xs text-base-content/35">Home</span>
+                                    </RouterLink>
+                                </li>
+                                <li>
+                                    <RouterLink
+                                        :to="{ name: 'ArticleList', query: { category: news_category_id, page: 1 } }"
+                                        class="mobile-link">
+                                        <span>新闻列表</span>
+                                        <span class="text-xs text-base-content/35">News</span>
+                                    </RouterLink>
+                                </li>
+                                <li>
+                                    <RouterLink :to="{ name: 'About' }" class="mobile-link">
+                                        <span>关于我们</span>
+                                        <span class="text-xs text-base-content/35">About</span>
+                                    </RouterLink>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </Transition>
         </div>
     </header>
 </template>
+
+<style scoped>
+/* 导航项：hover 时底部出现细线，当前页常亮；比给每个 <li> 加背景更轻 */
+.nav-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.9375rem;
+    color: color-mix(in oklab, var(--color-base-content) 68%, transparent);
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0.875rem;
+    right: 0.875rem;
+    bottom: 0.15rem;
+    height: 2px;
+    border-radius: 999px;
+    background-color: var(--color-primary);
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nav-link:hover {
+    color: var(--color-primary);
+}
+
+.nav-link:hover::after,
+.nav-link[aria-current='page']::after {
+    transform: scaleX(1);
+}
+
+.nav-link[aria-current='page'] {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.mobile-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 0.15rem;
+    font-size: 0.9375rem;
+    color: var(--color-base-content);
+}
+
+.mobile-link[aria-current='page'] {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+</style>

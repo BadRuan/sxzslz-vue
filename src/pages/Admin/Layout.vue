@@ -14,18 +14,17 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="bg-base-200 font-sans">
-        <div class="flex h-screen overflow-hidden">
-            <SideBar />
-            <div class="flex-1 flex flex-col overflow-hidden">
-                <Header />
-                <Suspense>
-                    <RouterView />
-                    <template #fallback>
-                        <PageLoading full-height />
-                    </template>
-                </Suspense>
-            </div>
+    <!-- 后台独立骨架：左侧固定导航 + 右侧「顶栏 + 可滚动内容区」，内容区自己滚动，页面不会整屏跳 -->
+    <div class="flex h-screen overflow-hidden bg-base-200 font-sans">
+        <SideBar />
+        <div class="flex min-w-0 flex-1 flex-col overflow-hidden">
+            <Header />
+            <Suspense>
+                <RouterView />
+                <template #fallback>
+                    <PageLoading full-height />
+                </template>
+            </Suspense>
         </div>
     </div>
 </template>

@@ -220,172 +220,176 @@ watch(
 </script>
 
 <template>
-    <main class="bg-base-200">
-        <div class="min-h-screen section-y px-4">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <!-- 页头：说明搜索覆盖范围与多词规则 -->
-                <header class="mb-6">
-                    <h1 class="text-xl font-semibold text-base-content">站内搜索</h1>
-                    <p class="mt-1 text-sm text-base-content/60">
-                        同时检索全站文章的标题与正文；多个关键词用空格分隔，需同时命中（AND），结果按发布时间倒序。
-                    </p>
-                </header>
+    <main class="min-h-screen bg-base-200">
+        <!-- 搜索头：把搜索框放在深色主视觉里，成为页面唯一焦点 -->
+        <section class="bg-neutral">
+            <div class="page-container py-10 sm:py-14">
+                <p class="eyebrow text-white/45">Search</p>
+                <h1 class="mt-2.5 text-2xl font-bold tracking-tight text-white sm:text-[1.875rem]">站内搜索</h1>
+                <p class="mt-2.5 max-w-2xl text-sm leading-6 text-white/55">
+                    同时检索全站文章的标题与正文；多个关键词用空格分隔，需同时命中（AND），结果按发布时间倒序。
+                </p>
 
-                <!-- 搜索表单 -->
-                <form role="search" class="card rounded-box p-5 sm:p-6 mb-6" @submit.prevent="submit_search">
+                <form role="search" class="mt-7 rounded-box bg-base-100 p-4 shadow-[var(--shadow-lift)] sm:p-5"
+                    @submit.prevent="submit_search">
                     <div class="flex flex-col gap-4">
                         <div class="flex flex-col gap-2">
                             <label for="search-keyword" class="sr-only">搜索关键词</label>
-                            <label
-                                class="input input-bordered flex w-full items-center gap-2 focus-within:ring-2 focus-within:ring-primary/40 focus-within:ring-offset-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                    fill="none" class="shrink-0 text-base-content/50" aria-hidden="true">
-                                    <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.5"></circle>
-                                    <path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.5"
-                                        stroke-linecap="round"></path>
-                                </svg>
-                                <input id="search-keyword" v-model="keyword_input" type="search"
-                                    class="grow min-w-0" :maxlength="MAX_KEYWORD_LENGTH" autocomplete="off"
-                                    placeholder="输入关键词，如：泵站 托管" aria-label="搜索关键词"
-                                    @keydown.enter.prevent="submit_search" />
-                                <button v-if="keyword_input" type="button"
-                                    class="btn btn-ghost btn-xs shrink-0 active:scale-[0.98]"
-                                    aria-label="清空关键词" @click="clear_keyword">
-                                    清空
+                            <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+                                <label
+                                    class="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl border border-base-300 bg-base-100 px-4 py-3 transition-colors duration-200 focus-within:border-primary/50">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                                        fill="none" class="shrink-0 text-base-content/40" aria-hidden="true">
+                                        <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.6"></circle>
+                                        <path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.6"
+                                            stroke-linecap="round"></path>
+                                    </svg>
+                                    <input id="search-keyword" v-model="keyword_input" type="search"
+                                        class="w-full min-w-0 bg-transparent text-sm text-base-content outline-none placeholder:text-base-content/35"
+                                        :maxlength="MAX_KEYWORD_LENGTH" autocomplete="off"
+                                        placeholder="输入关键词，如：泵站 托管" aria-label="搜索关键词"
+                                        @keydown.enter.prevent="submit_search" />
+                                    <button v-if="keyword_input" type="button"
+                                        class="shrink-0 text-xs text-base-content/40 transition-colors hover:text-base-content/70"
+                                        aria-label="清空关键词" @click="clear_keyword">
+                                        清空
+                                    </button>
+                                </label>
+                                <button type="submit"
+                                    class="btn btn-primary btn-main shrink-0 rounded-xl px-7"
+                                    :disabled="loading">
+                                    <span v-if="loading" class="loading loading-spinner loading-xs"></span>
+                                    <span>搜索</span>
                                 </button>
-                            </label>
+                            </div>
                             <p v-if="input_error" class="text-sm text-error" role="alert">{{ input_error }}</p>
                         </div>
 
-                        <div class="flex flex-wrap items-center justify-between gap-3">
-                            <div class="flex flex-wrap items-center gap-3">
-                                <span class="text-sm text-base-content/60">搜索范围</span>
-                                <div class="join" role="group" aria-label="搜索范围">
-                                    <button v-for="option in SCOPE_OPTIONS" :key="option.value" type="button"
-                                        class="btn btn-sm join-item active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                                        :class="scope === option.value ? 'btn-primary' : 'btn-outline'"
-                                        :aria-pressed="scope === option.value" @click="change_scope(option.value)">
-                                        {{ option.label }}
-                                    </button>
-                                </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span class="text-xs text-base-content/40">搜索范围</span>
+                            <div class="inline-flex items-center gap-0.5 rounded-full bg-base-200 p-1" role="group"
+                                aria-label="搜索范围">
+                                <button v-for="option in SCOPE_OPTIONS" :key="option.value" type="button"
+                                    class="rounded-full px-3.5 py-1.5 text-xs transition-colors duration-200"
+                                    :class="scope === option.value
+                                        ? 'bg-base-100 font-medium text-primary shadow-sm'
+                                        : 'text-base-content/50 hover:text-base-content/80'"
+                                    :aria-pressed="scope === option.value" @click="change_scope(option.value)">
+                                    {{ option.label }}
+                                </button>
                             </div>
-                            <button type="submit"
-                                class="btn btn-primary btn-main active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                                :disabled="loading">
-                                <span v-if="loading" class="loading loading-spinner loading-xs"></span>
-                                <span>搜索</span>
-                            </button>
                         </div>
                     </div>
                 </form>
+            </div>
+        </section>
 
-                <!-- 首次搜索中（旧结果为空）：加载提示，而不是空白 -->
-                <div v-if="loading && results.length === 0"
-                    class="card rounded-box flex flex-col items-center gap-3 p-12 text-center">
-                    <span class="loading loading-spinner loading-md"></span>
-                    <p class="text-sm text-base-content/60">正在搜索…</p>
+        <div class="page-container py-8 sm:py-10">
+            <!-- 首次搜索中（旧结果为空）：加载提示，而不是空白 -->
+            <div v-if="loading && results.length === 0"
+                class="flex flex-col items-center gap-3 rounded-box border border-base-300 bg-base-100 p-12 text-center">
+                <span class="loading loading-spinner loading-md text-primary"></span>
+                <p class="text-sm text-base-content/50">正在搜索…</p>
+            </div>
+
+            <!-- 接口失败：展示后端原因并提供重试，而不是误报「无结果」 -->
+            <div v-else-if="error_message"
+                class="rounded-box border border-base-300 bg-base-100 p-10 text-center" role="alert">
+                <p class="mb-2 text-error">{{ error_message }}</p>
+                <p class="mb-4 text-sm text-base-content/45">请检查网络后重试</p>
+                <button type="button" class="btn btn-sm btn-primary" @click="retry_search">
+                    重新搜索
+                </button>
+            </div>
+
+            <!-- 未发起搜索：引导输入 -->
+            <div v-else-if="!has_searched"
+                class="rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-16 text-center">
+                <div
+                    class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                        aria-hidden="true">
+                        <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.6"></circle>
+                        <path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+                    </svg>
+                </div>
+                <p class="text-base-content/75">输入关键词，搜索全站文章的标题与正文</p>
+                <p class="mt-2 text-sm text-base-content/40">支持多关键词（空格分隔、同时命中）与按标题/正文限定范围</p>
+            </div>
+
+            <!-- 有结果：摘要 + 列表 + 分页 -->
+            <template v-else-if="results.length > 0">
+                <div class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-base-content/55">
+                    <span>共 <b class="num text-base-content">{{ total }}</b> 条结果</span>
+                    <span class="h-3 w-px bg-base-300" aria-hidden="true"></span>
+                    <span>关键词：<span class="font-medium text-base-content/80">{{ active_keyword }}</span></span>
+                    <span class="h-3 w-px bg-base-300" aria-hidden="true"></span>
+                    <span>范围：{{ scope_label(active_scope) }}</span>
+                    <span class="ml-auto text-xs text-base-content/35">按发布时间倒序</span>
                 </div>
 
-                <!-- 接口失败：展示后端原因并提供重试，而不是误报「无结果」 -->
-                <div v-else-if="error_message" class="card rounded-box p-10 text-center" role="alert">
-                    <p class="mb-2 text-error">{{ error_message }}</p>
-                    <p class="mb-4 text-sm text-base-content/60">请检查网络后重试</p>
-                    <button type="button" class="btn btn-sm btn-primary active:scale-[0.98]" @click="retry_search">
-                        重新搜索
-                    </button>
-                </div>
-
-                <!-- 未发起搜索：引导输入 -->
-                <div v-else-if="!has_searched" class="card rounded-box p-12 text-center">
-                    <div
-                        class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            aria-hidden="true">
-                            <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.5"></circle>
-                            <path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-                            </path>
-                        </svg>
-                    </div>
-                    <p class="text-base-content/80">输入关键词，搜索全站文章的标题与正文</p>
-                    <p class="mt-2 text-sm text-base-content/50">支持多关键词（空格分隔、同时命中）与按标题/正文限定范围</p>
-                </div>
-
-                <!-- 有结果：摘要 + 列表 + 分页 -->
-                <template v-else-if="results.length > 0">
-                    <div class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-base-content/70">
-                        <span>共 <b class="text-base-content">{{ total }}</b> 条结果</span>
-                        <span class="text-base-content/30" aria-hidden="true">|</span>
-                        <span>关键词：<span class="font-medium text-base-content">{{ active_keyword }}</span></span>
-                        <span class="text-base-content/30" aria-hidden="true">|</span>
-                        <span>范围：{{ scope_label(active_scope) }}</span>
-                        <span class="ml-auto text-xs text-base-content/50">按发布时间倒序</span>
-                    </div>
-
-                    <!-- 翻页时保留旧结果并降透明度，避免整块闪烁 -->
-                    <div class="space-y-4"
-                        :class="loading ? 'pointer-events-none opacity-60 transition-opacity duration-150' : ''"
-                        :aria-busy="loading">
-                        <article v-for="item in results" :key="item.id"
-                            class="card rounded-box card-hover group hover:-translate-y-0.5 hover:shadow-md">
-                            <RouterLink :to="{ name: 'ArticleDetail', params: { slug: item.slug } }"
-                                class="flex gap-4 p-4 sm:p-5">
-                                <div
-                                    class="hidden h-24 w-32 shrink-0 overflow-hidden rounded-lg bg-base-300 sm:block">
-                                    <ArticleCover :slug="item.cover_img_slug" :alt="item.title"
-                                        class="transition-transform duration-200 ease-out group-hover:scale-105" />
+                <!-- 翻页时保留旧结果并降透明度，避免整块闪烁 -->
+                <div class="space-y-3"
+                    :class="loading ? 'pointer-events-none opacity-60 transition-opacity duration-150' : ''"
+                    :aria-busy="loading">
+                    <article v-for="item in results" :key="item.id"
+                        class="group overflow-hidden rounded-box border border-base-300 bg-base-100 card-hover hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-[var(--shadow-card)]">
+                        <RouterLink :to="{ name: 'ArticleDetail', params: { slug: item.slug } }"
+                            class="flex gap-4 p-4 sm:gap-5 sm:p-5">
+                            <div class="hidden h-28 w-40 shrink-0 overflow-hidden rounded-lg bg-base-300 sm:block">
+                                <ArticleCover :slug="item.cover_img_slug" :alt="item.title"
+                                    class="transition-transform duration-500 ease-out group-hover:scale-[1.03]" />
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="mb-2 flex flex-wrap items-center gap-1.5">
+                                    <span v-if="item.matched_fields?.includes('title')"
+                                        class="rounded-full bg-primary/10 px-2 py-0.5 text-[0.6875rem] font-medium text-primary">
+                                        标题命中
+                                    </span>
+                                    <span v-if="item.matched_fields?.includes('content')"
+                                        class="rounded-full bg-base-200 px-2 py-0.5 text-[0.6875rem] text-base-content/55">
+                                        正文命中
+                                    </span>
+                                    <span v-for="category in item_categories(item).slice(0, 3)" :key="category.id"
+                                        class="rounded-full bg-base-200 px-2 py-0.5 text-[0.6875rem] text-base-content/45">
+                                        {{ category.name }}
+                                    </span>
                                 </div>
-                                <div class="min-w-0 flex-1">
-                                    <div class="mb-2 flex flex-wrap items-center gap-2">
-                                        <span v-if="item.matched_fields?.includes('title')"
-                                            class="badge badge-outline badge-sm border-primary/40 text-primary">
-                                            标题命中
-                                        </span>
-                                        <span v-if="item.matched_fields?.includes('content')"
-                                            class="badge badge-outline badge-sm">
-                                            正文命中
-                                        </span>
-                                        <span v-for="category in item_categories(item).slice(0, 3)" :key="category.id"
-                                            class="badge badge-ghost badge-sm">{{ category.name }}</span>
-                                    </div>
-                                    <h2
-                                        class="text-base font-semibold text-base-content group-hover:text-primary line-clamp-2">
-                                        <HighlightText :text="item.title" :terms="active_terms" />
-                                    </h2>
-                                    <p v-if="item.content_snippet"
-                                        class="mt-2 text-sm leading-relaxed text-base-content/70 line-clamp-2">
-                                        <HighlightText :text="item.content_snippet" :terms="active_terms" />
-                                    </p>
-                                    <p v-else class="mt-2 text-sm text-base-content/50">仅标题命中，正文未包含关键词</p>
-                                    <div
-                                        class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-base-content/60">
-                                        <span v-if="item.user">{{ item.user.nickname }}</span>
-                                        <time>{{ date_text(item.create_at) }}</time>
-                                        <span>阅读 {{ item.view_count }}</span>
-                                    </div>
+                                <h2 class="line-clamp-2 text-[0.95rem] font-semibold leading-6 text-base-content transition-colors duration-200 group-hover:text-primary">
+                                    <HighlightText :text="item.title" :terms="active_terms" />
+                                </h2>
+                                <p v-if="item.content_snippet"
+                                    class="mt-2 line-clamp-2 text-sm leading-6 text-base-content/55">
+                                    <HighlightText :text="item.content_snippet" :terms="active_terms" />
+                                </p>
+                                <p v-else class="mt-2 text-sm text-base-content/40">仅标题命中，正文未包含关键词</p>
+                                <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-base-content/35">
+                                    <span v-if="item.user">{{ item.user.nickname }}</span>
+                                    <time class="num">{{ date_text(item.create_at) }}</time>
+                                    <span class="num">阅读 {{ item.view_count }}</span>
                                 </div>
-                            </RouterLink>
-                        </article>
-                    </div>
-
-                    <AppPagination class="mt-8" :page="page" :has-next="has_next" :total="total" unit="条"
-                        :page-size="PAGE_SIZE" @change="go_to_page" />
-                </template>
-
-                <!-- 已搜索但无结果：给出可操作的下一步，而不是只说「暂无数据」 -->
-                <div v-else class="card rounded-box p-12 text-center">
-                    <p class="text-base-content/80">
-                        未找到与「<span class="font-medium text-base-content">{{ active_keyword }}</span>」相关的文章
-                    </p>
-                    <ul class="mx-auto mt-4 max-w-md list-disc space-y-1 pl-5 text-left text-sm text-base-content/60">
-                        <li>试试更短或更通用的关键词</li>
-                        <li>多个关键词需同时命中，可减少关键词数量</li>
-                        <li>切换搜索范围（标题 / 正文 / 标题 + 正文）</li>
-                    </ul>
-                    <button v-if="page > 1" type="button" class="btn btn-sm btn-primary mt-6 active:scale-[0.98]"
-                        @click="go_to_page(1)">
-                        返回第一页
-                    </button>
+                            </div>
+                        </RouterLink>
+                    </article>
                 </div>
+
+                <AppPagination class="mt-8" :page="page" :has-next="has_next" :total="total" unit="条"
+                    :page-size="PAGE_SIZE" @change="go_to_page" />
+            </template>
+
+            <!-- 已搜索但无结果：给出可操作的下一步，而不是只说「暂无数据」 -->
+            <div v-else class="rounded-box border border-base-300 bg-base-100 px-6 py-14 text-center">
+                <p class="text-base-content/75">
+                    未找到与「<span class="font-medium text-base-content">{{ active_keyword }}</span>」相关的文章
+                </p>
+                <ul class="mx-auto mt-4 max-w-md list-disc space-y-1.5 pl-5 text-left text-sm text-base-content/50">
+                    <li>试试更短或更通用的关键词</li>
+                    <li>多个关键词需同时命中，可减少关键词数量</li>
+                    <li>切换搜索范围（标题 / 正文 / 标题 + 正文）</li>
+                </ul>
+                <button v-if="page > 1" type="button" class="btn btn-sm btn-primary mt-6" @click="go_to_page(1)">
+                    返回第一页
+                </button>
             </div>
         </div>
     </main>

@@ -8,63 +8,83 @@ const { station_array } = storeToRefs(station_store);
 </script>
 
 <template>
-    <div class="page-container section-y">
-        <TitleComponent>
-            <template #first>泵站信息</template>
-            <template #second>Station Info</template>
-        </TitleComponent>
+    <section class="bg-base-100 section-y">
+        <div class="page-container">
+            <TitleComponent>
+                <template #first>泵站信息</template>
+                <template #second>Station Info</template>
+                <template #action>
+                    <span class="text-sm text-base-content/40">
+                        共 <span class="num font-semibold text-base-content/70">{{ station_array.length }}</span> 座在册泵站
+                    </span>
+                </template>
+            </TitleComponent>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mt-6">
-            <RouterLink v-for="(station, index) in station_array" :key="index"
-                :to="{ name: 'Station', query: { index: index } }"
-                class="card rounded-box card-hover group flex flex-col overflow-hidden hover:-translate-y-0.5 hover:shadow-md">
-                <div class="overflow-hidden h-52">
-                    <img class="w-full h-full object-cover transition-transform duration-200 ease-out group-hover:scale-105"
-                        :src="url_prefix.pic_prefix + station.thumb" alt="pic">
-                </div>
-                <div class="p-5 flex flex-col gap-2">
+            <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
+                <RouterLink v-for="(station, index) in station_array" :key="index"
+                    :to="{ name: 'Station', query: { index: index } }"
+                    class="group flex flex-col overflow-hidden rounded-box border border-base-300 bg-base-100 card-hover hover:-translate-y-1 hover:border-primary/25 hover:shadow-[var(--shadow-lift)]">
 
-                    <div class="flex items-center min-w-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            class="text-primary mx-2 shrink-0">
-                            <path fill="currentColor"
-                                d="M18.9932 7.46811L15.4924 7.40095Q15.1059 7.39353 14.7711 7.20026Q14.4364 7.00699 14.2367 6.676L12.4281 3.67778C12.2337 3.35546 11.7663 3.35546 11.5719 3.67778L9.76328 6.676Q9.56363 7.00699 9.22887 7.20026Q8.89411 7.39353 8.50764 7.40095L5.00681 7.46811C4.63046 7.47533 4.39675 7.88013 4.57867 8.20967L6.27092 11.2751Q6.45774 11.6135 6.45774 12Q6.45774 12.3865 6.27092 12.7249L4.57867 15.7903C4.39675 16.1199 4.63046 16.5247 5.00681 16.5319L8.50764 16.5991Q8.89411 16.6065 9.22887 16.7997Q9.56363 16.993 9.76328 17.324L11.5719 20.3222C11.7663 20.6445 12.2337 20.6445 12.4281 20.3222L14.2367 17.324Q14.4364 16.993 14.7711 16.7997Q15.1059 16.6065 15.4924 16.5991L18.9932 16.5319C19.3695 16.5247 19.6032 16.1199 19.4213 15.7903L17.7291 12.7249Q17.5423 12.3865 17.5423 12Q17.5423 11.6135 17.7291 11.2751L19.4213 8.20967C19.6032 7.88013 19.3695 7.47533 18.9932 7.46811ZM19.0124 6.46829C20.1414 6.48995 20.8426 7.70434 20.2968 8.69296L18.6045 11.7584Q18.4711 12 18.6045 12.2416L20.2968 15.307C20.8426 16.2957 20.1414 17.51 19.0124 17.5317L15.5115 17.5989Q15.2356 17.6042 15.093 17.8405L13.2844 20.8387C12.7011 21.8057 11.2989 21.8057 10.7156 20.8387L8.90701 17.8405Q8.76443 17.6042 8.48846 17.5989L4.98763 17.5317C3.85857 17.51 3.15745 16.2957 3.70322 15.307L5.39547 12.2416Q5.52887 12 5.39547 11.7584L3.70322 8.69296C3.15745 7.70434 3.85857 6.48995 4.98763 6.46829L8.48846 6.40113Q8.76443 6.39584 8.90701 6.15948L10.7156 3.16126C11.2989 2.19429 12.7011 2.19429 13.2844 3.16126L15.093 6.15948Q15.2356 6.39584 15.5115 6.40113L19.0124 6.46829Z">
-                            </path>
-                            <circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="1"></circle>
-                        </svg>
-                        <div class="font-bold text-base-content/80 truncate" :title="station.station_name">{{
-                            station.station_name }}
+                    <!-- 站区实景：站名压在图上，图文一体 -->
+                    <div class="relative aspect-[4/3] overflow-hidden bg-base-300">
+                        <img class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                            :src="url_prefix.pic_prefix + station.thumb" :alt="station.station_name + '实景'">
+                        <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral/85 via-neutral/20 to-transparent">
                         </div>
+                        <span
+                            class="absolute right-3 top-3 rounded-full bg-white/15 px-2.5 py-1 text-[0.6875rem] text-white backdrop-blur-sm">
+                            {{ station.birth_day }} 年建
+                        </span>
+                        <h3 class="absolute inset-x-0 bottom-0 px-5 pb-4 text-[1.05rem] font-semibold tracking-tight text-white"
+                            :title="station.station_name">
+                            {{ station.station_name }}
+                        </h3>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-1 my-4 text-center">
-                        <div class="text-center whitespace-nowrap">
-                            <div class="text-sm text-base-content/60"><span class="text-base-content/90 text-lg">{{
-                                station.zhuangji
-                                    }}</span> 台
-                            </div>
-                            <div class="text-base-content/60 text-sm">机组</div>
-                        </div>
+                    <div class="flex flex-1 flex-col p-5">
+                        <p class="flex items-start gap-1.5 text-xs leading-5 text-base-content/45">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                                fill="none" class="mt-0.5 shrink-0" aria-hidden="true">
+                                <path d="M12 21s7-5.686 7-11a7 7 0 1 0-14 0c0 5.314 7 11 7 11Z" stroke="currentColor"
+                                    stroke-width="1.7" stroke-linejoin="round"></path>
+                                <circle cx="12" cy="10" r="2.4" stroke="currentColor" stroke-width="1.7"></circle>
+                            </svg>
+                            <span class="truncate" :title="station.station_location">{{ station.station_location }}</span>
+                        </p>
 
-                        <div class="text-center whitespace-nowrap">
-                            <div class="text-sm text-base-content/60"><span class="text-base-content/90 text-lg">{{
-                                station.zongrongliang
-                                    }}</span> kw
+                        <dl class="mt-4 grid grid-cols-3 gap-2 border-t border-base-300 pt-4">
+                            <div>
+                                <dd class="num text-lg font-semibold leading-none text-base-content">
+                                    {{ station.zhuangji }}<span class="ml-0.5 text-[0.6875rem] font-normal text-base-content/40">台</span>
+                                </dd>
+                                <dt class="mt-1.5 text-[0.6875rem] tracking-wide text-base-content/40">机组</dt>
                             </div>
-                            <div class="text-base-content/60 text-sm">容量</div>
-                        </div>
+                            <div class="border-l border-base-300 pl-3">
+                                <dd class="num text-lg font-semibold leading-none text-base-content">
+                                    {{ station.zongrongliang }}<span class="ml-0.5 text-[0.6875rem] font-normal text-base-content/40">kW</span>
+                                </dd>
+                                <dt class="mt-1.5 text-[0.6875rem] tracking-wide text-base-content/40">容量</dt>
+                            </div>
+                            <div class="border-l border-base-300 pl-3">
+                                <dd class="num text-lg font-semibold leading-none text-base-content">
+                                    {{ station.liuliang }}<span class="ml-0.5 text-[0.6875rem] font-normal text-base-content/40">m³/s</span>
+                                </dd>
+                                <dt class="mt-1.5 text-[0.6875rem] tracking-wide text-base-content/40">流量</dt>
+                            </div>
+                        </dl>
 
-                        <div class="text-center whitespace-nowrap">
-                            <div class="text-sm text-base-content/60"><span class="text-base-content/90 text-lg">{{
-                                station.liuliang
-                                    }}</span>
-                                m<sup>3</sup>/s
-                            </div>
-                            <div class="text-base-content/60 text-sm">流量</div>
-                        </div>
+                        <span
+                            class="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary/80 transition-transform duration-200 group-hover:translate-x-0.5">
+                            查看详情
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                                fill="none" aria-hidden="true">
+                                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                        </span>
                     </div>
-                </div>
-            </RouterLink>
+                </RouterLink>
+            </div>
         </div>
-    </div>
+    </section>
 </template>

@@ -54,6 +54,15 @@ const parent_of_active = computed(() => {
     return undefined;
 });
 
+/** 当前分类名称：用于列表页头和「更多」定位，避免只显示 id */
+const active_category_name = computed(() => {
+    for (const parent of categories.value) {
+        const child = parent.children.find(item => item.id === active_category.value);
+        if (child) return child.name;
+    }
+    return '新闻资讯';
+});
+
 // —— 侧边栏折叠：默认只展开当前激活分类所在的一级分组 ——
 const expanded_ids = ref<Set<number>>(new Set());
 
@@ -130,150 +139,152 @@ const reload_articles = () => {
 </script>
 
 <template>
-    <main class="bg-base-200">
-        <div class="min-h-screen section-y px-4">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex flex-col gap-8 lg:flex-row">
-                    <aside class="lg:w-64 shrink-0">
-                        <div class="card rounded-box p-5">
-                            <h3 class="text-sm font-semibold text-base-content mb-3 flex flex-row items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                    fill="none" class="mr-1">
-                                    <circle cx="15.809047641754152" cy="15.309043827056886" r="6.19"
-                                        stroke="currentColor" stroke-width="1"></circle>
-                                    <path stroke="currentColor" stroke-width="1" stroke-linejoin="round"
-                                        d="M19.1429 7.21428L19.1429 4.95238L8.85714 4.95238L7.14286 2.45238L2 2.45238L2 19.5952L8.19048 19.5952">
-                                    </path>
-                                    <path stroke="currentColor" stroke-width="1" stroke-linejoin="round"
-                                        d="M15.8095 11.5L15.8095 18.6429"></path>
-                                    <path stroke="currentColor" stroke-width="1" stroke-linejoin="round"
-                                        d="M12.9524 15.7857L15.8095 18.6429L18.6667 15.7857"></path>
-                                </svg>
-                                新闻分类
-                            </h3>
-                            <nav class="flex flex-col space-y-1">
-                                <template v-for="parent in categories" :key="parent.id">
-                                    <!-- 一级分类：折叠分组头，点击展开/收起（文章只挂二级，一级不可筛选） -->
-                                    <button type="button" class="flex items-center justify-between w-full rounded-lg px-3 py-2 text-sm font-semibold text-base-content/90 hover:bg-base-200 link-transition"
-                                        :class="parent.children.length === 0 ? 'cursor-default text-base-content/60 font-medium' : 'cursor-pointer'"
-                                        @click="toggle_group(parent)">
-                                        <span>{{ parent.name }}</span>
-                                        <svg v-if="parent.children.length > 0" xmlns="http://www.w3.org/2000/svg"
-                                            class="h-4 w-4 text-base-content/40 transition-transform duration-200"
-                                            :class="is_expanded(parent.id) ? 'rotate-90' : ''"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </button>
-                                    <template v-if="is_expanded(parent.id)">
-                                        <RouterLink v-for="child in parent.children" :key="child.id"
-                                            :to="{ name: 'ArticleList', query: { category: child.id } }" :class="[
-                                                active_category === child.id
-                                                    ? 'bg-primary/10 text-primary font-semibold'
-                                                    : 'text-base-content/80 hover:bg-base-200 hover:text-primary/80'
-                                            ]" class="rounded-lg px-3 py-2 text-sm link-transition"
-                                            style="padding-left: 1.5rem"
-                                            @click="handleCategoryClick(child.id)">
-                                            <span class="text-xs">{{ child.name }}</span>
-                                        </RouterLink>
-                                    </template>
-                                </template>
-                            </nav>
-                            <!-- 分类树加载失败：给出后端原因与重试，而不是静默展示空侧栏 -->
-                            <div v-if="categories_error" class="mt-3">
-                                <p class="alert alert-error text-xs">{{ categories_error }}</p>
-                                <button type="button" class="btn btn-xs btn-primary mt-2"
-                                    @click="baseinfo_store.checkBaseinfo()">重新加载分类</button>
-                            </div>
-                        </div>
-                    </aside>
+    <main class="min-h-screen bg-base-200">
+        <!-- 页头：标题与当前分类，替代原先直接进入列表的突兀感 -->
+        <section class="border-b border-base-300 bg-base-100">
+            <div class="page-container py-10 sm:py-12">
+                <p class="eyebrow text-primary/60">News Center</p>
+                <div class="mt-2.5 flex flex-wrap items-end justify-between gap-4">
+                    <h1 class="text-2xl font-bold tracking-tight text-base-content sm:text-[1.875rem]">
+                        新闻资讯
+                    </h1>
+                    <p class="text-sm text-base-content/45">
+                        当前浏览 <span class="font-medium text-base-content/75">{{ active_category_name }}</span>
+                        <span v-if="article_total" class="ml-2 num">共 {{ article_total }} 条</span>
+                    </p>
+                </div>
+            </div>
+        </section>
 
-                    <div class="flex-1 min-w-0">
-                        <!-- 加载状态 -->
-                        <div v-if="loading" class="card rounded-box p-12 text-center">
-                            <span class="loading loading-spinner loading-md mx-auto mb-4 block"></span>
-                            <p class="text-base-content/60">加载中...</p>
-                        </div>
-
-                        <!-- 正常内容 -->
-                        <template v-else>
-                            <!-- 接口失败与空数据区分：失败给出后端原因与重试，而非误报「暂无文章」 -->
-                            <div v-if="article_list_error"
-                                class="card rounded-box p-12 text-center text-base-content/60">
-                                <p class="mb-2 text-error">{{ article_list_error_message || '文章加载失败' }}</p>
-                                <p class="mb-4">请检查网络后重试</p>
-                                <button type="button" class="btn btn-sm btn-primary"
-                                    @click="reload_articles">
-                                    重新加载
+        <div class="page-container py-8 sm:py-12">
+            <div class="flex flex-col gap-8 lg:flex-row lg:gap-10">
+                <aside class="shrink-0 lg:sticky lg:top-28 lg:z-10 lg:w-64 lg:self-start">
+                    <div class="rounded-box border border-base-300 bg-base-100 p-5 shadow-[var(--shadow-card)]">
+                        <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-base-content">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                fill="none" class="text-primary/70" aria-hidden="true">
+                                <path d="M4 5.5h11.5V19H4z" stroke="currentColor" stroke-width="1.6"
+                                    stroke-linejoin="round"></path>
+                                <path d="M15.5 8.5h4.5V19h-4.5" stroke="currentColor" stroke-width="1.6"
+                                    stroke-linejoin="round"></path>
+                                <path d="M7 9h5.5M7 12.5h5.5M7 16h3.5" stroke="currentColor" stroke-width="1.6"
+                                    stroke-linecap="round"></path>
+                            </svg>
+                            新闻分类
+                        </h3>
+                        <nav class="flex flex-col gap-0.5">
+                            <template v-for="parent in categories" :key="parent.id">
+                                <!-- 一级分类：折叠分组头，点击展开/收起（文章只挂二级，一级不可筛选） -->
+                                <button type="button"
+                                    class="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-base-content/85 transition-colors duration-200"
+                                    :class="parent.children.length === 0
+                                        ? 'cursor-default text-base-content/50'
+                                        : 'cursor-pointer hover:bg-base-200'"
+                                    @click="toggle_group(parent)">
+                                    <span>{{ parent.name }}</span>
+                                    <svg v-if="parent.children.length > 0" xmlns="http://www.w3.org/2000/svg"
+                                        class="h-3.5 w-3.5 shrink-0 text-base-content/35 transition-transform duration-200"
+                                        :class="is_expanded(parent.id) ? 'rotate-90' : ''" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                    </svg>
                                 </button>
-                            </div>
-                            <div v-else-if="article_list.length === 0"
-                                class="card rounded-box p-12 text-center text-base-content/60">
-                                暂无文章
-                            </div>
-                            <div v-else class="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
-                                <article v-for="(article, index) in article_list" :key="index"
-                                    class="card rounded-box card-hover group hover:-translate-y-0.5 overflow-hidden">
-                                    <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }">
-                                        <div class="h-52 w-full overflow-hidden bg-base-300">
-                                            <ArticleCover :slug="article.cover_img_slug" alt="news_pic"
-                                                class="transition-transform duration-200 ease-out group-hover:scale-105" />
-                                        </div>
-                                        <div class="p-5 flex flex-col gap-4 divide-y divide-base-200">
-                                            <div class="flex flex-row items-center justify-between gap-2">
-                                                <div class="min-w-0 flex flex-row items-center text-sm text-base-content/80 py-1"
-                                                    :title="article_categories(article).title">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                        viewBox="0 0 24 24" fill="none" class="mx-1 shrink-0">
-                                                        <path fill="currentColor"
-                                                            d="M11.8419 5.52566L14.8024 4.53883Q16.4189 4 18.1228 4L21 4C21.2761 4 21.5 4.22386 21.5 4.5L21.5 18.5C21.5 18.7761 21.2761 19 21 19L18.1228 19Q16.5811 19 15.1186 19.4875L12.1581 20.4743C11.8343 20.5823 11.5 20.3413 11.5 20L11.5 6C11.5 5.78478 11.6377 5.59372 11.8419 5.52566ZM12.1581 6.47434L12 6L12.5 6L12.5 20L12 20L11.8419 19.5257L14.8024 18.5388Q16.4189 18 18.1228 18L21 18L21 18.5L20.5 18.5L20.5 4.5L21 4.5L21 5L18.1228 5Q16.5811 5 15.1186 5.48751L12.1581 6.47434Z">
-                                                        </path>
-                                                        <path fill="currentColor"
-                                                            d="M12.1581 5.52566L9.19761 4.53883Q7.58114 4 5.87722 4L3 4C2.72386 4 2.5 4.22386 2.5 4.5L2.5 18.5C2.5 18.7761 2.72386 19 3 19L5.87722 19Q7.41887 19 8.88139 19.4875L11.8419 20.4743C12.1657 20.5823 12.5 20.3413 12.5 20L12.5 6C12.5 5.78478 12.3623 5.59372 12.1581 5.52566ZM11.8419 6.47434L12 6L11.5 6L11.5 20L12 20L12.1581 19.5257L9.19761 18.5388Q7.58114 18 5.87722 18L3 18L3 18.5L3.5 18.5L3.5 4.5L3 4.5L3 5L5.87722 5Q7.41886 5 8.88139 5.48751L11.8419 6.47434Z">
-                                                        </path>
-                                                    </svg>
-                                                    <span class="truncate">{{ article_categories(article).label }}</span>
-                                                    <span v-if="article_categories(article).extra > 0"
-                                                        class="badge badge-ghost badge-xs ml-1">
-                                                        +{{ article_categories(article).extra }}
-                                                    </span>
-                                                </div>
-                                                <div class="flex flex-row items-center shrink-0">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                        viewBox="0 0 24 24" fill="none" class="text-base-content/60 mr-2">
-                                                        <path d="M2 3.5L22 3.5L22 22.5L2 22.5L2 3.5Z"
-                                                            stroke="currentColor" stroke-width="1"
-                                                            stroke-linejoin="round"></path>
-                                                        <path stroke="currentColor" stroke-width="1" d="M6 5L6 2">
-                                                        </path>
-                                                        <path stroke="currentColor" stroke-width="1" d="M18 5L18 2">
-                                                        </path>
-                                                        <path stroke="currentColor" stroke-width="1" d="M22 7.5L2 7.5">
-                                                        </path>
-                                                        <circle cx="12.5" cy="15" r="5" stroke="currentColor"
-                                                            stroke-width="1" stroke-linejoin="round"></circle>
-                                                        <path stroke="currentColor" stroke-width="1"
-                                                            stroke-linejoin="round" d="M12 12.5L12 15.5L15 15.5"></path>
-                                                    </svg>
-                                                    <time class="text-xs text-base-content/70">
-                                                        {{ date_text(article.create_at) }}
-                                                    </time>
-                                                </div>
-                                            </div>
-                                            <!-- 标题最多展示 4 行（至少预留 3 行高度）：公文类长标题 2 行会被截断，不满足阅读需要 -->
-                                            <h2
-                                                class="text-base font-semibold text-base-content/70 group-hover:text-primary line-clamp-4 min-h-[4.5rem]">
-                                                {{ article.title }}
-                                            </h2>
-                                        </div>
+                                <template v-if="is_expanded(parent.id)">
+                                    <RouterLink v-for="child in parent.children" :key="child.id"
+                                        :to="{ name: 'ArticleList', query: { category: child.id } }" :class="[
+                                            active_category === child.id
+                                                ? 'bg-primary text-primary-content font-semibold shadow-sm'
+                                                : 'text-base-content/65 hover:bg-base-200 hover:text-primary'
+                                        ]"
+                                        class="ml-1 rounded-lg py-2 pl-4 pr-3 text-[0.8125rem] transition-colors duration-200"
+                                        @click="handleCategoryClick(child.id)">
+                                        {{ child.name }}
                                     </RouterLink>
-                                </article>
-                            </div>
-
-                            <AppPagination class="m-8" :page="article_page" :has-next="article_has_next"
-                                :total="article_total" unit="条" :page-size="PAGE_SIZE" @change="goToPage" />
-                        </template>
+                                </template>
+                            </template>
+                        </nav>
+                        <!-- 分类树加载失败：给出后端原因与重试，而不是静默展示空侧栏 -->
+                        <div v-if="categories_error" class="mt-3">
+                            <p class="alert alert-error text-xs">{{ categories_error }}</p>
+                            <button type="button" class="btn btn-xs btn-primary mt-2"
+                                @click="baseinfo_store.checkBaseinfo()">重新加载分类</button>
+                        </div>
                     </div>
+                </aside>
+
+                <div class="min-w-0 flex-1">
+                    <!-- 加载状态：骨架屏，比单行 spinner 更少布局跳动 -->
+                    <div v-if="loading" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                        <div v-for="i in 6" :key="i"
+                            class="overflow-hidden rounded-box border border-base-300 bg-base-100">
+                            <div class="aspect-[16/10] animate-pulse bg-base-300"></div>
+                            <div class="space-y-3 p-5">
+                                <div class="h-4 w-4/5 animate-pulse rounded bg-base-300"></div>
+                                <div class="h-4 w-3/5 animate-pulse rounded bg-base-300"></div>
+                                <div class="h-3 w-1/3 animate-pulse rounded bg-base-300"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 正常内容 -->
+                    <template v-else>
+                        <!-- 接口失败与空数据区分：失败给出后端原因与重试，而非误报「暂无文章」 -->
+                        <div v-if="article_list_error"
+                            class="rounded-box border border-base-300 bg-base-100 p-12 text-center text-base-content/60">
+                            <p class="mb-2 text-error">{{ article_list_error_message || '文章加载失败' }}</p>
+                            <p class="mb-4 text-sm">请检查网络后重试</p>
+                            <button type="button" class="btn btn-sm btn-primary" @click="reload_articles">
+                                重新加载
+                            </button>
+                        </div>
+                        <div v-else-if="article_list.length === 0"
+                            class="rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-20 text-center">
+                            <p class="text-base-content/55">暂无文章</p>
+                            <p class="mt-1.5 text-sm text-base-content/35">该分类下还没有发布内容，换个分类看看</p>
+                        </div>
+                        <div v-else class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                            <article v-for="(article, index) in article_list" :key="index"
+                                class="group overflow-hidden rounded-box border border-base-300 bg-base-100 card-hover hover:-translate-y-1 hover:border-primary/25 hover:shadow-[var(--shadow-lift)]">
+                                <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
+                                    class="flex h-full flex-col">
+                                    <div class="relative aspect-[16/10] w-full overflow-hidden bg-base-300">
+                                        <ArticleCover :slug="article.cover_img_slug" alt="news_pic"
+                                            class="transition-transform duration-500 ease-out group-hover:scale-[1.03]" />
+                                        <!-- 分类胶囊浮于封面：优先当前浏览分类，多分类折叠 +N -->
+                                        <span
+                                            class="absolute left-3 top-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1 rounded-full bg-base-100/90 px-2.5 py-1 text-[0.6875rem] font-medium text-base-content/70 shadow-sm backdrop-blur-sm"
+                                            :title="article_categories(article).title">
+                                            <span class="truncate">{{ article_categories(article).label }}</span>
+                                            <span v-if="article_categories(article).extra > 0" class="shrink-0 text-base-content/40">
+                                                +{{ article_categories(article).extra }}
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div class="flex flex-1 flex-col p-5">
+                                        <!-- 标题最多展示 3 行（至少预留 3 行高度）：公文类长标题不满足阅读需要时也不跳版 -->
+                                        <h2 class="line-clamp-3 min-h-[5.25rem] text-[0.95rem] font-semibold leading-7 text-base-content transition-colors duration-200 group-hover:text-primary">
+                                            {{ article.title }}
+                                        </h2>
+                                        <div
+                                            class="mt-auto flex items-center justify-between gap-3 border-t border-base-300/70 pt-3.5 text-xs text-base-content/40">
+                                            <time class="num">{{ date_text(article.create_at) }}</time>
+                                            <span class="inline-flex items-center gap-1 transition-transform duration-200 group-hover:translate-x-0.5">
+                                                阅读全文
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+                                                    viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                    <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </RouterLink>
+                            </article>
+                        </div>
+
+                        <AppPagination class="mt-10" :page="article_page" :has-next="article_has_next"
+                            :total="article_total" unit="条" :page-size="PAGE_SIZE" @change="goToPage" />
+                    </template>
                 </div>
             </div>
         </div>

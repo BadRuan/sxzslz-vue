@@ -96,14 +96,12 @@ const renderedHtml = computed(() => {
     return render_markdown(article_detail.value.content ?? '');
 });
 
-
 </script>
 
 <template>
-    <main class="bg-base-200">
-        <div class="min-h-screen pt-5 pb-14 px-4">
-            <nav class="breadcrumbs page-container mb-4 text-base text-base-content/60"
-                aria-label="Breadcrumb">
+    <main class="min-h-screen bg-base-200">
+        <div class="page-container py-6 sm:py-8">
+            <nav class="breadcrumbs mb-5 text-sm text-base-content/45" aria-label="Breadcrumb">
                 <ul>
                     <li>
                         <RouterLink :to="{ name: 'Home' }" class="link-hover">网站首页</RouterLink>
@@ -114,120 +112,146 @@ const renderedHtml = computed(() => {
                             {{ category_crumb.name }}
                         </RouterLink>
                     </li>
-                    <li class="text-base-content/80 font-medium">正文</li>
+                    <li class="font-medium text-base-content/70">正文</li>
                 </ul>
             </nav>
 
-            <!-- 加载状态 -->
-            <div v-if="loading" class="max-w-7xl mx-auto card rounded-box p-12 text-center">
-                <span class="loading loading-spinner loading-md mx-auto mb-4 block"></span>
-                <p class="text-base-content/60">加载中...</p>
-            </div>
-
-            <!-- 错误状态 -->
-            <div v-else-if="error" class="max-w-7xl mx-auto card rounded-box p-12 text-center">
-                <svg class="w-16 h-16 text-base-content/40 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-                <h2 class="text-xl font-semibold text-base-content/80 mb-2">{{ error }}</h2>
-                <p class="text-base-content/60 mb-6">请检查文章链接或网络后重试，也可返回其他页面</p>
-                <div class="flex justify-center gap-4">
-                    <RouterLink :to="{ name: 'ArticleList' }" class="btn btn-primary">
-                        返回列表
-                    </RouterLink>
-                    <RouterLink :to="{ name: 'Home' }" class="btn">
-                        返回首页
-                    </RouterLink>
-                </div>
-            </div>
-
-            <!-- 正常内容 -->
-            <article v-else class="max-w-7xl mx-auto min-h-120 px-4 card rounded-box overflow-hidden">
-                <div class="px-6 sm:px-10 pt-12 pb-8 border-b border-base-300 text-center">
-                    <h1 class="text-2xl md:text-3xl font-bold text-base-content/90 leading-tight mb-5">
-                        {{ article_detail?.title }}
-                    </h1>
-
-                    <div class="flex flex-wrap items-center justify-center gap-6 md:gap-12 text-sm text-base-content/60">
-                        <div class="flex flex-row items-center gap-1 text-sm">
-                            <span class="text-base-content/60 mr-1">字号</span>
-                            <button type="button" class="btn btn-xs" :class="font_size==='sm'?'btn-primary':'btn-ghost'" @click="font_size='sm'">小</button>
-                            <button type="button" class="btn btn-xs" :class="font_size==='md'?'btn-primary':'btn-ghost'" @click="font_size='md'">中</button>
-                            <button type="button" class="btn btn-xs" :class="font_size==='lg'?'btn-primary':'btn-ghost'" @click="font_size='lg'">大</button>
-                        </div>
-                        <div class="flex flex-row items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="text-base-content/60 mr-2" width="20" height="20"
-                                viewBox="0 0 24 24" fill="none">
-                                <circle cx="12" cy="7" r="5" stroke="currentColor" stroke-width="1"
-                                    stroke-linejoin="bevel"></circle>
-                                <path stroke="currentColor" stroke-width="1" stroke-linejoin="bevel"
-                                    d="M22 22C22 16.4772 17.5228 12 12 12C6.47715 12 2 16.4772 2 22"></path>
-                            </svg>
-                            <RouterLink v-if="article_detail?.user"
-                                :to="{ name: 'Profile', params: { id: article_detail.user.id } }"
-                                class="text-base text-base-content/60 hover:text-primary truncate">
-                                <span>{{ article_detail.user.nickname }}</span>
-                            </RouterLink>
-                            <span v-else class="text-base text-base-content/60">佚名</span>
-                        </div>
-                        <div class="flex flex-row items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" class="text-base-content/60 mr-2">
-                                <path d="M2 3.5L22 3.5L22 22.5L2 22.5L2 3.5Z" stroke="currentColor" stroke-width="1"
-                                    stroke-linejoin="round"></path>
-                                <path stroke="currentColor" stroke-width="1" d="M6 5L6 2"></path>
-                                <path stroke="currentColor" stroke-width="1" d="M18 5L18 2"></path>
-                                <path stroke="currentColor" stroke-width="1" d="M22 7.5L2 7.5"></path>
-                                <circle cx="12.5" cy="15" r="5" stroke="currentColor" stroke-width="1"
-                                    stroke-linejoin="round"></circle>
-                                <path stroke="currentColor" stroke-width="1" stroke-linejoin="round"
-                                    d="M12 12.5L12 15.5L15 15.5"></path>
-                            </svg>
-                            <time datetime="2024-07-23">
-                                {{ dayjs(article_detail?.create_at).format('YYYY-MM-DD HH:mm')
-                                }}</time>
-                        </div>
-                        <div class="flex flex-row items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" class="text-base-content/60 mr-2">
-                                <path stroke="currentColor" stroke-width="1" stroke-linejoin="round"
-                                    d="M2 2L2 22L22 22"></path>
-                                <path d="M20.6107 10.8462L20.6877 6.33992L16.4984 8.00208L20.6107 10.8462Z"
-                                    stroke="currentColor" stroke-width="1" stroke-linejoin="round"></path>
-                                <path stroke="currentColor" stroke-width="1" stroke-linejoin="round"
-                                    d="M18.5 9.5L14 16L9.5 13L5 18"></path>
-                            </svg>
-                            <span>阅读量: {{ article_detail?.view_count }}</span>
-                        </div>
+            <div class="mx-auto max-w-[64rem]">
+                <!-- 加载状态：骨架屏，形状贴近正文避免白屏跳动 -->
+                <div v-if="loading" class="overflow-hidden rounded-box border border-base-300 bg-base-100">
+                    <div class="space-y-4 px-6 py-12 sm:px-12">
+                        <div class="mx-auto h-7 w-3/4 animate-pulse rounded bg-base-300"></div>
+                        <div class="mx-auto h-4 w-1/3 animate-pulse rounded bg-base-300"></div>
+                        <div class="mx-auto mt-8 h-3 w-full animate-pulse rounded bg-base-300"></div>
+                        <div class="mx-auto h-3 w-11/12 animate-pulse rounded bg-base-300"></div>
+                        <div class="mx-auto h-3 w-full animate-pulse rounded bg-base-300"></div>
+                        <div class="mx-auto h-3 w-4/5 animate-pulse rounded bg-base-300"></div>
                     </div>
                 </div>
-                <!-- 正文区：加宽到 max-w-5xl（原 768px 在大屏下卡片内两侧留白过多），并保留上下留白 -->
-                <div class="px-6 sm:px-10 py-12 mx-auto max-w-5xl prose prose-headings:font-bold prose-headings:text-base-content/90 prose-headings:mb-4 prose-headings:mt-8 prose-h1:text-2xl prose-h2:text-2xl prose-h3:text-base prose-p:leading-relaxed prose-p:indent-2em prose-strong:text-base-content/80 prose-strong:font-semibold prose-blockquote:border-l-primary prose-blockquote:bg-error/10 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-lg prose-ul:list-disc prose-ul:mx-8 prose-ul:my-4 prose-ul:text-base-content/80 prose-ol:list-decimal prose-ol:mx-8 prose-ol:my-4 prose-ol:text-base-content/80 prose-a:text-primary prose-a:underline prose-a:underline-offset-2 prose-a:font-bold prose-img:w-2/3 prose-img:max-w-full prose-img:block prose-img:shadow prose-img:rounded-sm prose-img:my-6 prose-img:mx-auto"
+
+                <!-- 错误状态 -->
+                <div v-else-if="error"
+                    class="rounded-box border border-base-300 bg-base-100 px-6 py-16 text-center">
+                    <svg class="mx-auto mb-5 h-14 w-14 text-base-content/25" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <h2 class="mb-2 text-lg font-semibold text-base-content">{{ error }}</h2>
+                    <p class="mb-6 text-sm text-base-content/45">请检查文章链接或网络后重试，也可返回其他页面</p>
+                    <div class="flex justify-center gap-3">
+                        <RouterLink :to="{ name: 'ArticleList' }" class="btn btn-primary btn-sm sm:btn-md">
+                            返回列表
+                        </RouterLink>
+                        <RouterLink :to="{ name: 'Home' }" class="btn btn-ghost btn-sm sm:btn-md">
+                            返回首页
+                        </RouterLink>
+                    </div>
+                </div>
+
+                <!-- 正常内容 -->
+                <article v-else class="overflow-hidden rounded-box border border-base-300 bg-base-100">
+                    <header class="px-6 pb-8 pt-10 text-center sm:px-12 sm:pt-12">
+                        <RouterLink v-if="category_crumb"
+                            :to="{ name: 'ArticleList', query: { category: category_crumb.id } }"
+                            class="eyebrow inline-flex items-center gap-1.5 text-primary/70 hover:text-primary">
+                            {{ category_crumb.name }}
+                        </RouterLink>
+
+                        <h1 class="mx-auto mt-4 max-w-3xl text-[1.375rem] font-bold leading-snug tracking-tight text-base-content sm:text-[1.75rem] sm:leading-[1.45]">
+                            {{ article_detail?.title }}
+                        </h1>
+
+                        <!-- 元信息：作者 / 时间 / 阅读量，弱化颜色只保留一层信息层级 -->
+                        <div class="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs text-base-content/45">
+                            <RouterLink v-if="article_detail?.user"
+                                :to="{ name: 'Profile', params: { id: article_detail.user.id } }"
+                                class="inline-flex items-center gap-1.5 hover:text-primary">
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-[0.625rem] font-semibold text-primary">
+                                    {{ article_detail.user.nickname?.slice(0, 1) ?? '佚' }}
+                                </span>
+                                {{ article_detail.user.nickname }}
+                            </RouterLink>
+                            <span v-else class="inline-flex items-center gap-1.5">佚名</span>
+                            <span class="h-3 w-px bg-base-300" aria-hidden="true"></span>
+                            <time class="num" :datetime="article_detail?.create_at">
+                                {{ dayjs(article_detail?.create_at).format('YYYY-MM-DD HH:mm') }}
+                            </time>
+                            <span class="h-3 w-px bg-base-300" aria-hidden="true"></span>
+                            <span class="num">阅读 {{ article_detail?.view_count }}</span>
+                        </div>
+                    </header>
+
+                    <!-- 阅读工具条：字号切换与点赞集中在一行，正文区保持干净 -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-y border-base-300 bg-base-200/60 px-6 py-3 sm:px-12">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-base-content/40">字号</span>
+                            <div class="inline-flex items-center gap-0.5 rounded-lg bg-base-100 p-0.5">
+                                <button v-for="option in ([{ key: 'sm', label: '小' }, { key: 'md', label: '中' }, { key: 'lg', label: '大' }] as const)"
+                                    :key="option.key" type="button"
+                                    class="rounded-md px-3 py-1 text-xs transition-colors duration-200"
+                                    :class="font_size === option.key
+                                        ? 'bg-primary/10 font-medium text-primary'
+                                        : 'text-base-content/50 hover:text-base-content/80'"
+                                    :aria-pressed="font_size === option.key"
+                                    @click="font_size = option.key">
+                                    {{ option.label }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <p v-if="like_message" class="text-xs text-success">{{ like_message }}</p>
+                            <button type="button" :disabled="has_liked || liking"
+                                class="inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs transition-colors duration-200"
+                                :class="has_liked
+                                    ? 'cursor-default border-primary/25 bg-primary/10 text-primary'
+                                    : 'border-base-300 bg-base-100 text-base-content/60 hover:border-primary/40 hover:text-primary'"
+                                @click="handle_like">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                    :fill="has_liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path
+                                        d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+                                </svg>
+                                {{ has_liked ? '已点赞' : '点赞' }}
+                                <span v-if="like_count > 0" class="num">{{ like_count }}</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 正文区：放宽到 max-w-5xl 并保留舒适留白，长文阅读不局促 -->
+                    <div class="prose mx-auto max-w-5xl px-6 py-10 sm:px-10 sm:py-12 prose-headings:mb-4 prose-headings:mt-8 prose-headings:font-bold prose-headings:text-base-content prose-h1:text-2xl prose-h2:text-2xl prose-h3:text-base prose-p:indent-2em prose-p:leading-relaxed prose-strong:font-semibold prose-strong:text-base-content prose-blockquote:rounded-lg prose-blockquote:border-l-primary prose-blockquote:bg-base-200 prose-blockquote:px-4 prose-blockquote:py-2 prose-ul:mx-8 prose-ul:my-4 prose-ul:list-disc prose-ol:mx-8 prose-ol:my-4 prose-ol:list-decimal prose-a:font-semibold prose-a:text-primary prose-a:underline prose-a:underline-offset-2 prose-img:mx-auto prose-img:my-6 prose-img:block prose-img:w-2/3 prose-img:max-w-full prose-img:rounded-sm prose-img:shadow"
                         :class="font_size_class" v-html="renderedHtml">
+                    </div>
 
-                </div>
-
-                <!-- 匿名点赞 -->
-                <div class="px-6 sm:px-10 pb-10 flex flex-col items-center gap-2 border-t border-base-300 pt-8">
-                    <button type="button" :disabled="has_liked || liking"
-                        class="btn btn-main gap-2"
-                        :class="has_liked
-                            ? 'btn-primary btn-soft btn-disabled cursor-default'
-                            : 'btn-primary'"
-                        @click="handle_like">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                            :fill="has_liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path
-                                d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
-                        </svg>
-                        {{ has_liked ? '已点赞' : '点赞' }} {{ like_count > 0 ? `· ${like_count}` : '' }}
-                    </button>
-                    <p v-if="like_message" class="text-sm text-base-content/60">{{ like_message }}</p>
-                </div>
-
-            </article>
+                    <!-- 文末：点赞 + 返回列表，给阅读一个收尾动作 -->
+                    <div class="flex flex-col items-center gap-4 border-t border-base-300 px-6 py-10 sm:px-12">
+                        <button type="button" :disabled="has_liked || liking"
+                            class="btn btn-primary gap-2 rounded-full"
+                            :class="has_liked ? 'btn-soft cursor-default' : ''"
+                            @click="handle_like">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                :fill="has_liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path
+                                    d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+                            </svg>
+                            {{ has_liked ? '已点赞' : '为这篇文章点赞' }}
+                            <span v-if="like_count > 0" class="num opacity-70">{{ like_count }}</span>
+                        </button>
+                        <RouterLink :to="{ name: 'ArticleList', query: category_crumb ? { category: category_crumb.id } : {} }"
+                            class="inline-flex items-center gap-1.5 text-sm text-base-content/45 hover:text-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                fill="none" aria-hidden="true">
+                                <path d="M19 12H5M11 18l-6-6 6-6" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                            返回列表
+                        </RouterLink>
+                    </div>
+                </article>
+            </div>
         </div>
     </main>
 </template>

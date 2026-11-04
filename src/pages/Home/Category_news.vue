@@ -35,45 +35,56 @@ const columns = computed(() => [
 </script>
 
 <template>
-    <div class="section-y">
-        <section class="page-container h-full">
+    <section class="bg-base-200 section-y">
+        <div class="page-container">
             <TitleComponent>
                 <template #first>分类资讯</template>
                 <template #second>Category News</template>
             </TitleComponent>
 
             <!-- 接口失败：展示后端 detail，避免分类/文章拉取失败时静默空栏 -->
-            <p v-if="baseinfo_error || home_error" role="alert" class="alert alert-error mt-4 text-sm">
+            <p v-if="baseinfo_error || home_error" role="alert" class="alert alert-error mt-6 text-sm">
                 {{ baseinfo_error || home_error }}
             </p>
 
-            <div class="grid gap-6 mt-6 md:grid-cols-2 xl:grid-cols-3">
-                <div v-for="col in columns" :key="col.key" class="card rounded-box p-6 divide-y divide-base-300">
-                    <div class="flex flex-row justify-between items-center">
-                        <div class="text-base-content/70 text-base font-bold my-2">{{ col.title }}</div>
+            <div class="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                <div v-for="(col, index) in columns" :key="col.key"
+                    class="card flex flex-col rounded-box p-6 card-hover hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)] sm:p-7">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <span class="num text-[0.6875rem] font-medium tracking-widest text-primary/45">
+                                0{{ index + 1 }}
+                            </span>
+                            <h3 class="text-base font-semibold tracking-tight text-base-content">{{ col.title }}</h3>
+                        </div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: col.cid } }"
-                            class="btn btn-ghost btn-xs mr-4">
-                            更多 &gt;
+                            class="group inline-flex items-center gap-1 text-xs text-base-content/45 hover:text-primary">
+                            更多
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                                fill="none" class="transition-transform duration-200 group-hover:translate-x-0.5"
+                                aria-hidden="true">
+                                <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"></path>
+                            </svg>
                         </RouterLink>
                     </div>
-                    <ul class="flex flex-col gap-4 justify-around divide-y divide-dashed divide-base-300">
-                        <RouterLink v-for="item in col.list" :key="item.id"
-                            :to="{ name: 'ArticleDetail', params: { slug: item.slug } }">
-                            <li class="flex items-center justify-between">
-                                <div class="flex flex-row items-center min-w-0 flex-1">
-                                    <div class="bg-base-300 w-1 h-1 rounded-xl shrink-0"></div>
 
-                                    <div
-                                        class="text-base-content hover:text-primary text-sm py-2 px-2 truncate">
-                                        {{ item.title }}</div>
-                                </div>
-                                <div class="text-base-content/40 text-right text-sm px-4 shrink-0">{{ easy_date_text(item.create_at) }}
-                                </div>
-                            </li>
-                        </RouterLink>
+                    <ul class="mt-4 flex-1 divide-y divide-base-300/80">
+                        <li v-for="item in col.list" :key="item.id">
+                            <RouterLink :to="{ name: 'ArticleDetail', params: { slug: item.slug } }"
+                                class="group flex items-center justify-between gap-4 py-3">
+                                <span
+                                    class="min-w-0 flex-1 truncate text-sm text-base-content/75 transition-colors duration-200 group-hover:text-primary">
+                                    {{ item.title }}
+                                </span>
+                                <span class="num shrink-0 text-xs text-base-content/35">{{ easy_date_text(item.create_at) }}</span>
+                            </RouterLink>
+                        </li>
                     </ul>
+
+                    <p v-if="!col.list.length" class="py-10 text-center text-sm text-base-content/35">暂无内容</p>
                 </div>
             </div>
-        </section>
-    </div>
+        </div>
+    </section>
 </template>
