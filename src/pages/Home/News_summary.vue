@@ -31,6 +31,10 @@ const options = {
     speed: 800,          // 切换动画时长
 };
 
+/** 首页公告位固定 6 条：多了不撑高卡片，少了留白也不错位 */
+const NOTICE_LIMIT = 6;
+const notice_items = computed(() => article_obj.value.notice.slice(0, NOTICE_LIMIT));
+
 /** 公告列表的年份单独取，MM/DD 用大字号，年份弱化 */
 const year_of = (value: string) => date_text(value).slice(0, 4);
 
@@ -126,15 +130,16 @@ onMounted(async () => {
                             </RouterLink>
                         </div>
 
-                        <ul class="mt-3 flex-1 divide-y divide-base-300 lg:min-h-0 lg:overflow-y-auto lg:pr-1">
-                            <li v-for="item in article_obj.notice" :key="item.id">
+                        <ul
+                            class="mt-3 flex-1 divide-y divide-base-300 lg:grid lg:grid-rows-6 lg:overflow-hidden">
+                            <li v-for="item in notice_items" :key="item.id" class="min-h-0">
                                 <RouterLink :to="{ name: 'ArticleDetail', params: { slug: item.slug } }"
-                                    class="group flex items-center gap-3.5 py-3.5">
+                                    class="group flex h-full items-center gap-3.5 py-1.5 lg:py-0">
                                     <span
-                                        class="grid w-12 shrink-0 place-items-center rounded-lg bg-base-200 py-1.5 text-center transition-colors duration-200 group-hover:bg-primary/10">
+                                        class="grid w-12 shrink-0 place-items-center rounded-lg bg-base-200 py-1.5 text-center transition-colors duration-200 group-hover:bg-primary/10 lg:py-1">
                                         <span class="num text-[0.8125rem] font-semibold leading-none text-base-content/80">{{
                                             easy_date_text(item.create_at) }}</span>
-                                        <span class="num mt-1 text-[0.625rem] leading-none text-base-content/50">{{
+                                        <span class="num mt-1 text-[0.625rem] leading-none text-base-content/50 lg:mt-0.5 lg:text-[0.5625rem]">{{
                                             year_of(item.create_at) }}</span>
                                     </span>
                                     <span
