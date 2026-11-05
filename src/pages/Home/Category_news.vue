@@ -74,7 +74,7 @@ const columns = computed(() => [
                             <RouterLink :to="{ name: 'ArticleDetail', params: { slug: item.slug } }"
                                 class="group flex items-center justify-between gap-4 py-3">
                                 <span
-                                    class="min-w-0 flex-1 truncate text-sm text-base-content/75 transition-colors duration-200 group-hover:text-primary">
+                                    class="min-w-0 flex-1 text-sm leading-5 text-base-content/75 transition-colors duration-200 group-hover:text-primary line-clamp-2">
                                     {{ item.title }}
                                 </span>
                                 <span class="num shrink-0 text-xs text-base-content/50">{{ easy_date_text(item.create_at) }}</span>

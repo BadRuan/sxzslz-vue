@@ -101,7 +101,7 @@ onMounted(async () => {
                                     <span class="text-xs text-white/70">{{ date_text(article.create_at) }}</span>
                                 </div>
                                 <h3
-                                    class="mt-3 max-w-3xl text-lg font-semibold leading-snug tracking-tight text-white line-clamp-2 sm:text-xl">
+                                    class="mt-3 max-w-3xl text-lg font-semibold leading-snug tracking-tight text-white line-clamp-3 sm:text-xl">
                                     {{ article.title }}
                                 </h3>
                             </div>
@@ -143,7 +143,7 @@ onMounted(async () => {
                                             year_of(item.create_at) }}</span>
                                     </span>
                                     <span
-                                        class="min-w-0 flex-1 truncate text-sm text-base-content/75 transition-colors duration-200 group-hover:text-primary">{{
+                                        class="min-w-0 flex-1 text-sm leading-5 text-base-content/75 transition-colors duration-200 group-hover:text-primary line-clamp-2">{{
                                             item.title }}</span>
                                 </RouterLink>
                             </li>
@@ -160,9 +160,9 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/* 轮播固定 16/9，slide 高度撑满，封面才能铺满整块 */
+/* 轮播固定 16/10（比 16/9 更高一些，给两行标题留空间），slide 高度撑满，封面才能铺满整块 */
 .news-splide {
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 16 / 10;
 }
 
 .news-splide :deep(.splide__track),
