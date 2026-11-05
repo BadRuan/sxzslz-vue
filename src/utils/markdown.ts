@@ -34,12 +34,25 @@ const with_prefix = (src: string, prefix: string): string =>
 const default_image_rule = md.renderer.rules.image
     ?? ((tokens, index, options, _env, self) => self.renderToken(tokens, index, options));
 
+/**
+ * 站内图片的「原图地址」：`/image/{slug}` 默认返回 WebP 预览图（省流量），
+ * 原图要带 `?file_type=raw`（后端同时接受简写 `?raw=1`）。这里用后者之前先看是否已有该参数，
+ * 外链图片不做任何改写。
+ */
+const original_image_url = (src: string): string => {
+    if (!src.includes('/image/')) return src;
+    if (/[?&](?:raw|file_type)=/.test(src)) return src;
+    const [pathname, query] = src.split('?');
+    return query ? `${pathname}?${query}&file_type=raw` : `${pathname}?file_type=raw`;
+};
+
 md.renderer.rules.image = (tokens, index, options, env, self) => {
     const image_html = default_image_rule(tokens, index, options, env, self);
     const src = tokens[index]?.attrGet('src') ?? '';
     if (!src) return image_html;
-    // 链接文本用空 alt：图片本身已可读，避免读屏重复朗读一遍文件名
-    return `<a class="md-image-link" href="${md.utils.escapeHtml(src)}" target="_blank"`
+    // 图片本体仍是预览图（加载快），链接指向原图（点击后看大图）
+    const original = original_image_url(src);
+    return `<a class="md-image-link" href="${md.utils.escapeHtml(original)}" target="_blank"`
         + ` rel="noopener noreferrer" title="点击查看原图" aria-label="查看原图">${image_html}</a>`;
 };
 
