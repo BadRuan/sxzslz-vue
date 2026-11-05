@@ -100,7 +100,7 @@ onBeforeUnmount(() => {
                 <div class="flex items-center gap-2">
                     <form role="search" class="hidden items-center xl:flex" @submit.prevent="submit_search">
                         <label
-                            class="flex h-9 w-56 items-center gap-2 rounded-full border border-base-300 bg-base-200/70 px-3 text-sm link-transition focus-within:border-ink/40 focus-within:bg-base-100 focus-within:shadow-[0_0_0_3px_rgba(31,51,70,0.10)]">
+                            class="flex h-9 w-56 items-center gap-2 rounded-full border border-base-300 bg-base-200/70 px-3 text-sm link-transition focus-within:border-primary/40 focus-within:bg-base-100 focus-within:shadow-[0_0_0_3px_rgba(18,94,143,0.10)]">
                             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
                                 class="shrink-0 text-base-content/55" aria-hidden="true">
                                 <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.8"></circle>
@@ -114,7 +114,7 @@ onBeforeUnmount(() => {
                     </form>
 
                     <RouterLink :to="{ name: 'Search' }"
-                        class="btn btn-ghost btn-sm btn-circle hidden text-base-content/70 hover:text-ink lg:inline-flex xl:hidden"
+                        class="btn btn-ghost btn-sm btn-circle hidden text-base-content/70 hover:text-primary lg:inline-flex xl:hidden"
                         aria-label="站内搜索" title="站内搜索">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                             aria-hidden="true">
@@ -208,14 +208,14 @@ onBeforeUnmount(() => {
     bottom: 0.15rem;
     height: 2px;
     border-radius: 999px;
-    background-color: var(--color-ink);
+    background-color: var(--color-primary);
     transform: scaleX(0);
     transform-origin: center;
     transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .nav-link:hover {
-    color: var(--color-ink);
+    color: var(--color-primary);
 }
 
 .nav-link:hover::after,
@@ -224,7 +224,7 @@ onBeforeUnmount(() => {
 }
 
 .nav-link[aria-current='page'] {
-    color: var(--color-ink);
+    color: var(--color-primary);
     font-weight: 600;
 }
 

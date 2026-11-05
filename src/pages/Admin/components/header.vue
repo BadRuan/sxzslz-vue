@@ -25,7 +25,7 @@ const handle_logout = () => {
 <template>
     <header class="flex h-16 shrink-0 items-center justify-between gap-4 border-b border-base-300 bg-base-100 px-4 sm:px-6">
         <div class="flex min-w-0 items-center gap-3">
-            <div class="h-4 w-1 shrink-0 rounded-full bg-ink" aria-hidden="true"></div>
+            <div class="h-4 w-1 shrink-0 rounded-full bg-primary" aria-hidden="true"></div>
             <h1 class="truncate text-[0.9375rem] font-semibold text-base-content">{{ page_title }}</h1>
             <span class="hidden text-xs text-base-content/45 md:inline">管理后台</span>
         </div>
@@ -33,7 +33,7 @@ const handle_logout = () => {
         <div class="flex shrink-0 items-center gap-2 sm:gap-3">
             <div class="flex items-center gap-2.5">
                 <span
-                    class="flex h-8 w-8 items-center justify-center rounded-full bg-ink/10 text-xs font-semibold text-ink">
+                    class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                     {{ initial }}
                 </span>
                 <div class="hidden flex-col leading-tight sm:flex">
@@ -43,7 +43,7 @@ const handle_logout = () => {
                     </span>
                 </div>
                 <span v-if="auth_store.is_superuser"
-                    class="badge badge-sm whitespace-nowrap border-ink/20 bg-ink/10 text-ink">超级管理员</span>
+                    class="badge badge-sm whitespace-nowrap border-primary/20 bg-primary/10 text-primary">超级管理员</span>
             </div>
 
             <div class="mx-1 hidden h-6 w-px bg-base-300 sm:block" aria-hidden="true"></div>

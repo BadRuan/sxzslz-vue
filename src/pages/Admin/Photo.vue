@@ -219,7 +219,7 @@ onMounted(getImageList);
                         <CopyButton :text="`![${image.raw_filename}](${image.slug})`" label="复制 md" />
                         <!-- 改名/删除：上传者本人或超管（后端 403 其他人） -->
                         <template v-if="can_manage(image)">
-                            <button type="button" class="text-xs text-ink/90 hover:underline"
+                            <button type="button" class="text-xs text-primary/90 hover:underline"
                                 @click="open_rename(image)">改名</button>
                             <button type="button" class="text-xs text-error/90 hover:underline"
                                 @click="remove_image(image)">删除</button>

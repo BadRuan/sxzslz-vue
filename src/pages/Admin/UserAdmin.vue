@@ -218,7 +218,7 @@ onMounted(load_users);
                             <div class="flex items-center justify-center gap-1">
                                 <!-- 超级管理员账户受保护：后端返回 403，此处也不展示操作入口 -->
                                 <template v-if="!item.is_superuser">
-                                    <button class="btn btn-ghost btn-xs text-ink whitespace-nowrap"
+                                    <button class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
                                         :disabled="action_id === item.id"
                                         @click="reset_password(item.id, item.nickname)">
                                         重置密码

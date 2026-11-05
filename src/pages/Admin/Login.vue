@@ -107,7 +107,7 @@ const submit = async () => {
                 </form>
 
                 <div class="mt-8 flex items-center justify-between border-t border-base-300 pt-5 text-xs text-base-content/50">
-                    <RouterLink :to="{ name: 'Home' }" class="hover:text-ink">← 返回门户首页</RouterLink>
+                    <RouterLink :to="{ name: 'Home' }" class="hover:text-primary">← 返回门户首页</RouterLink>
                     <span>© 2026 沈巷镇水利站</span>
                 </div>
             </div>

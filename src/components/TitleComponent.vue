@@ -9,7 +9,7 @@ withDefaults(defineProps<{ invert?: boolean }>(), { invert: false });
 <template>
     <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div class="min-w-0">
-            <p class="eyebrow" :class="invert ? '!text-white/70' : '!text-ink/75'">
+            <p class="eyebrow" :class="invert ? '!text-white/70' : '!text-primary/75'">
                 <span class="h-px w-7 bg-current opacity-60" aria-hidden="true"></span>
                 <span class="truncate"><slot name="second"></slot></span>
             </p>

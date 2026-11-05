@@ -23,7 +23,7 @@ const { station_array } = storeToRefs(station_store);
             <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
                 <RouterLink v-for="(station, index) in station_array" :key="index"
                     :to="{ name: 'Station', query: { index: index } }"
-                    class="group flex flex-col overflow-hidden rounded-box border border-base-300 bg-base-100 card-hover hover:-translate-y-1 hover:border-ink/25 hover:shadow-[var(--shadow-lift)]">
+                    class="group flex flex-col overflow-hidden rounded-box border border-base-300 bg-base-100 card-hover hover:-translate-y-1 hover:border-primary/25 hover:shadow-[var(--shadow-lift)]">
 
                     <!-- 站区实景：站名压在图上，图文一体 -->
                     <div class="relative aspect-[4/3] overflow-hidden bg-base-300">
@@ -74,7 +74,7 @@ const { station_array } = storeToRefs(station_store);
                         </dl>
 
                         <span
-                            class="mt-4 inline-flex items-center gap-1 text-xs font-medium text-ink/80 transition-transform duration-200 group-hover:translate-x-0.5">
+                            class="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary/80 transition-transform duration-200 group-hover:translate-x-0.5">
                             查看详情
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
                                 fill="none" aria-hidden="true">

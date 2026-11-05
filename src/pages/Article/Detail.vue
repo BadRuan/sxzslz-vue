@@ -154,7 +154,7 @@ const renderedHtml = computed(() => {
                     <header class="px-6 pb-8 pt-10 text-center sm:px-12 sm:pt-12">
                         <RouterLink v-if="category_crumb"
                             :to="{ name: 'ArticleList', query: { category: category_crumb.id } }"
-                            class="eyebrow inline-flex items-center gap-1.5 text-ink/70 hover:text-ink">
+                            class="eyebrow inline-flex items-center gap-1.5 text-primary/70 hover:text-primary">
                             {{ category_crumb.name }}
                         </RouterLink>
 
@@ -166,8 +166,8 @@ const renderedHtml = computed(() => {
                         <div class="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs text-base-content/60">
                             <RouterLink v-if="article_detail?.user"
                                 :to="{ name: 'Profile', params: { id: article_detail.user.id } }"
-                                class="inline-flex items-center gap-1.5 hover:text-ink">
-                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-ink/10 text-[0.625rem] font-semibold text-ink">
+                                class="inline-flex items-center gap-1.5 hover:text-primary">
+                                <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-[0.625rem] font-semibold text-primary">
                                     {{ article_detail.user.nickname?.slice(0, 1) ?? '佚' }}
                                 </span>
                                 {{ article_detail.user.nickname }}
@@ -191,7 +191,7 @@ const renderedHtml = computed(() => {
                                     :key="option.key" type="button"
                                     class="rounded-md px-3 py-1 text-xs transition-colors duration-200"
                                     :class="font_size === option.key
-                                        ? 'bg-ink/10 font-medium text-ink'
+                                        ? 'bg-primary/10 font-medium text-primary'
                                         : 'text-base-content/65 hover:text-base-content/80'"
                                     :aria-pressed="font_size === option.key"
                                     @click="font_size = option.key">
@@ -205,8 +205,8 @@ const renderedHtml = computed(() => {
                             <button type="button" :disabled="has_liked || liking"
                                 class="inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs transition-colors duration-200"
                                 :class="has_liked
-                                    ? 'cursor-default border-ink/25 bg-ink/10 text-ink'
-                                    : 'border-base-300 bg-base-100 text-base-content/60 hover:border-ink/40 hover:text-ink'"
+                                    ? 'cursor-default border-primary/25 bg-primary/10 text-primary'
+                                    : 'border-base-300 bg-base-100 text-base-content/60 hover:border-primary/40 hover:text-primary'"
                                 @click="handle_like">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
                                     :fill="has_liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8"
@@ -221,7 +221,7 @@ const renderedHtml = computed(() => {
                     </div>
 
                     <!-- 正文区：放宽到 max-w-5xl 并保留舒适留白，长文阅读不局促 -->
-                    <div class="prose mx-auto max-w-5xl px-6 py-10 sm:px-10 sm:py-12 prose-headings:mb-4 prose-headings:mt-8 prose-headings:font-bold prose-headings:text-base-content prose-h1:text-2xl prose-h2:text-2xl prose-h3:text-base prose-p:indent-2em prose-p:leading-relaxed prose-strong:font-semibold prose-strong:text-base-content prose-blockquote:rounded-lg prose-blockquote:border-l-primary prose-blockquote:bg-base-200 prose-blockquote:px-4 prose-blockquote:py-2 prose-ul:mx-8 prose-ul:my-4 prose-ul:list-disc prose-ol:mx-8 prose-ol:my-4 prose-ol:list-decimal prose-a:font-semibold prose-a:text-ink prose-a:underline prose-a:underline-offset-2 prose-img:mx-auto prose-img:my-6 prose-img:block prose-img:w-2/3 prose-img:max-w-full prose-img:rounded-sm prose-img:shadow"
+                    <div class="prose mx-auto max-w-5xl px-6 py-10 sm:px-10 sm:py-12 prose-headings:mb-4 prose-headings:mt-8 prose-headings:font-bold prose-headings:text-base-content prose-h1:text-2xl prose-h2:text-2xl prose-h3:text-base prose-p:indent-2em prose-p:leading-relaxed prose-strong:font-semibold prose-strong:text-base-content prose-blockquote:rounded-lg prose-blockquote:border-l-primary prose-blockquote:bg-base-200 prose-blockquote:px-4 prose-blockquote:py-2 prose-ul:mx-8 prose-ul:my-4 prose-ul:list-disc prose-ol:mx-8 prose-ol:my-4 prose-ol:list-decimal prose-a:font-semibold prose-a:text-primary prose-a:underline prose-a:underline-offset-2 prose-img:mx-auto prose-img:my-6 prose-img:block prose-img:w-2/3 prose-img:max-w-full prose-img:rounded-sm prose-img:shadow"
                         :class="font_size_class" v-html="renderedHtml">
                     </div>
 
@@ -241,7 +241,7 @@ const renderedHtml = computed(() => {
                             <span v-if="like_count > 0" class="num opacity-70">{{ like_count }}</span>
                         </button>
                         <RouterLink :to="{ name: 'ArticleList', query: category_crumb ? { category: category_crumb.id } : {} }"
-                            class="inline-flex items-center gap-1.5 text-sm text-base-content/60 hover:text-ink">
+                            class="inline-flex items-center gap-1.5 text-sm text-base-content/60 hover:text-primary">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
                                 fill="none" aria-hidden="true">
                                 <path d="M19 12H5M11 18l-6-6 6-6" stroke="currentColor" stroke-width="2"

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useStationStore } from '@/store/station';
 import { url_prefix } from '@/utils/baseInfo';
@@ -10,18 +9,25 @@ const { station_array } = storeToRefs(station_store);
 
 /**
  * 影像取自带标题的站区图集（数据里本来就有 title，不另造文案）：
- * 优先取第一座有图集的泵站，够 6 张就用，不足则用其余泵站补位。
+ * 把所有泵站的图集汇成一池，每次加载洗牌后取 6 张，首图固定占两格作为版面锚点。
  */
-const gallery = computed(() => {
+const gallery = (() => {
     const pictures = station_array.value
         .flatMap((station) => (station.station_pic_list ?? []).map((pic) => ({
             ...pic,
             station_name: station.station_name,
         })))
-        .filter((pic) => Boolean(pic.src))
-        .slice(0, 6);
-    return pictures;
-});
+        .filter((pic) => Boolean(pic.src));
+    const pool = [...pictures];
+    const shuffled: typeof pictures = [];
+    while (shuffled.length < 6 && pool.length) {
+        const [picked] = pool.splice(Math.floor(Math.random() * pool.length), 1);
+        if (picked) {
+            shuffled.push(picked);
+        }
+    }
+    return shuffled;
+})();
 </script>
 
 <template>
@@ -36,7 +42,7 @@ const gallery = computed(() => {
             </TitleComponent>
 
             <div v-if="gallery.length" class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-                <figure v-for="(pic, index) in gallery" :key="pic.src"
+                <figure v-for="(pic, index) in gallery" :key="`${pic.src}-${index}`"
                     class="group relative overflow-hidden rounded-xl bg-white/5"
                     :class="index === 0 ? 'col-span-2 aspect-[16/10] sm:col-span-2' : 'aspect-[4/3]'">
                     <img :src="url_prefix.pic_prefix + pic.src" :alt="pic.title"

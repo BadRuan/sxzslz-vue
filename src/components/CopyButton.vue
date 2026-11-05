@@ -35,7 +35,7 @@ const on_copy = async () => {
 
 <template>
     <button type="button" class="btn btn-ghost btn-xs"
-        :class="failed ? 'text-error' : 'text-ink'" @click="on_copy">
+        :class="failed ? 'text-error' : 'text-primary'" @click="on_copy">
         {{ copied ? '已复制' : failed ? '复制失败' : label }}
     </button>
 </template>

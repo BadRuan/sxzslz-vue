@@ -16,11 +16,16 @@ const { categories } = storeToRefs(baseinfo_store);
 const news_category_id = computed(() =>
     to_second_level_id(categories.value, name_category_id(categories.value, CATEGORY_NAMES.news)));
 
-/** 首屏主视觉用站区实景（首次进入泵站数据是本地静态 seed，可直接取） */
-const hero_image = computed(() => {
-    const thumb = station_array.value[0]?.thumb;
-    return thumb ? url_prefix.pic_prefix + thumb : `${url_prefix.pic_prefix}f4b1736834f24101bf8e57b509af9933.JPG`;
-});
+/** 首屏主视觉用站区实景：每次加载在全部泵站封面里随机取一张，回访不至于总是同一张 */
+const HERO_FALLBACK = `${url_prefix.pic_prefix}f4b1736834f24101bf8e57b509af9933.JPG`;
+const hero_image = (() => {
+    const thumbs = station_array.value.map((item) => item.thumb).filter((thumb) => Boolean(thumb));
+    if (!thumbs.length) {
+        return HERO_FALLBACK;
+    }
+    const picked = thumbs[Math.floor(Math.random() * thumbs.length)];
+    return `${url_prefix.pic_prefix}${picked}`;
+})();
 
 const sum_of = (pick: (item: (typeof station_array.value)[number]) => unknown) =>
     station_array.value.reduce((total, item) => total + (Number(pick(item)) || 0), 0);

@@ -50,7 +50,7 @@ onMounted(async () => {
                 <template #second>Station News</template>
                 <template #action>
                     <RouterLink :to="{ name: 'ArticleList', query: { category: news_category_id } }"
-                        class="group inline-flex items-center gap-1.5 text-sm font-medium text-base-content/55 hover:text-ink">
+                        class="group inline-flex items-center gap-1.5 text-sm font-medium text-base-content/55 hover:text-primary">
                         全部动态
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                             class="transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true">
@@ -109,11 +109,11 @@ onMounted(async () => {
                 <div class="card flex flex-col rounded-box p-6 lg:col-span-4 sm:p-7">
                     <div class="flex items-center justify-between">
                         <h3 class="flex items-center gap-2 text-base font-semibold tracking-tight text-base-content">
-                            <span class="inline-block size-1.5 rounded-full bg-ink" aria-hidden="true"></span>
+                            <span class="inline-block size-1.5 rounded-full bg-primary" aria-hidden="true"></span>
                             {{ CATEGORY_NAMES.notice[0] }}
                         </h3>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: notice_category_id } }"
-                            class="group inline-flex items-center gap-1 text-xs text-base-content/60 hover:text-ink">
+                            class="group inline-flex items-center gap-1 text-xs text-base-content/60 hover:text-primary">
                             更多
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
                                 fill="none" class="transition-transform duration-200 group-hover:translate-x-0.5"
@@ -129,14 +129,14 @@ onMounted(async () => {
                             <RouterLink :to="{ name: 'ArticleDetail', params: { slug: item.slug } }"
                                 class="group flex items-center gap-3.5 py-3.5">
                                 <span
-                                    class="grid w-12 shrink-0 place-items-center rounded-lg bg-base-200 py-1.5 text-center transition-colors duration-200 group-hover:bg-ink/10">
+                                    class="grid w-12 shrink-0 place-items-center rounded-lg bg-base-200 py-1.5 text-center transition-colors duration-200 group-hover:bg-primary/10">
                                     <span class="num text-[0.8125rem] font-semibold leading-none text-base-content/80">{{
                                         easy_date_text(item.create_at) }}</span>
                                     <span class="num mt-1 text-[0.625rem] leading-none text-base-content/50">{{
                                         year_of(item.create_at) }}</span>
                                 </span>
                                 <span
-                                    class="min-w-0 flex-1 truncate text-sm text-base-content/75 transition-colors duration-200 group-hover:text-ink">{{
+                                    class="min-w-0 flex-1 truncate text-sm text-base-content/75 transition-colors duration-200 group-hover:text-primary">{{
                                         item.title }}</span>
                             </RouterLink>
                         </li>

@@ -14,9 +14,9 @@ const go_back = () => {
     <main class="flex min-h-screen items-center justify-center bg-base-200 px-4 py-20">
         <div class="w-full max-w-lg text-center">
             <!-- 错误码做主视觉：数字本身即是页面语言 -->
-            <p class="num text-[6rem] font-bold leading-none tracking-tighter text-ink/15 sm:text-[8rem]">404</p>
+            <p class="num text-[6rem] font-bold leading-none tracking-tighter text-primary/15 sm:text-[8rem]">404</p>
 
-            <div class="mx-auto -mt-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-ink/10 text-ink sm:-mt-8 sm:h-16 sm:w-16">
+            <div class="mx-auto -mt-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:-mt-8 sm:h-16 sm:w-16">
                 <svg class="h-7 w-7 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                     aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
@@ -39,11 +39,11 @@ const go_back = () => {
             </div>
 
             <div class="mt-10 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-base-content/50">
-                <RouterLink :to="{ name: 'ArticleList' }" class="hover:text-ink">新闻资讯</RouterLink>
+                <RouterLink :to="{ name: 'ArticleList' }" class="hover:text-primary">新闻资讯</RouterLink>
                 <span class="h-3 w-px bg-base-300" aria-hidden="true"></span>
-                <RouterLink :to="{ name: 'Station', query: { index: 0 } }" class="hover:text-ink">泵站概览</RouterLink>
+                <RouterLink :to="{ name: 'Station', query: { index: 0 } }" class="hover:text-primary">泵站概览</RouterLink>
                 <span class="h-3 w-px bg-base-300" aria-hidden="true"></span>
-                <RouterLink :to="{ name: 'About' }" class="hover:text-ink">关于我们</RouterLink>
+                <RouterLink :to="{ name: 'About' }" class="hover:text-primary">关于我们</RouterLink>
             </div>
         </div>
     </main>

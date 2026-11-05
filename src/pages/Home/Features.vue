@@ -39,7 +39,7 @@ const features = [
             <div class="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <RouterLink v-for="feature in features" :key="feature.slug"
                     :to="{ name: 'ArticleDetail', params: { slug: feature.slug } }"
-                    class="group flex flex-col overflow-hidden rounded-box border border-base-300 bg-base-100 card-hover hover:-translate-y-1 hover:border-ink/25 hover:shadow-[var(--shadow-lift)]">
+                    class="group flex flex-col overflow-hidden rounded-box border border-base-300 bg-base-100 card-hover hover:-translate-y-1 hover:border-primary/25 hover:shadow-[var(--shadow-lift)]">
                     <div class="relative aspect-[16/10] overflow-hidden bg-base-300">
                         <img :src="url_prefix.pic_prefix + feature.image" :alt="feature.title"
                             loading="lazy" decoding="async"
@@ -47,13 +47,13 @@ const features = [
                     </div>
 
                     <div class="flex flex-1 flex-col p-6 sm:p-7">
-                        <p class="eyebrow text-ink/70">{{ feature.label }}</p>
-                        <h3 class="mt-2.5 text-[1.05rem] font-semibold leading-snug tracking-tight text-base-content transition-colors duration-200 group-hover:text-ink">
+                        <p class="eyebrow text-primary/70">{{ feature.label }}</p>
+                        <h3 class="mt-2.5 text-[1.05rem] font-semibold leading-snug tracking-tight text-base-content transition-colors duration-200 group-hover:text-primary">
                             {{ feature.title }}
                         </h3>
                         <p class="mt-3 line-clamp-3 flex-1 text-sm leading-6 text-base-content/55">{{ feature.excerpt }}</p>
                         <span
-                            class="mt-5 inline-flex items-center gap-1.5 text-xs font-medium text-ink/80 transition-transform duration-200 group-hover:translate-x-0.5">
+                            class="mt-5 inline-flex items-center gap-1.5 text-xs font-medium text-primary/80 transition-transform duration-200 group-hover:translate-x-0.5">
                             阅读全文
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
                                 fill="none" aria-hidden="true">
