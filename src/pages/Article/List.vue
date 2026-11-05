@@ -143,7 +143,7 @@ const reload_articles = () => {
         <!-- 页头：标题与当前分类，替代原先直接进入列表的突兀感 -->
         <section class="border-b border-base-300 bg-base-100">
             <div class="page-container py-10 sm:py-12">
-                <p class="eyebrow text-primary/60">News Center</p>
+                <p class="eyebrow text-ink/60">News Center</p>
                 <div class="mt-2.5 flex flex-wrap items-end justify-between gap-4">
                     <h1 class="text-2xl font-bold tracking-tight text-base-content sm:text-[1.875rem]">
                         新闻资讯
@@ -162,7 +162,7 @@ const reload_articles = () => {
                     <div class="rounded-box border border-base-300 bg-base-100 p-5 shadow-[var(--shadow-card)]">
                         <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-base-content">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                fill="none" class="text-primary/70" aria-hidden="true">
+                                fill="none" class="text-ink/70" aria-hidden="true">
                                 <path d="M4 5.5h11.5V19H4z" stroke="currentColor" stroke-width="1.6"
                                     stroke-linejoin="round"></path>
                                 <path d="M15.5 8.5h4.5V19h-4.5" stroke="currentColor" stroke-width="1.6"
@@ -194,7 +194,7 @@ const reload_articles = () => {
                                         :to="{ name: 'ArticleList', query: { category: child.id } }" :class="[
                                             active_category === child.id
                                                 ? 'bg-primary text-primary-content font-semibold shadow-sm'
-                                                : 'text-base-content/65 hover:bg-base-200 hover:text-primary'
+                                                : 'text-base-content/65 hover:bg-base-200 hover:text-ink'
                                         ]"
                                         class="ml-1 rounded-lg py-2 pl-4 pr-3 text-[0.8125rem] transition-colors duration-200"
                                         @click="handleCategoryClick(child.id)">
@@ -244,7 +244,7 @@ const reload_articles = () => {
                         </div>
                         <div v-else class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                             <article v-for="(article, index) in article_list" :key="index"
-                                class="group overflow-hidden rounded-box border border-base-300 bg-base-100 card-hover hover:-translate-y-1 hover:border-primary/25 hover:shadow-[var(--shadow-lift)]">
+                                class="group overflow-hidden rounded-box border border-base-300 bg-base-100 card-hover hover:-translate-y-1 hover:border-ink/25 hover:shadow-[var(--shadow-lift)]">
                                 <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
                                     class="flex h-full flex-col">
                                     <div class="relative aspect-[16/10] w-full overflow-hidden bg-base-300">
@@ -262,7 +262,7 @@ const reload_articles = () => {
                                     </div>
                                     <div class="flex flex-1 flex-col p-5">
                                         <!-- 标题最多展示 3 行（至少预留 3 行高度）：公文类长标题不满足阅读需要时也不跳版 -->
-                                        <h2 class="line-clamp-3 min-h-[5.25rem] text-[0.95rem] font-semibold leading-7 text-base-content transition-colors duration-200 group-hover:text-primary">
+                                        <h2 class="line-clamp-3 min-h-[5.25rem] text-[0.95rem] font-semibold leading-7 text-base-content transition-colors duration-200 group-hover:text-ink">
                                             {{ article.title }}
                                         </h2>
                                         <div

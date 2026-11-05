@@ -539,7 +539,7 @@ onMounted(
                                 <template v-if="view === 'active'">
                                     <!-- 超管可操作全部；普通用户仅本人文章（他人操作后端 403） -->
                                     <template v-if="can_manage_article(article.user_id)">
-                                        <button class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
+                                        <button class="btn btn-ghost btn-xs text-ink whitespace-nowrap"
                                             @click="open_edit(article)">编辑</button>
                                         <button class="btn btn-ghost btn-xs text-error whitespace-nowrap"
                                             :disabled="action_slug === article.slug"
@@ -547,7 +547,7 @@ onMounted(
                                     </template>
                                     <span v-else class="text-xs text-base-content/45">—</span>
                                 </template>
-                                <button v-else-if="can_manage_article(article.user_id)" class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
+                                <button v-else-if="can_manage_article(article.user_id)" class="btn btn-ghost btn-xs text-ink whitespace-nowrap"
                                     :disabled="action_slug === article.slug"
                                     @click="restore_article(article)">恢复</button>
                                 <span v-else class="text-xs text-base-content/45">—</span>
@@ -582,7 +582,7 @@ onMounted(
                             封面图
                             <div class="mt-1 flex items-center gap-3">
                                 <input type="file" :accept="IMAGE_ACCEPT"
-                                    class="text-sm text-base-content/60 file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-primary/90 hover:file:bg-primary/20"
+                                    class="text-sm text-base-content/60 file:mr-3 file:rounded-lg file:border-0 file:bg-ink/10 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-ink/90 hover:file:bg-primary/20"
                                     :disabled="uploading_cover" @change="pick_cover" />
                                 <span v-if="uploading_cover" class="text-xs text-base-content/60 whitespace-nowrap">
                                     {{ cover_phase === 'processing' ? '服务器处理中...' : `上传中 ${cover_progress}%` }}

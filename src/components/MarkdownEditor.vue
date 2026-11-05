@@ -288,7 +288,7 @@ const pick_upload = async (event: Event) => {
                                 class="ml-auto shrink-0 text-xs text-base-content/55">
                                 {{ format_bytes(doc.size_bytes) }}
                             </span>
-                            <span class="shrink-0 text-xs text-primary/80">插入</span>
+                            <span class="shrink-0 text-xs text-ink/80">插入</span>
                         </button>
                     </li>
                 </ul>
@@ -308,7 +308,7 @@ const pick_upload = async (event: Event) => {
                         prose-headings:font-bold prose-headings:mt-5 prose-headings:mb-2
                         prose-h2:text-xl prose-h3:text-base
                         prose-p:leading-relaxed prose-p:my-2
-                        prose-a:text-primary prose-a:underline prose-a:underline-offset-2
+                        prose-a:text-ink prose-a:underline prose-a:underline-offset-2
                         prose-img:max-w-full prose-img:rounded-sm prose-img:my-3
                         prose-blockquote:border-l-primary prose-blockquote:bg-base-200 prose-blockquote:px-3 prose-blockquote:py-1 prose-blockquote:rounded-lg
                         prose-ul:list-disc prose-ol:list-decimal"

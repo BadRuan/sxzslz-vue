@@ -46,14 +46,14 @@ const duties = [
 
                 <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:gap-5">
                     <div v-for="(duty, index) in duties" :key="duty"
-                        class="group flex items-start gap-4 rounded-box border border-base-300 bg-base-100 p-5 transition-colors duration-200 hover:border-primary/30 sm:p-6">
+                        class="group flex items-start gap-4 rounded-box border border-base-300 bg-base-100 p-5 transition-colors duration-200 hover:border-ink/30 sm:p-6">
                         <!-- 序号 + 勾选图标：让职责清单有节奏，长文案也能对齐阅读 -->
-                        <span class="num mt-0.5 shrink-0 text-xs font-medium tracking-widest text-primary/35">
+                        <span class="num mt-0.5 shrink-0 text-xs font-medium tracking-widest text-ink/35">
                             0{{ index + 1 }}
                         </span>
                         <span class="min-w-0 flex-1 text-sm leading-6 text-base-content/75">{{ duty }}</span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                            fill="none" class="mt-1 shrink-0 text-primary/30 transition-colors duration-200 group-hover:text-primary/70"
+                            fill="none" class="mt-1 shrink-0 text-ink/30 transition-colors duration-200 group-hover:text-ink/70"
                             aria-hidden="true">
                             <path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.2"
                                 stroke-linecap="round" stroke-linejoin="round"></path>

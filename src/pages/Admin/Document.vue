@@ -267,13 +267,13 @@ onMounted(fetch_list);
                         <td class="px-4 py-3.5">
                             <div class="flex flex-wrap items-center gap-x-2 gap-y-1 whitespace-nowrap">
                                 <button type="button"
-                                    class="text-xs text-primary/90 hover:underline"
+                                    class="text-xs text-ink/90 hover:underline"
                                     @click="download_document(doc)">下载</button>
                                 <!-- 详情页会把相对路径 slug 自动补成 /api/document/，MD 里只写 slug 即可生成下载链接 -->
                                 <CopyButton :text="`[${doc.raw_filename}](${doc.slug})`" label="复制 md" />
                                 <!-- 改名/删除：上传者本人或超管（后端 403 其他人） -->
                                 <template v-if="can_manage(doc)">
-                                    <button type="button" class="text-xs text-primary/90 hover:underline"
+                                    <button type="button" class="text-xs text-ink/90 hover:underline"
                                         @click="open_rename(doc)">改名</button>
                                     <button type="button" class="text-xs text-error/90 hover:underline"
                                         @click="remove_document(doc)">删除</button>

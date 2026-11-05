@@ -151,7 +151,7 @@ onMounted(
                     {{ auth_store.is_superuser ? '全站最新文章' : '我的最新文章' }}
                 </h3>
                 <RouterLink :to="{ name: 'AdminArticleList' }"
-                    class="group inline-flex items-center gap-1 text-xs text-primary">
+                    class="group inline-flex items-center gap-1 text-xs text-ink">
                     查看更多
                     <svg class="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -172,10 +172,10 @@ onMounted(
                         class="group flex items-center justify-between gap-4 px-5 py-3 transition-colors duration-200 hover:bg-base-200/60">
                         <div class="flex min-w-0 flex-1 items-center gap-3">
                             <span
-                                class="shrink-0 rounded-md bg-base-200 px-2 py-1 text-[0.6875rem] font-medium text-base-content/65 transition-colors duration-200 group-hover:bg-primary/10 group-hover:text-primary">
+                                class="shrink-0 rounded-md bg-base-200 px-2 py-1 text-[0.6875rem] font-medium text-base-content/65 transition-colors duration-200 group-hover:bg-ink/10 group-hover:text-ink">
                                 {{ article.categories?.[0]?.name || '—' }}
                             </span>
-                            <span class="min-w-0 flex-1 truncate text-sm text-base-content/80 transition-colors duration-200 group-hover:text-primary">
+                            <span class="min-w-0 flex-1 truncate text-sm text-base-content/80 transition-colors duration-200 group-hover:text-ink">
                                 {{ article.title }}
                             </span>
                         </div>

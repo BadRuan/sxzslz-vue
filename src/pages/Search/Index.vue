@@ -237,7 +237,7 @@ watch(
                             <label for="search-keyword" class="sr-only">搜索关键词</label>
                             <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center">
                                 <label
-                                    class="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl border border-base-300 bg-base-100 px-4 py-3 transition-colors duration-200 focus-within:border-primary/50">
+                                    class="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl border border-base-300 bg-base-100 px-4 py-3 transition-colors duration-200 focus-within:border-ink/50">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
                                         fill="none" class="shrink-0 text-base-content/55" aria-hidden="true">
                                         <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.6"></circle>
@@ -272,7 +272,7 @@ watch(
                                 <button v-for="option in SCOPE_OPTIONS" :key="option.value" type="button"
                                     class="rounded-full px-3.5 py-1.5 text-xs transition-colors duration-200"
                                     :class="scope === option.value
-                                        ? 'bg-base-100 font-medium text-primary shadow-sm'
+                                        ? 'bg-base-100 font-medium text-ink shadow-sm'
                                         : 'text-base-content/65 hover:text-base-content/80'"
                                     :aria-pressed="scope === option.value" @click="change_scope(option.value)">
                                     {{ option.label }}
@@ -288,7 +288,7 @@ watch(
             <!-- 首次搜索中（旧结果为空）：加载提示，而不是空白 -->
             <div v-if="loading && results.length === 0"
                 class="flex flex-col items-center gap-3 rounded-box border border-base-300 bg-base-100 p-12 text-center">
-                <span class="loading loading-spinner loading-md text-primary"></span>
+                <span class="loading loading-spinner loading-md text-ink"></span>
                 <p class="text-sm text-base-content/65">正在搜索…</p>
             </div>
 
@@ -306,7 +306,7 @@ watch(
             <div v-else-if="!has_searched"
                 class="rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-16 text-center">
                 <div
-                    class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-ink/10 text-ink">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
                         aria-hidden="true">
                         <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.6"></circle>
@@ -333,7 +333,7 @@ watch(
                     :class="loading ? 'pointer-events-none opacity-60 transition-opacity duration-150' : ''"
                     :aria-busy="loading">
                     <article v-for="item in results" :key="item.id"
-                        class="group overflow-hidden rounded-box border border-base-300 bg-base-100 card-hover hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-[var(--shadow-card)]">
+                        class="group overflow-hidden rounded-box border border-base-300 bg-base-100 card-hover hover:-translate-y-0.5 hover:border-ink/25 hover:shadow-[var(--shadow-card)]">
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: item.slug } }"
                             class="flex gap-4 p-4 sm:gap-5 sm:p-5">
                             <div class="hidden h-28 w-40 shrink-0 overflow-hidden rounded-lg bg-base-300 sm:block">
@@ -343,7 +343,7 @@ watch(
                             <div class="min-w-0 flex-1">
                                 <div class="mb-2 flex flex-wrap items-center gap-1.5">
                                     <span v-if="item.matched_fields?.includes('title')"
-                                        class="rounded-full bg-primary/10 px-2 py-0.5 text-[0.6875rem] font-medium text-primary">
+                                        class="rounded-full bg-ink/10 px-2 py-0.5 text-[0.6875rem] font-medium text-ink">
                                         标题命中
                                     </span>
                                     <span v-if="item.matched_fields?.includes('content')"
@@ -355,7 +355,7 @@ watch(
                                         {{ category.name }}
                                     </span>
                                 </div>
-                                <h2 class="line-clamp-2 text-[0.95rem] font-semibold leading-6 text-base-content transition-colors duration-200 group-hover:text-primary">
+                                <h2 class="line-clamp-2 text-[0.95rem] font-semibold leading-6 text-base-content transition-colors duration-200 group-hover:text-ink">
                                     <HighlightText :text="item.title" :terms="active_terms" />
                                 </h2>
                                 <p v-if="item.content_snippet"

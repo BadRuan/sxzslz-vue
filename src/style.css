@@ -18,15 +18,16 @@
   color-scheme: light;
   /*
    * 设计语言：水利蓝 + 中性灰（Water Bureau）。
-   * 主色取 logo 蓝 #2A82E4 的下沉版本：比 logo 蓝深一档以保证白字可读（对白 4.85:1），
-   * 又比初版亮一档，避免整站发闷；logo 原蓝保留为 secondary 作图形强调；暖色只作小面积提示（accent）。
+   * 主题色 #E1E3E5（浅钢灰）：用于填充面（按钮底、选中底、标签底），配深墨字保证可读。
+   * 由于浅灰放在白底上做题注/下划线几乎不可见，另设 ink（深墨蓝灰）承担文字、描边、
+   * 焦点环与当前态指示；logo 原蓝保留为 secondary，暖色 accent 只作小面积提示。
    */
   --color-base-100: #ffffff;
   --color-base-200: #eef3f8;
   --color-base-300: #d9e2ec;
   --color-base-content: #0b1420;
-  --color-primary: #1a76b8;
-  --color-primary-content: #ffffff;
+  --color-primary: #e1e3e5;
+  --color-primary-content: #1f3346;
   --color-secondary: #2a82e4;
   --color-secondary-content: #ffffff;
   --color-accent: #f2b544;
@@ -53,6 +54,9 @@
 }
 
 @theme {
+    /* ink：浅灰主色的可读搭档，承担正文强调、描边、当前态与焦点环 */
+    --color-ink: #1f3346;
+    --color-ink-content: #ffffff;
     --font-sans: "GoogleSansCode", "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif;
     /* 卡片阴影只有两级，避免页面上出现七八种投影 */
     --shadow-card: 0 1px 2px rgb(11 20 32 / 0.04), 0 1px 3px rgb(11 20 32 / 0.05);
@@ -72,8 +76,8 @@
 
 /* 菜单激活项 */
 @utility menu-active {
-    background-color: color-mix(in oklab, var(--color-primary) 10%, transparent);
-    color: var(--color-primary);
+    background-color: color-mix(in oklab, var(--color-ink) 10%, transparent);
+    color: var(--color-ink);
 }
 
 /* 主操作按钮字号 14→15px */
@@ -86,9 +90,9 @@
     border-radius: 0.33rem;
 }
 
-/* 加载指示器统一主色 */
+/* 加载指示器统一用 ink，浅灰在浅底上看不见 */
 @utility loading {
-    color: var(--color-primary);
+    color: var(--color-ink);
 }
 
 /* 页面主容器：全站统一最大宽 + 水平内边距 */
@@ -213,7 +217,7 @@
 
 /* 键盘可达性：焦点环 + 偏移 */
 :focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--color-ink);
     outline-offset: 2px;
 }
 
@@ -222,13 +226,13 @@
     --tw-prose-body: #2c3b52;
     --tw-prose-headings: #0b1420;
     --tw-prose-lead: #475569;
-    --tw-prose-links: var(--color-primary);
+    --tw-prose-links: var(--color-ink);
     --tw-prose-bold: #0b1420;
     --tw-prose-counters: #64748b;
     --tw-prose-bullets: #94a3b8;
     --tw-prose-hr: var(--color-base-300);
     --tw-prose-quotes: #1e3a5f;
-    --tw-prose-quote-borders: color-mix(in oklab, var(--color-primary) 30%, white);
+    --tw-prose-quote-borders: color-mix(in oklab, var(--color-ink) 25%, white);
     --tw-prose-captions: #64748b;
     --tw-prose-code: #0b1420;
     --tw-prose-th-borders: var(--color-base-300);
@@ -257,8 +261,8 @@
     }
 
     ::selection {
-        background-color: color-mix(in oklab, var(--color-primary) 88%, black);
-        color: #ffffff;
+        background-color: var(--color-primary);
+        color: var(--color-base-content);
     }
 
     /* 细滚动条，避免默认滚动条把版面撑糙 */
@@ -297,8 +301,8 @@
     select:focus-visible,
     textarea:focus-visible {
         outline: none;
-        box-shadow: 0 0 0 2px var(--color-base-100), 0 0 0 4px var(--color-primary);
-        border-color: var(--color-primary);
+        box-shadow: 0 0 0 2px var(--color-base-100), 0 0 0 4px var(--color-ink);
+        border-color: var(--color-ink);
     }
 }
 

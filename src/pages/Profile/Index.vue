@@ -142,19 +142,19 @@ onMounted(
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
                             class="group flex items-center gap-4 px-6 py-4 transition-colors duration-200 hover:bg-base-200/60 sm:px-8">
                             <span
-                                class="shrink-0 rounded-md bg-base-200 px-2 py-1 text-[0.6875rem] font-medium text-base-content/65 transition-colors duration-200 group-hover:bg-primary/10 group-hover:text-primary"
+                                class="shrink-0 rounded-md bg-base-200 px-2 py-1 text-[0.6875rem] font-medium text-base-content/65 transition-colors duration-200 group-hover:bg-ink/10 group-hover:text-ink"
                                 :class="article_categories(article).extra > 0 ? 'max-w-[10em] truncate' : ''"
                                 :title="article_categories(article).title">
                                 {{ article_categories(article).label }}
                                 <span v-if="article_categories(article).extra > 0">+{{ article_categories(article).extra }}</span>
                             </span>
                             <span
-                                class="min-w-0 flex-1 truncate text-sm font-medium text-base-content/75 transition-colors duration-200 group-hover:text-primary">
+                                class="min-w-0 flex-1 truncate text-sm font-medium text-base-content/75 transition-colors duration-200 group-hover:text-ink">
                                 {{ article.title }}
                             </span>
                             <time class="num ml-2 shrink-0 text-xs text-base-content/50">{{ date_text(article.create_at) }}</time>
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                                fill="none" class="hidden shrink-0 text-base-content/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary/60 sm:block"
+                                fill="none" class="hidden shrink-0 text-base-content/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-ink/60 sm:block"
                                 aria-hidden="true">
                                 <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"></path>

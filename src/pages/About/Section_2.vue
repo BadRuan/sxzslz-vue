@@ -34,14 +34,14 @@ const station_leaders = [
 
             <div class="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                 <article v-for="leader in leaders" :key="leader.name"
-                    class="flex flex-col gap-5 rounded-box border border-base-300 bg-base-100 p-6 card-hover hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-[var(--shadow-card)] sm:flex-row sm:items-start">
+                    class="flex flex-col gap-5 rounded-box border border-base-300 bg-base-100 p-6 card-hover hover:-translate-y-0.5 hover:border-ink/25 hover:shadow-[var(--shadow-card)] sm:flex-row sm:items-start">
                     <img :alt="leader.name + '照片'"
                         class="h-28 w-28 shrink-0 rounded-xl object-cover object-center"
                         :src="leader_author" loading="lazy">
                     <div class="min-w-0 flex-1">
                         <div class="flex flex-wrap items-center gap-2">
                             <h2 class="text-lg font-semibold tracking-tight text-base-content">{{ leader.name }}</h2>
-                            <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-[0.6875rem] font-medium text-primary">
+                            <span class="rounded-full bg-ink/10 px-2.5 py-0.5 text-[0.6875rem] font-medium text-ink">
                                 {{ leader.role }}
                             </span>
                         </div>
@@ -61,7 +61,7 @@ const station_leaders = [
 
             <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 <div v-for="person in station_leaders" :key="person.name"
-                    class="flex items-center gap-3.5 rounded-box border border-base-300 bg-base-100 px-4 py-3.5 transition-colors duration-200 hover:border-primary/30">
+                    class="flex items-center gap-3.5 rounded-box border border-base-300 bg-base-100 px-4 py-3.5 transition-colors duration-200 hover:border-ink/30">
                     <img :alt="person.name + '照片'"
                         class="h-11 w-11 shrink-0 rounded-full bg-base-200 object-cover object-center"
                         :src="default_author" loading="lazy">

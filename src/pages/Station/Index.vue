@@ -225,7 +225,7 @@ const metrics = computed(() => {
             <!-- 站间切换：看完一座站可直接翻到下一座 -->
             <nav class="mt-12 flex items-center justify-between gap-4 border-t border-base-300 pt-6">
                 <RouterLink :to="{ name: 'Station', query: { index: prev_index } }"
-                    class="group inline-flex items-center gap-2 text-sm text-base-content/65 hover:text-primary">
+                    class="group inline-flex items-center gap-2 text-sm text-base-content/65 hover:text-ink">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                         class="transition-transform duration-200 group-hover:-translate-x-0.5" aria-hidden="true">
                         <path d="M19 12H5M11 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -233,11 +233,11 @@ const metrics = computed(() => {
                     </svg>
                     {{ station_array[prev_index]?.station_name }}
                 </RouterLink>
-                <RouterLink :to="{ name: 'Home' }" class="text-xs text-base-content/50 hover:text-primary">
+                <RouterLink :to="{ name: 'Home' }" class="text-xs text-base-content/50 hover:text-ink">
                     全部泵站
                 </RouterLink>
                 <RouterLink :to="{ name: 'Station', query: { index: next_index } }"
-                    class="group inline-flex items-center gap-2 text-sm text-base-content/65 hover:text-primary">
+                    class="group inline-flex items-center gap-2 text-sm text-base-content/65 hover:text-ink">
                     {{ station_array[next_index]?.station_name }}
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                         class="transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true">

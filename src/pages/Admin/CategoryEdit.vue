@@ -234,9 +234,9 @@ onMounted(load_category_page);
                             <td class="px-6 py-3.5">
                                 <div class="flex items-center justify-center gap-1">
                                     <!-- 仅一级分类可添加子分类（严格二级） -->
-                                    <button v-if="depth === 0" class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
+                                    <button v-if="depth === 0" class="btn btn-ghost btn-xs text-ink whitespace-nowrap"
                                         @click="open_create(node.id)">添加子分类</button>
-                                    <button class="btn btn-ghost btn-xs text-primary whitespace-nowrap" @click="open_edit(node)">编辑</button>
+                                    <button class="btn btn-ghost btn-xs text-ink whitespace-nowrap" @click="open_edit(node)">编辑</button>
                                     <button class="btn btn-ghost btn-xs text-error whitespace-nowrap" @click="remove_category(node)">删除</button>
                                 </div>
                             </td>

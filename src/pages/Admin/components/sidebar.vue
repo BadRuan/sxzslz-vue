@@ -125,8 +125,8 @@ const nav_groups = computed<NavGroup[]>(() => [
 }
 
 .admin-nav-link.is-active {
-    background-color: color-mix(in oklab, var(--color-primary) 10%, transparent);
-    color: var(--color-primary);
+    background-color: color-mix(in oklab, var(--color-ink) 10%, transparent);
+    color: var(--color-ink);
     font-weight: 600;
 }
 </style>

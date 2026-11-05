@@ -52,13 +52,13 @@ const columns = computed(() => [
                     class="card flex flex-col rounded-box p-6 card-hover hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)] sm:p-7">
                     <div class="flex items-center justify-between gap-3">
                         <div class="flex items-center gap-3">
-                            <span class="num text-[0.6875rem] font-medium tracking-widest text-primary/45">
+                            <span class="num text-[0.6875rem] font-medium tracking-widest text-ink/45">
                                 0{{ index + 1 }}
                             </span>
                             <h3 class="text-base font-semibold tracking-tight text-base-content">{{ col.title }}</h3>
                         </div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: col.cid } }"
-                            class="group inline-flex items-center gap-1 text-xs text-base-content/60 hover:text-primary">
+                            class="group inline-flex items-center gap-1 text-xs text-base-content/60 hover:text-ink">
                             更多
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
                                 fill="none" class="transition-transform duration-200 group-hover:translate-x-0.5"
@@ -74,7 +74,7 @@ const columns = computed(() => [
                             <RouterLink :to="{ name: 'ArticleDetail', params: { slug: item.slug } }"
                                 class="group flex items-center justify-between gap-4 py-3">
                                 <span
-                                    class="min-w-0 flex-1 truncate text-sm text-base-content/75 transition-colors duration-200 group-hover:text-primary">
+                                    class="min-w-0 flex-1 truncate text-sm text-base-content/75 transition-colors duration-200 group-hover:text-ink">
                                     {{ item.title }}
                                 </span>
                                 <span class="num shrink-0 text-xs text-base-content/50">{{ easy_date_text(item.create_at) }}</span>
