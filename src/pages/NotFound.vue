@@ -25,7 +25,7 @@ const go_back = () => {
             </div>
 
             <h1 class="mt-6 text-xl font-semibold tracking-tight text-base-content sm:text-2xl">页面走丢了</h1>
-            <p class="mx-auto mt-3 max-w-sm text-sm leading-6 text-base-content/45">
+            <p class="mx-auto mt-3 max-w-sm text-sm leading-6 text-base-content/60">
                 您访问的页面可能已被移除、重命名或暂时不可用。请检查网址是否正确。
             </p>
 
@@ -38,7 +38,7 @@ const go_back = () => {
                 </button>
             </div>
 
-            <div class="mt-10 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-base-content/35">
+            <div class="mt-10 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-base-content/50">
                 <RouterLink :to="{ name: 'ArticleList' }" class="hover:text-primary">新闻资讯</RouterLink>
                 <span class="h-3 w-px bg-base-300" aria-hidden="true"></span>
                 <RouterLink :to="{ name: 'Station', query: { index: 0 } }" class="hover:text-primary">泵站概览</RouterLink>

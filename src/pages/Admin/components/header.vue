@@ -27,7 +27,7 @@ const handle_logout = () => {
         <div class="flex min-w-0 items-center gap-3">
             <div class="h-4 w-1 shrink-0 rounded-full bg-primary" aria-hidden="true"></div>
             <h1 class="truncate text-[0.9375rem] font-semibold text-base-content">{{ page_title }}</h1>
-            <span class="hidden text-xs text-base-content/30 md:inline">管理后台</span>
+            <span class="hidden text-xs text-base-content/45 md:inline">管理后台</span>
         </div>
 
         <div class="flex shrink-0 items-center gap-2 sm:gap-3">
@@ -38,7 +38,7 @@ const handle_logout = () => {
                 </span>
                 <div class="hidden flex-col leading-tight sm:flex">
                     <span class="max-w-[9rem] truncate text-sm font-medium text-base-content">{{ nickname }}</span>
-                    <span class="text-[0.625rem] text-base-content/35">
+                    <span class="text-[0.625rem] text-base-content/50">
                         {{ auth_store.is_superuser ? '超级管理员' : auth_store.is_normal_user ? '普通账号' : '已登录' }}
                     </span>
                 </div>

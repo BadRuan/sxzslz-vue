@@ -14,7 +14,7 @@ const { station_array } = storeToRefs(station_store);
                 <template #first>泵站信息</template>
                 <template #second>Station Info</template>
                 <template #action>
-                    <span class="text-sm text-base-content/40">
+                    <span class="text-sm text-base-content/55">
                         共 <span class="num font-semibold text-base-content/70">{{ station_array.length }}</span> 座在册泵站
                     </span>
                 </template>
@@ -29,7 +29,7 @@ const { station_array } = storeToRefs(station_store);
                     <div class="relative aspect-[4/3] overflow-hidden bg-base-300">
                         <img class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
                             :src="url_prefix.pic_prefix + station.thumb" :alt="station.station_name + '实景'">
-                        <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral/85 via-neutral/20 to-transparent">
+                        <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral/75 via-neutral/15 to-transparent">
                         </div>
                         <span
                             class="absolute right-3 top-3 rounded-full bg-white/15 px-2.5 py-1 text-[0.6875rem] text-white backdrop-blur-sm">
@@ -42,7 +42,7 @@ const { station_array } = storeToRefs(station_store);
                     </div>
 
                     <div class="flex flex-1 flex-col p-5">
-                        <p class="flex items-start gap-1.5 text-xs leading-5 text-base-content/45">
+                        <p class="flex items-start gap-1.5 text-xs leading-5 text-base-content/60">
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
                                 fill="none" class="mt-0.5 shrink-0" aria-hidden="true">
                                 <path d="M12 21s7-5.686 7-11a7 7 0 1 0-14 0c0 5.314 7 11 7 11Z" stroke="currentColor"
@@ -55,21 +55,21 @@ const { station_array } = storeToRefs(station_store);
                         <dl class="mt-4 grid grid-cols-3 gap-2 border-t border-base-300 pt-4">
                             <div>
                                 <dd class="num text-lg font-semibold leading-none text-base-content">
-                                    {{ station.zhuangji }}<span class="ml-0.5 text-[0.6875rem] font-normal text-base-content/40">台</span>
+                                    {{ station.zhuangji }}<span class="ml-0.5 text-[0.6875rem] font-normal text-base-content/55">台</span>
                                 </dd>
-                                <dt class="mt-1.5 text-[0.6875rem] tracking-wide text-base-content/40">机组</dt>
+                                <dt class="mt-1.5 text-[0.6875rem] tracking-wide text-base-content/55">机组</dt>
                             </div>
                             <div class="border-l border-base-300 pl-3">
                                 <dd class="num text-lg font-semibold leading-none text-base-content">
-                                    {{ station.zongrongliang }}<span class="ml-0.5 text-[0.6875rem] font-normal text-base-content/40">kW</span>
+                                    {{ station.zongrongliang }}<span class="ml-0.5 text-[0.6875rem] font-normal text-base-content/55">kW</span>
                                 </dd>
-                                <dt class="mt-1.5 text-[0.6875rem] tracking-wide text-base-content/40">容量</dt>
+                                <dt class="mt-1.5 text-[0.6875rem] tracking-wide text-base-content/55">容量</dt>
                             </div>
                             <div class="border-l border-base-300 pl-3">
                                 <dd class="num text-lg font-semibold leading-none text-base-content">
-                                    {{ station.liuliang }}<span class="ml-0.5 text-[0.6875rem] font-normal text-base-content/40">m³/s</span>
+                                    {{ station.liuliang }}<span class="ml-0.5 text-[0.6875rem] font-normal text-base-content/55">m³/s</span>
                                 </dd>
-                                <dt class="mt-1.5 text-[0.6875rem] tracking-wide text-base-content/40">流量</dt>
+                                <dt class="mt-1.5 text-[0.6875rem] tracking-wide text-base-content/55">流量</dt>
                             </div>
                         </dl>
 

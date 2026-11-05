@@ -497,7 +497,7 @@ onMounted(
                         <td :colspan="column_count" class="px-6 py-8 text-center text-error">{{ list_error }}</td>
                     </tr>
                     <tr v-else-if="article_list.length === 0">
-                        <td :colspan="column_count" class="px-6 py-8 text-center text-base-content/40">
+                        <td :colspan="column_count" class="px-6 py-8 text-center text-base-content/55">
                             {{ view === 'trash' ? '回收站为空' : (is_normal_user ? '暂无我的文章' : '暂无文章') }}
                         </td>
                     </tr>
@@ -528,7 +528,7 @@ onMounted(
                                 @click="toggle_recommended(article)">
                                 {{ article.is_recommended ? '已推荐' : '未推荐' }}
                             </button>
-                            <span v-else class="text-xs text-base-content/30">{{ article.is_recommended ? '已推荐' : '未推荐' }}</span>
+                            <span v-else class="text-xs text-base-content/45">{{ article.is_recommended ? '已推荐' : '未推荐' }}</span>
                         </td>
                         <td class="px-4 py-3 text-base-content/70 hidden xl:table-cell">{{ article.view_count }}</td>
                         <td class="px-4 py-3 text-base-content/60 whitespace-nowrap">
@@ -545,12 +545,12 @@ onMounted(
                                             :disabled="action_slug === article.slug"
                                             @click="remove_article(article)">删除</button>
                                     </template>
-                                    <span v-else class="text-xs text-base-content/30">—</span>
+                                    <span v-else class="text-xs text-base-content/45">—</span>
                                 </template>
                                 <button v-else-if="can_manage_article(article.user_id)" class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
                                     :disabled="action_slug === article.slug"
                                     @click="restore_article(article)">恢复</button>
-                                <span v-else class="text-xs text-base-content/30">—</span>
+                                <span v-else class="text-xs text-base-content/45">—</span>
                             </div>
                         </td>
                     </tr>
@@ -613,7 +613,7 @@ onMounted(
                                 <label>发布时间
                                     <input v-model="form.create_at" type="datetime-local"
                                         class="input input-bordered w-full mt-1" />
-                                    <span class="block mt-1 text-xs text-base-content/40">留空则新增时用服务器当前时间，编辑时保持不变</span>
+                                    <span class="block mt-1 text-xs text-base-content/55">留空则新增时用服务器当前时间，编辑时保持不变</span>
                                 </label>
                             </div>
                         </template>
@@ -632,7 +632,7 @@ onMounted(
                                     {{ opt.label }}
                                 </button>
                             </div>
-                            <span v-if="!can_edit_categories" class="mt-2 block text-xs text-base-content/40">
+                            <span v-if="!can_edit_categories" class="mt-2 block text-xs text-base-content/55">
                                 普通账号不可修改已有文章的分类，如需调整请联系管理员。
                             </span>
                         </div>

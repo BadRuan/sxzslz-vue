@@ -130,9 +130,9 @@ const news_category_id = computed(() => to_second_level_id(categories.value, nam
                 <p>© 2026 芜湖市鸠江区沈巷镇水利站 版权所有</p>
                 <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <span>皖ICP备20260101号</span>
-                    <span class="text-white/15">|</span>
+                    <span class="text-white/30">|</span>
                     <span>网站找错</span>
-                    <span class="text-white/15">|</span>
+                    <span class="text-white/30">|</span>
                     <span>隐私声明</span>
                 </div>
             </div>

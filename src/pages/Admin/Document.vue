@@ -205,7 +205,7 @@ onMounted(fetch_list);
                     :disabled="upload_progress.is_active" @change="pick_files" />
             </label>
         </div>
-        <p class="mb-4 text-xs text-base-content/40">{{ DOCUMENT_LIMIT_HINT }}</p>
+        <p class="mb-4 text-xs text-base-content/55">{{ DOCUMENT_LIMIT_HINT }}</p>
 
         <!-- 上传进度：字节发完后切「服务器处理中」，并给出取消入口，避免大文件长时间无反馈 -->
         <div v-if="upload_progress.is_active" class="card bg-base-100 border border-base-300 rounded-box mb-4 px-4 py-3">
@@ -245,7 +245,7 @@ onMounted(fetch_list);
                 </thead>
                 <tbody class="divide-y divide-base-300 divide-dashed">
                     <tr v-if="!list_error && document_list.length === 0">
-                        <td :colspan="auth_store.is_superuser ? 8 : 7" class="px-4 py-8 text-center text-base-content/40">暂无文件</td>
+                        <td :colspan="auth_store.is_superuser ? 8 : 7" class="px-4 py-8 text-center text-base-content/55">暂无文件</td>
                     </tr>
                     <tr v-for="(doc, index) in document_list" :key="doc.id" class="hover:bg-base-200 link-transition">
                         <td class="px-4 py-3.5 text-base-content/60 whitespace-nowrap">{{ row_index(index) }}</td>

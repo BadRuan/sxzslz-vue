@@ -20,7 +20,7 @@ import Freatres from './Features.vue';
         <section class="bg-neutral">
             <div class="page-container flex flex-col items-start justify-between gap-6 py-12 md:flex-row md:items-center">
                 <div>
-                    <p class="eyebrow !text-white/45">Flood Control Duty</p>
+                    <p class="eyebrow !text-white/60">Flood Control Duty</p>
                     <h2 class="mt-2.5 text-xl font-semibold tracking-tight text-white sm:text-2xl">
                         汛期 24 小时值守，有事请随时联系
                     </h2>

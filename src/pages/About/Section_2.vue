@@ -55,7 +55,7 @@ const station_leaders = [
                 <template #first>分站负责人</template>
                 <template #second>Station Leader</template>
                 <template #action>
-                    <span class="text-sm text-base-content/40">{{ station_leaders.length }} 个站点</span>
+                    <span class="text-sm text-base-content/55">{{ station_leaders.length }} 个站点</span>
                 </template>
             </TitleComponent>
 
@@ -67,7 +67,7 @@ const station_leaders = [
                         :src="default_author" loading="lazy">
                     <div class="min-w-0">
                         <h3 class="truncate text-sm font-semibold text-base-content">{{ person.name }}</h3>
-                        <p class="truncate text-xs text-base-content/45">{{ person.station }}</p>
+                        <p class="truncate text-xs text-base-content/60">{{ person.station }}</p>
                     </div>
                 </div>
             </div>

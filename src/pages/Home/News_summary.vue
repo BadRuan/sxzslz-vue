@@ -63,7 +63,7 @@ onMounted(async () => {
 
             <div v-if="loading" class="card mt-8 rounded-box p-12 text-center">
                 <span class="loading loading-spinner loading-md mx-auto mb-4 block"></span>
-                <p class="text-sm text-base-content/50">正在加载动态…</p>
+                <p class="text-sm text-base-content/65">正在加载动态…</p>
             </div>
 
             <!-- 接口失败：展示后端 detail 并提供重试，避免首页静默空白 -->
@@ -85,7 +85,7 @@ onMounted(async () => {
                                 class="transition-transform duration-500 ease-out group-hover:scale-[1.02]" />
                             <!-- 底部深色渐变：保证叠字在任何封面上都可读 -->
                             <div
-                                class="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral/95 via-neutral/35 to-transparent">
+                                class="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral/80 via-neutral/20 to-transparent">
                             </div>
 
                             <div class="absolute inset-x-0 bottom-0 p-6 sm:p-8">
@@ -94,7 +94,7 @@ onMounted(async () => {
                                         class="rounded-full bg-white/15 px-2.5 py-1 text-[0.6875rem] font-medium text-white backdrop-blur-sm">
                                         {{ categories_label(article.categories) }}
                                     </span>
-                                    <span class="text-xs text-white/55">{{ date_text(article.create_at) }}</span>
+                                    <span class="text-xs text-white/70">{{ date_text(article.create_at) }}</span>
                                 </div>
                                 <h3
                                     class="mt-3 max-w-3xl text-lg font-semibold leading-snug tracking-tight text-white line-clamp-2 sm:text-xl">
@@ -113,7 +113,7 @@ onMounted(async () => {
                             {{ CATEGORY_NAMES.notice[0] }}
                         </h3>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: notice_category_id } }"
-                            class="group inline-flex items-center gap-1 text-xs text-base-content/45 hover:text-primary">
+                            class="group inline-flex items-center gap-1 text-xs text-base-content/60 hover:text-primary">
                             更多
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
                                 fill="none" class="transition-transform duration-200 group-hover:translate-x-0.5"
@@ -132,7 +132,7 @@ onMounted(async () => {
                                     class="grid w-12 shrink-0 place-items-center rounded-lg bg-base-200 py-1.5 text-center transition-colors duration-200 group-hover:bg-primary/10">
                                     <span class="num text-[0.8125rem] font-semibold leading-none text-base-content/80">{{
                                         easy_date_text(item.create_at) }}</span>
-                                    <span class="num mt-1 text-[0.625rem] leading-none text-base-content/35">{{
+                                    <span class="num mt-1 text-[0.625rem] leading-none text-base-content/50">{{
                                         year_of(item.create_at) }}</span>
                                 </span>
                                 <span
@@ -142,7 +142,7 @@ onMounted(async () => {
                         </li>
                     </ul>
 
-                    <p v-if="!article_obj.notice.length" class="py-10 text-center text-sm text-base-content/35">
+                    <p v-if="!article_obj.notice.length" class="py-10 text-center text-sm text-base-content/50">
                         暂无通知公告
                     </p>
                 </div>

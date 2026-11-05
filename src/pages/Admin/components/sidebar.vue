@@ -68,13 +68,13 @@ const nav_groups = computed<NavGroup[]>(() => [
             <img src="/icon/water-logo.svg" class="h-8 w-8 shrink-0" alt="logo" />
             <span class="hidden min-w-0 flex-col leading-tight lg:flex">
                 <span class="truncate text-sm font-semibold text-base-content">管理后台</span>
-                <span class="truncate text-[0.625rem] text-base-content/35">沈巷镇水利站</span>
+                <span class="truncate text-[0.625rem] text-base-content/50">沈巷镇水利站</span>
             </span>
         </RouterLink>
 
         <nav class="flex-1 space-y-5 overflow-y-auto px-2 py-5 lg:px-3">
             <div v-for="group in nav_groups" :key="group.label">
-                <p class="hidden px-2.5 pb-1.5 text-[0.625rem] font-medium tracking-[0.14em] text-base-content/30 lg:block">
+                <p class="hidden px-2.5 pb-1.5 text-[0.625rem] font-medium tracking-[0.14em] text-base-content/45 lg:block">
                     {{ group.label }}
                 </p>
                 <ul class="space-y-0.5">
@@ -94,7 +94,7 @@ const nav_groups = computed<NavGroup[]>(() => [
         </nav>
 
         <div class="hidden border-t border-base-300 px-4 py-3 lg:block">
-            <p class="text-[0.625rem] leading-relaxed text-base-content/25">沈巷镇水利站 · 内容管理系统</p>
+            <p class="text-[0.625rem] leading-relaxed text-base-content/40">沈巷镇水利站 · 内容管理系统</p>
         </div>
     </aside>
 </template>

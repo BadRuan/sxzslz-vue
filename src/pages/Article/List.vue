@@ -148,7 +148,7 @@ const reload_articles = () => {
                     <h1 class="text-2xl font-bold tracking-tight text-base-content sm:text-[1.875rem]">
                         新闻资讯
                     </h1>
-                    <p class="text-sm text-base-content/45">
+                    <p class="text-sm text-base-content/60">
                         当前浏览 <span class="font-medium text-base-content/75">{{ active_category_name }}</span>
                         <span v-if="article_total" class="ml-2 num">共 {{ article_total }} 条</span>
                     </p>
@@ -178,12 +178,12 @@ const reload_articles = () => {
                                 <button type="button"
                                     class="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-base-content/85 transition-colors duration-200"
                                     :class="parent.children.length === 0
-                                        ? 'cursor-default text-base-content/50'
+                                        ? 'cursor-default text-base-content/65'
                                         : 'cursor-pointer hover:bg-base-200'"
                                     @click="toggle_group(parent)">
                                     <span>{{ parent.name }}</span>
                                     <svg v-if="parent.children.length > 0" xmlns="http://www.w3.org/2000/svg"
-                                        class="h-3.5 w-3.5 shrink-0 text-base-content/35 transition-transform duration-200"
+                                        class="h-3.5 w-3.5 shrink-0 text-base-content/50 transition-transform duration-200"
                                         :class="is_expanded(parent.id) ? 'rotate-90' : ''" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
@@ -240,7 +240,7 @@ const reload_articles = () => {
                         <div v-else-if="article_list.length === 0"
                             class="rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-20 text-center">
                             <p class="text-base-content/55">暂无文章</p>
-                            <p class="mt-1.5 text-sm text-base-content/35">该分类下还没有发布内容，换个分类看看</p>
+                            <p class="mt-1.5 text-sm text-base-content/50">该分类下还没有发布内容，换个分类看看</p>
                         </div>
                         <div v-else class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                             <article v-for="(article, index) in article_list" :key="index"
@@ -255,7 +255,7 @@ const reload_articles = () => {
                                             class="absolute left-3 top-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1 rounded-full bg-base-100/90 px-2.5 py-1 text-[0.6875rem] font-medium text-base-content/70 shadow-sm backdrop-blur-sm"
                                             :title="article_categories(article).title">
                                             <span class="truncate">{{ article_categories(article).label }}</span>
-                                            <span v-if="article_categories(article).extra > 0" class="shrink-0 text-base-content/40">
+                                            <span v-if="article_categories(article).extra > 0" class="shrink-0 text-base-content/55">
                                                 +{{ article_categories(article).extra }}
                                             </span>
                                         </span>
@@ -266,7 +266,7 @@ const reload_articles = () => {
                                             {{ article.title }}
                                         </h2>
                                         <div
-                                            class="mt-auto flex items-center justify-between gap-3 border-t border-base-300/70 pt-3.5 text-xs text-base-content/40">
+                                            class="mt-auto flex items-center justify-between gap-3 border-t border-base-300/70 pt-3.5 text-xs text-base-content/55">
                                             <time class="num">{{ date_text(article.create_at) }}</time>
                                             <span class="inline-flex items-center gap-1 transition-transform duration-200 group-hover:translate-x-0.5">
                                                 阅读全文

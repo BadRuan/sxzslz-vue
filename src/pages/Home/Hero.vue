@@ -44,11 +44,11 @@ const format_value = (value: number) =>
         <img :src="hero_image" alt="沈巷镇水利站站区实景"
             class="absolute inset-0 -z-20 h-full w-full object-cover object-center" />
         <!-- 双层遮罩：横向保证左侧文字对比度，纵向压暗天地留出呼吸 -->
-        <div class="absolute inset-0 -z-10 bg-gradient-to-r from-neutral via-neutral/85 to-neutral/25"></div>
-        <div class="absolute inset-0 -z-10 bg-gradient-to-t from-neutral via-transparent to-neutral/45"></div>
+        <div class="absolute inset-0 -z-10 bg-gradient-to-r from-neutral/95 via-neutral/75 to-neutral/15"></div>
+        <div class="absolute inset-0 -z-10 bg-gradient-to-t from-neutral/85 via-transparent to-neutral/30"></div>
 
         <div class="page-container relative flex min-h-[32rem] flex-col justify-center py-16 lg:min-h-[38rem] lg:py-24">
-            <p class="eyebrow !text-white/60">
+            <p class="eyebrow !text-white/70">
                 <span class="inline-block size-1.5 rounded-full bg-accent" aria-hidden="true"></span>
                 Shenxiang Water Station · 芜湖市鸠江区
             </p>
@@ -86,9 +86,9 @@ const format_value = (value: number) =>
                     :class="index === 0 ? 'sm:!border-l-0 sm:!pl-0' : ''">
                     <dd class="flex items-baseline gap-1.5 text-white">
                         <span class="num text-[1.75rem] font-semibold leading-none sm:text-[2rem]">{{ format_value(item.value) }}</span>
-                        <span class="text-xs font-medium text-white/50">{{ item.unit }}</span>
+                        <span class="text-xs font-medium text-white/65">{{ item.unit }}</span>
                     </dd>
-                    <dt class="mt-2 text-xs tracking-wide text-white/55">{{ item.label }}</dt>
+                    <dt class="mt-2 text-xs tracking-wide text-white/70">{{ item.label }}</dt>
                 </div>
             </dl>
         </div>

@@ -222,7 +222,7 @@ onMounted(load_category_page);
                     </thead>
                     <tbody class="divide-y divide-base-300 divide-dashed">
                         <tr v-if="!list_error && tree_rows.length === 0">
-                            <td colspan="4" class="px-6 py-8 text-center text-base-content/40">暂无分类</td>
+                            <td colspan="4" class="px-6 py-8 text-center text-base-content/55">暂无分类</td>
                         </tr>
                         <tr v-for="{ node, depth } in tree_rows" :key="node.id" class="hover:bg-base-200 link-transition">
                             <td class="px-6 py-3.5 text-base-content/80 text-left"
@@ -259,7 +259,7 @@ onMounted(load_category_page);
                             <option :value="0">一级分类</option>
                             <option v-for="opt in parent_options" :key="opt.id" :value="opt.id">{{ opt.label }}</option>
                         </select>
-                        <span class="block mt-1 text-xs text-base-content/40">
+                        <span class="block mt-1 text-xs text-base-content/55">
                             {{ editing_is_first_level
                                 ? '一级分类不可调整父级'
                                 : '分类仅支持二级：子分类只能挂在一级分类下' }}

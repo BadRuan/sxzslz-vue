@@ -31,7 +31,7 @@ const gallery = computed(() => {
                 <template #first>泵站风光</template>
                 <template #second>Station Picture</template>
                 <template #action>
-                    <span class="text-sm text-white/40">站区实景影像</span>
+                    <span class="text-sm text-white/55">站区实景影像</span>
                 </template>
             </TitleComponent>
 
@@ -43,16 +43,16 @@ const gallery = computed(() => {
                         loading="lazy" decoding="async"
                         class="h-full w-full object-cover opacity-90 transition duration-500 ease-out group-hover:scale-[1.04] group-hover:opacity-100" />
                     <!-- 底部渐隐 + 标题：静态时干净，悬浮时给出图注 -->
-                    <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral/85 via-transparent to-transparent opacity-90">
+                    <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral/75 via-transparent to-transparent opacity-90">
                     </div>
                     <figcaption class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4">
                         <span class="text-sm font-medium text-white">{{ pic.title }}</span>
-                        <span class="hidden text-[0.6875rem] text-white/45 sm:block">{{ pic.station_name }}</span>
+                        <span class="hidden text-[0.6875rem] text-white/60 sm:block">{{ pic.station_name }}</span>
                     </figcaption>
                 </figure>
             </div>
 
-            <p v-else class="mt-8 text-sm text-white/40">暂无站区影像</p>
+            <p v-else class="mt-8 text-sm text-white/55">暂无站区影像</p>
         </div>
     </section>
 </template>

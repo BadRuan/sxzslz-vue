@@ -175,7 +175,7 @@ onMounted(getImageList);
                     :disabled="upload_progress.is_active" @change="pick_files" />
             </label>
         </div>
-        <p class="mb-4 text-xs text-base-content/40">{{ IMAGE_LIMIT_HINT }}</p>
+        <p class="mb-4 text-xs text-base-content/55">{{ IMAGE_LIMIT_HINT }}</p>
 
         <!-- 上传进度：字节发完后切「服务器处理中」，并给出取消入口，避免大文件长时间无反馈 -->
         <div v-if="upload_progress.is_active" class="card bg-base-100 border border-base-300 rounded-box mb-4 px-4 py-3">
@@ -211,9 +211,9 @@ onMounted(getImageList);
                     <p class="text-sm my-1 font-medium text-base-content truncate" :title="image.raw_filename">{{ image.raw_filename }}</p>
                     <p class="text-xs text-base-content/60">{{ format_bytes(image.size_bytes) }} · 浏览 {{ image.view }}</p>
                     <!-- 超管可见上传者（普通用户列表本身只含自己的图片） -->
-                    <p v-if="auth_store.is_superuser" class="text-xs text-base-content/40 truncate"
+                    <p v-if="auth_store.is_superuser" class="text-xs text-base-content/55 truncate"
                         :title="image.user?.nickname ?? ''">上传者：{{ image.user?.nickname ?? '—' }}</p>
-                    <p class="text-xs text-base-content/40">{{ dayjs(image.uploaded_at).format('YYYY-MM-DD HH:mm') }}</p>
+                    <p class="text-xs text-base-content/55">{{ dayjs(image.uploaded_at).format('YYYY-MM-DD HH:mm') }}</p>
                     <div class="mt-1 flex flex-wrap items-center gap-x-1 gap-y-0.5">
                         <!-- 详情页会把相对路径 slug 自动补成 /api/image/，MD 里只写 slug 即可渲染 -->
                         <CopyButton :text="`![${image.raw_filename}](${image.slug})`" label="复制 md" />
@@ -229,7 +229,7 @@ onMounted(getImageList);
             </div>
         </div>
 
-        <p v-if="!list_error && image_list.length === 0" class="py-16 text-center text-base-content/40">暂无图片</p>
+        <p v-if="!list_error && image_list.length === 0" class="py-16 text-center text-base-content/55">暂无图片</p>
 
         <AppPagination class="mt-8" :page="page" :has-next="has_next"
             :total="total" unit="张" :page-size="PAGE_SIZE" @change="go_page" />

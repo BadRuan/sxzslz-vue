@@ -58,7 +58,7 @@ const columns = computed(() => [
                             <h3 class="text-base font-semibold tracking-tight text-base-content">{{ col.title }}</h3>
                         </div>
                         <RouterLink :to="{ name: 'ArticleList', query: { category: col.cid } }"
-                            class="group inline-flex items-center gap-1 text-xs text-base-content/45 hover:text-primary">
+                            class="group inline-flex items-center gap-1 text-xs text-base-content/60 hover:text-primary">
                             更多
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
                                 fill="none" class="transition-transform duration-200 group-hover:translate-x-0.5"
@@ -77,12 +77,12 @@ const columns = computed(() => [
                                     class="min-w-0 flex-1 truncate text-sm text-base-content/75 transition-colors duration-200 group-hover:text-primary">
                                     {{ item.title }}
                                 </span>
-                                <span class="num shrink-0 text-xs text-base-content/35">{{ easy_date_text(item.create_at) }}</span>
+                                <span class="num shrink-0 text-xs text-base-content/50">{{ easy_date_text(item.create_at) }}</span>
                             </RouterLink>
                         </li>
                     </ul>
 
-                    <p v-if="!col.list.length" class="py-10 text-center text-sm text-base-content/35">暂无内容</p>
+                    <p v-if="!col.list.length" class="py-10 text-center text-sm text-base-content/50">暂无内容</p>
                 </div>
             </div>
         </div>

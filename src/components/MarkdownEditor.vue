@@ -219,7 +219,7 @@ const pick_upload = async (event: Event) => {
                 :class="panel_kind === 'document' ? 'btn-primary btn-soft' : ''"
                 title="从本站附件库插入文档，或直接上传" @click="toggle_panel('document')">文档</button>
 
-            <span class="ml-auto text-xs text-base-content/40">
+            <span class="ml-auto text-xs text-base-content/55">
                 {{ content.length }} 字符 · Markdown
             </span>
         </div>
@@ -247,7 +247,7 @@ const pick_upload = async (event: Event) => {
             </div>
 
             <p v-if="panel_error" class="text-xs text-error mb-2">{{ panel_error }}</p>
-            <p v-if="!is_image" class="text-[11px] text-base-content/40 mb-2">{{ DOCUMENT_LIMIT_HINT }}</p>
+            <p v-if="!is_image" class="text-[11px] text-base-content/55 mb-2">{{ DOCUMENT_LIMIT_HINT }}</p>
 
             <div v-if="is_image ? image_loading : document_loading"
                 class="flex items-center gap-2 text-xs text-base-content/60 py-4">
@@ -256,7 +256,7 @@ const pick_upload = async (event: Event) => {
 
             <!-- 图片库：缩略图网格 -->
             <template v-else-if="is_image">
-                <p v-if="image_list.length === 0" class="text-xs text-base-content/40 py-4 text-center">
+                <p v-if="image_list.length === 0" class="text-xs text-base-content/55 py-4 text-center">
                     暂无已上传图片，可点右上角「上传图片」。
                 </p>
                 <div v-else class="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-48 overflow-y-auto pr-1">
@@ -274,7 +274,7 @@ const pick_upload = async (event: Event) => {
 
             <!-- 附件库：文件条目列表（图标 + 文件名 + 大小） -->
             <template v-else>
-                <p v-if="document_list.length === 0" class="text-xs text-base-content/40 py-4 text-center">
+                <p v-if="document_list.length === 0" class="text-xs text-base-content/55 py-4 text-center">
                     暂无已上传文档，可点右上角「上传文档」。
                 </p>
                 <ul v-else class="max-h-48 overflow-y-auto pr-1 divide-y divide-base-300/60">
@@ -285,7 +285,7 @@ const pick_upload = async (event: Event) => {
                             <img :src="doc_icon_for(doc.raw_filename)" alt="" class="h-4 w-4 shrink-0" />
                             <span class="truncate text-sm text-base-content/80">{{ doc.raw_filename }}</span>
                             <span v-if="typeof doc.size_bytes === 'number'"
-                                class="ml-auto shrink-0 text-xs text-base-content/40">
+                                class="ml-auto shrink-0 text-xs text-base-content/55">
                                 {{ format_bytes(doc.size_bytes) }}
                             </span>
                             <span class="shrink-0 text-xs text-primary/80">插入</span>
@@ -303,7 +303,7 @@ const pick_upload = async (event: Event) => {
 
             <div v-show="mode !== 'edit'"
                 class="h-[360px] overflow-y-auto rounded-lg border border-base-300 bg-base-100 px-4 py-3">
-                <p v-if="!content.trim()" class="text-sm text-base-content/40">暂无内容，输入 Markdown 后此处实时预览。</p>
+                <p v-if="!content.trim()" class="text-sm text-base-content/55">暂无内容，输入 Markdown 后此处实时预览。</p>
                 <div v-else class="prose prose-sm max-w-none
                         prose-headings:font-bold prose-headings:mt-5 prose-headings:mb-2
                         prose-h2:text-xl prose-h3:text-base

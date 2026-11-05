@@ -101,7 +101,7 @@ const renderedHtml = computed(() => {
 <template>
     <main class="min-h-screen bg-base-200">
         <div class="page-container py-6 sm:py-8">
-            <nav class="breadcrumbs mb-5 text-sm text-base-content/45" aria-label="Breadcrumb">
+            <nav class="breadcrumbs mb-5 text-sm text-base-content/60" aria-label="Breadcrumb">
                 <ul>
                     <li>
                         <RouterLink :to="{ name: 'Home' }" class="link-hover">网站首页</RouterLink>
@@ -132,13 +132,13 @@ const renderedHtml = computed(() => {
                 <!-- 错误状态 -->
                 <div v-else-if="error"
                     class="rounded-box border border-base-300 bg-base-100 px-6 py-16 text-center">
-                    <svg class="mx-auto mb-5 h-14 w-14 text-base-content/25" fill="none" stroke="currentColor"
+                    <svg class="mx-auto mb-5 h-14 w-14 text-base-content/40" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
                     <h2 class="mb-2 text-lg font-semibold text-base-content">{{ error }}</h2>
-                    <p class="mb-6 text-sm text-base-content/45">请检查文章链接或网络后重试，也可返回其他页面</p>
+                    <p class="mb-6 text-sm text-base-content/60">请检查文章链接或网络后重试，也可返回其他页面</p>
                     <div class="flex justify-center gap-3">
                         <RouterLink :to="{ name: 'ArticleList' }" class="btn btn-primary btn-sm sm:btn-md">
                             返回列表
@@ -163,7 +163,7 @@ const renderedHtml = computed(() => {
                         </h1>
 
                         <!-- 元信息：作者 / 时间 / 阅读量，弱化颜色只保留一层信息层级 -->
-                        <div class="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs text-base-content/45">
+                        <div class="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs text-base-content/60">
                             <RouterLink v-if="article_detail?.user"
                                 :to="{ name: 'Profile', params: { id: article_detail.user.id } }"
                                 class="inline-flex items-center gap-1.5 hover:text-primary">
@@ -185,14 +185,14 @@ const renderedHtml = computed(() => {
                     <!-- 阅读工具条：字号切换与点赞集中在一行，正文区保持干净 -->
                     <div class="flex flex-wrap items-center justify-between gap-3 border-y border-base-300 bg-base-200/60 px-6 py-3 sm:px-12">
                         <div class="flex items-center gap-2">
-                            <span class="text-xs text-base-content/40">字号</span>
+                            <span class="text-xs text-base-content/55">字号</span>
                             <div class="inline-flex items-center gap-0.5 rounded-lg bg-base-100 p-0.5">
                                 <button v-for="option in ([{ key: 'sm', label: '小' }, { key: 'md', label: '中' }, { key: 'lg', label: '大' }] as const)"
                                     :key="option.key" type="button"
                                     class="rounded-md px-3 py-1 text-xs transition-colors duration-200"
                                     :class="font_size === option.key
                                         ? 'bg-primary/10 font-medium text-primary'
-                                        : 'text-base-content/50 hover:text-base-content/80'"
+                                        : 'text-base-content/65 hover:text-base-content/80'"
                                     :aria-pressed="font_size === option.key"
                                     @click="font_size = option.key">
                                     {{ option.label }}
@@ -241,7 +241,7 @@ const renderedHtml = computed(() => {
                             <span v-if="like_count > 0" class="num opacity-70">{{ like_count }}</span>
                         </button>
                         <RouterLink :to="{ name: 'ArticleList', query: category_crumb ? { category: category_crumb.id } : {} }"
-                            class="inline-flex items-center gap-1.5 text-sm text-base-content/45 hover:text-primary">
+                            class="inline-flex items-center gap-1.5 text-sm text-base-content/60 hover:text-primary">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
                                 fill="none" aria-hidden="true">
                                 <path d="M19 12H5M11 18l-6-6 6-6" stroke="currentColor" stroke-width="2"

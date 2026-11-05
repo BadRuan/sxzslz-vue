@@ -102,7 +102,7 @@ onBeforeUnmount(() => {
                         <label
                             class="flex h-9 w-56 items-center gap-2 rounded-full border border-base-300 bg-base-200/70 px-3 text-sm link-transition focus-within:border-primary/40 focus-within:bg-base-100 focus-within:shadow-[0_0_0_3px_rgba(18,94,143,0.10)]">
                             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                class="shrink-0 text-base-content/40" aria-hidden="true">
+                                class="shrink-0 text-base-content/55" aria-hidden="true">
                                 <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.8"></circle>
                                 <path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.8"
                                     stroke-linecap="round"></path>
@@ -148,7 +148,7 @@ onBeforeUnmount(() => {
                         <form role="search" class="mb-3 flex items-center gap-2" @submit.prevent="submit_search">
                             <label class="input input-sm flex grow items-center gap-2 border-base-300 bg-base-200/60">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
-                                    fill="none" class="shrink-0 text-base-content/40" aria-hidden="true">
+                                    fill="none" class="shrink-0 text-base-content/55" aria-hidden="true">
                                     <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.8"></circle>
                                     <path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.8"
                                         stroke-linecap="round"></path>
@@ -163,7 +163,7 @@ onBeforeUnmount(() => {
                                 <li>
                                     <RouterLink :to="{ name: 'Home' }" class="mobile-link">
                                         <span>网站首页</span>
-                                        <span class="text-xs text-base-content/35">Home</span>
+                                        <span class="text-xs text-base-content/50">Home</span>
                                     </RouterLink>
                                 </li>
                                 <li>
@@ -171,13 +171,13 @@ onBeforeUnmount(() => {
                                         :to="{ name: 'ArticleList', query: { category: news_category_id, page: 1 } }"
                                         class="mobile-link">
                                         <span>新闻列表</span>
-                                        <span class="text-xs text-base-content/35">News</span>
+                                        <span class="text-xs text-base-content/50">News</span>
                                     </RouterLink>
                                 </li>
                                 <li>
                                     <RouterLink :to="{ name: 'About' }" class="mobile-link">
                                         <span>关于我们</span>
-                                        <span class="text-xs text-base-content/35">About</span>
+                                        <span class="text-xs text-base-content/50">About</span>
                                     </RouterLink>
                                 </li>
                             </ul>

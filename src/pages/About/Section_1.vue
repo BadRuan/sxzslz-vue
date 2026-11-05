@@ -22,13 +22,13 @@ const duties = [
                     :src="url_prefix.pic_prefix + 'b8dc37b949384f73a03e7e515df58038.png'"
                     alt="沈巷镇水利站">
             </div>
-            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral via-neutral/55 to-neutral/15"></div>
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral/95 via-neutral/45 to-neutral/10"></div>
             <div class="page-container absolute inset-x-0 bottom-0 pb-8 sm:pb-10">
-                <p class="eyebrow text-white/50">About Us</p>
+                <p class="eyebrow text-white/65">About Us</p>
                 <h1 class="mt-2.5 text-2xl font-bold tracking-tight text-white sm:text-[2rem]">
                     走进沈巷镇水利站
                 </h1>
-                <p class="mt-3 max-w-2xl text-sm leading-6 text-white/60">
+                <p class="mt-3 max-w-2xl text-sm leading-6 text-white/70">
                     负责全镇水利规划、小型农田水利工程建设与泵站运行管护，守护一方安澜。
                 </p>
             </div>
@@ -40,7 +40,7 @@ const duties = [
                     <template #first>机构职能</template>
                     <template #second>Organizational Functions</template>
                     <template #action>
-                        <span class="text-sm text-base-content/40">六项主要职责</span>
+                        <span class="text-sm text-base-content/55">六项主要职责</span>
                     </template>
                 </TitleComponent>
 

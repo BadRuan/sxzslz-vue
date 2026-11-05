@@ -20,7 +20,7 @@ withDefaults(defineProps<{
         loading="lazy" decoding="async"
         class="h-full w-full bg-base-300 object-contain" v-bind="$attrs" />
     <div v-else
-        class="flex h-full w-full items-center justify-center bg-base-300 text-sm text-base-content/40">
+        class="flex h-full w-full items-center justify-center bg-base-300 text-sm text-base-content/55">
         暂无封面
     </div>
 </template>

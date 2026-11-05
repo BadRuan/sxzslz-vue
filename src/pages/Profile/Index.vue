@@ -106,19 +106,19 @@ onMounted(
                                 </h1>
                                 <img class="h-5 w-5 shrink-0" src="/icon/v.png" alt="认证">
                             </div>
-                            <p class="mt-1.5 text-sm text-base-content/40">暂无简介及其他补充信息</p>
+                            <p class="mt-1.5 text-sm text-base-content/55">暂无简介及其他补充信息</p>
                         </div>
                     </div>
 
                     <dl class="flex shrink-0 items-center gap-8 sm:gap-10 sm:pb-1">
                         <div>
                             <dd class="num text-xl font-semibold leading-none text-base-content sm:text-2xl">{{ post_count }}</dd>
-                            <dt class="mt-1.5 text-xs text-base-content/40">发布文章</dt>
+                            <dt class="mt-1.5 text-xs text-base-content/55">发布文章</dt>
                         </div>
                         <div class="h-8 w-px bg-base-300" aria-hidden="true"></div>
                         <div>
                             <dd class="num text-xl font-semibold leading-none text-base-content sm:text-2xl">{{ view_count }}</dd>
-                            <dt class="mt-1.5 text-xs text-base-content/40">文章累计阅读量</dt>
+                            <dt class="mt-1.5 text-xs text-base-content/55">文章累计阅读量</dt>
                         </div>
                     </dl>
                 </div>
@@ -128,21 +128,21 @@ onMounted(
             <section class="mt-6 overflow-hidden rounded-box border border-base-300 bg-base-100">
                 <div class="flex items-center justify-between gap-3 border-b border-base-300 px-6 py-4 sm:px-8">
                     <h2 class="text-sm font-semibold text-base-content">文章动态</h2>
-                    <span class="num text-xs text-base-content/35">共 {{ total }} 篇</span>
+                    <span class="num text-xs text-base-content/50">共 {{ total }} 篇</span>
                 </div>
 
                 <ul class="divide-y divide-base-300">
                     <li v-if="list_error" class="px-6 py-10 text-center text-sm text-error">
                         {{ list_error }}
                     </li>
-                    <li v-else-if="latest_article.length === 0" class="px-6 py-14 text-center text-sm text-base-content/40">
+                    <li v-else-if="latest_article.length === 0" class="px-6 py-14 text-center text-sm text-base-content/55">
                         暂无文章
                     </li>
                     <li v-for="(article, index) in latest_article" :key="index">
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
                             class="group flex items-center gap-4 px-6 py-4 transition-colors duration-200 hover:bg-base-200/60 sm:px-8">
                             <span
-                                class="shrink-0 rounded-md bg-base-200 px-2 py-1 text-[0.6875rem] font-medium text-base-content/50 transition-colors duration-200 group-hover:bg-primary/10 group-hover:text-primary"
+                                class="shrink-0 rounded-md bg-base-200 px-2 py-1 text-[0.6875rem] font-medium text-base-content/65 transition-colors duration-200 group-hover:bg-primary/10 group-hover:text-primary"
                                 :class="article_categories(article).extra > 0 ? 'max-w-[10em] truncate' : ''"
                                 :title="article_categories(article).title">
                                 {{ article_categories(article).label }}
@@ -152,9 +152,9 @@ onMounted(
                                 class="min-w-0 flex-1 truncate text-sm font-medium text-base-content/75 transition-colors duration-200 group-hover:text-primary">
                                 {{ article.title }}
                             </span>
-                            <time class="num ml-2 shrink-0 text-xs text-base-content/35">{{ date_text(article.create_at) }}</time>
+                            <time class="num ml-2 shrink-0 text-xs text-base-content/50">{{ date_text(article.create_at) }}</time>
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                                fill="none" class="hidden shrink-0 text-base-content/25 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary/60 sm:block"
+                                fill="none" class="hidden shrink-0 text-base-content/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary/60 sm:block"
                                 aria-hidden="true">
                                 <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"></path>

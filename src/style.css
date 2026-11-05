@@ -18,21 +18,21 @@
   color-scheme: light;
   /*
    * 设计语言：水利蓝 + 中性灰（Water Bureau）。
-   * 主色取 logo 蓝 #2A82E4 的深水版本，压到政务尺度上更稳、正文对比度更高；
-   * logo 原蓝保留为 secondary，仅用于图形强调；暖色只作小面积提示（accent）。
+   * 主色取 logo 蓝 #2A82E4 的下沉版本：比 logo 蓝深一档以保证白字可读（对白 4.85:1），
+   * 又比初版亮一档，避免整站发闷；logo 原蓝保留为 secondary 作图形强调；暖色只作小面积提示（accent）。
    */
   --color-base-100: #ffffff;
-  --color-base-200: #f4f7fa;
-  --color-base-300: #e4eaf1;
-  --color-base-content: #0f1b2a;
-  --color-primary: #125e8f;
+  --color-base-200: #eef3f8;
+  --color-base-300: #d9e2ec;
+  --color-base-content: #0b1420;
+  --color-primary: #1a76b8;
   --color-primary-content: #ffffff;
   --color-secondary: #2a82e4;
   --color-secondary-content: #ffffff;
-  --color-accent: #f6c667;
+  --color-accent: #f2b544;
   --color-accent-content: #4a2f00;
-  --color-neutral: #14283c;
-  --color-neutral-content: #cfdae6;
+  --color-neutral: #0e2030;
+  --color-neutral-content: #d3dee9;
   --color-info: #0e7490;
   --color-info-content: #ffffff;
   --color-success: #15803d;
@@ -55,8 +55,8 @@
 @theme {
     --font-sans: "GoogleSansCode", "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif;
     /* 卡片阴影只有两级，避免页面上出现七八种投影 */
-    --shadow-card: 0 1px 2px rgb(15 27 42 / 0.04), 0 1px 3px rgb(15 27 42 / 0.05);
-    --shadow-lift: 0 12px 28px -12px rgb(15 27 42 / 0.18), 0 2px 6px rgb(15 27 42 / 0.06);
+    --shadow-card: 0 1px 2px rgb(11 20 32 / 0.04), 0 1px 3px rgb(11 20 32 / 0.05);
+    --shadow-lift: 0 12px 28px -12px rgb(11 20 32 / 0.18), 0 2px 6px rgb(11 20 32 / 0.06);
 }
 
 @utility indent-2em {
@@ -219,18 +219,18 @@
 
 /* 正文排版：阅读优先，行距与字色都按长文调 */
 .prose {
-    --tw-prose-body: #33425a;
-    --tw-prose-headings: #0f1b2a;
+    --tw-prose-body: #2c3b52;
+    --tw-prose-headings: #0b1420;
     --tw-prose-lead: #475569;
     --tw-prose-links: var(--color-primary);
-    --tw-prose-bold: #0f1b2a;
+    --tw-prose-bold: #0b1420;
     --tw-prose-counters: #64748b;
     --tw-prose-bullets: #94a3b8;
     --tw-prose-hr: var(--color-base-300);
     --tw-prose-quotes: #1e3a5f;
     --tw-prose-quote-borders: color-mix(in oklab, var(--color-primary) 30%, white);
     --tw-prose-captions: #64748b;
-    --tw-prose-code: #0f1b2a;
+    --tw-prose-code: #0b1420;
     --tw-prose-th-borders: var(--color-base-300);
     --tw-prose-td-borders: var(--color-base-300);
 }

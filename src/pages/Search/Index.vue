@@ -224,9 +224,9 @@ watch(
         <!-- 搜索头：把搜索框放在深色主视觉里，成为页面唯一焦点 -->
         <section class="bg-neutral">
             <div class="page-container py-10 sm:py-14">
-                <p class="eyebrow text-white/45">Search</p>
+                <p class="eyebrow text-white/60">Search</p>
                 <h1 class="mt-2.5 text-2xl font-bold tracking-tight text-white sm:text-[1.875rem]">站内搜索</h1>
-                <p class="mt-2.5 max-w-2xl text-sm leading-6 text-white/55">
+                <p class="mt-2.5 max-w-2xl text-sm leading-6 text-white/70">
                     同时检索全站文章的标题与正文；多个关键词用空格分隔，需同时命中（AND），结果按发布时间倒序。
                 </p>
 
@@ -239,18 +239,18 @@ watch(
                                 <label
                                     class="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl border border-base-300 bg-base-100 px-4 py-3 transition-colors duration-200 focus-within:border-primary/50">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
-                                        fill="none" class="shrink-0 text-base-content/40" aria-hidden="true">
+                                        fill="none" class="shrink-0 text-base-content/55" aria-hidden="true">
                                         <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.6"></circle>
                                         <path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="1.6"
                                             stroke-linecap="round"></path>
                                     </svg>
                                     <input id="search-keyword" v-model="keyword_input" type="search"
-                                        class="w-full min-w-0 bg-transparent text-sm text-base-content outline-none placeholder:text-base-content/35"
+                                        class="w-full min-w-0 bg-transparent text-sm text-base-content outline-none placeholder:text-base-content/50"
                                         :maxlength="MAX_KEYWORD_LENGTH" autocomplete="off"
                                         placeholder="输入关键词，如：泵站 托管" aria-label="搜索关键词"
                                         @keydown.enter.prevent="submit_search" />
                                     <button v-if="keyword_input" type="button"
-                                        class="shrink-0 text-xs text-base-content/40 transition-colors hover:text-base-content/70"
+                                        class="shrink-0 text-xs text-base-content/55 transition-colors hover:text-base-content/70"
                                         aria-label="清空关键词" @click="clear_keyword">
                                         清空
                                     </button>
@@ -266,14 +266,14 @@ watch(
                         </div>
 
                         <div class="flex flex-wrap items-center gap-3">
-                            <span class="text-xs text-base-content/40">搜索范围</span>
+                            <span class="text-xs text-base-content/55">搜索范围</span>
                             <div class="inline-flex items-center gap-0.5 rounded-full bg-base-200 p-1" role="group"
                                 aria-label="搜索范围">
                                 <button v-for="option in SCOPE_OPTIONS" :key="option.value" type="button"
                                     class="rounded-full px-3.5 py-1.5 text-xs transition-colors duration-200"
                                     :class="scope === option.value
                                         ? 'bg-base-100 font-medium text-primary shadow-sm'
-                                        : 'text-base-content/50 hover:text-base-content/80'"
+                                        : 'text-base-content/65 hover:text-base-content/80'"
                                     :aria-pressed="scope === option.value" @click="change_scope(option.value)">
                                     {{ option.label }}
                                 </button>
@@ -289,14 +289,14 @@ watch(
             <div v-if="loading && results.length === 0"
                 class="flex flex-col items-center gap-3 rounded-box border border-base-300 bg-base-100 p-12 text-center">
                 <span class="loading loading-spinner loading-md text-primary"></span>
-                <p class="text-sm text-base-content/50">正在搜索…</p>
+                <p class="text-sm text-base-content/65">正在搜索…</p>
             </div>
 
             <!-- 接口失败：展示后端原因并提供重试，而不是误报「无结果」 -->
             <div v-else-if="error_message"
                 class="rounded-box border border-base-300 bg-base-100 p-10 text-center" role="alert">
                 <p class="mb-2 text-error">{{ error_message }}</p>
-                <p class="mb-4 text-sm text-base-content/45">请检查网络后重试</p>
+                <p class="mb-4 text-sm text-base-content/60">请检查网络后重试</p>
                 <button type="button" class="btn btn-sm btn-primary" @click="retry_search">
                     重新搜索
                 </button>
@@ -314,7 +314,7 @@ watch(
                     </svg>
                 </div>
                 <p class="text-base-content/75">输入关键词，搜索全站文章的标题与正文</p>
-                <p class="mt-2 text-sm text-base-content/40">支持多关键词（空格分隔、同时命中）与按标题/正文限定范围</p>
+                <p class="mt-2 text-sm text-base-content/55">支持多关键词（空格分隔、同时命中）与按标题/正文限定范围</p>
             </div>
 
             <!-- 有结果：摘要 + 列表 + 分页 -->
@@ -325,7 +325,7 @@ watch(
                     <span>关键词：<span class="font-medium text-base-content/80">{{ active_keyword }}</span></span>
                     <span class="h-3 w-px bg-base-300" aria-hidden="true"></span>
                     <span>范围：{{ scope_label(active_scope) }}</span>
-                    <span class="ml-auto text-xs text-base-content/35">按发布时间倒序</span>
+                    <span class="ml-auto text-xs text-base-content/50">按发布时间倒序</span>
                 </div>
 
                 <!-- 翻页时保留旧结果并降透明度，避免整块闪烁 -->
@@ -351,7 +351,7 @@ watch(
                                         正文命中
                                     </span>
                                     <span v-for="category in item_categories(item).slice(0, 3)" :key="category.id"
-                                        class="rounded-full bg-base-200 px-2 py-0.5 text-[0.6875rem] text-base-content/45">
+                                        class="rounded-full bg-base-200 px-2 py-0.5 text-[0.6875rem] text-base-content/60">
                                         {{ category.name }}
                                     </span>
                                 </div>
@@ -362,8 +362,8 @@ watch(
                                     class="mt-2 line-clamp-2 text-sm leading-6 text-base-content/55">
                                     <HighlightText :text="item.content_snippet" :terms="active_terms" />
                                 </p>
-                                <p v-else class="mt-2 text-sm text-base-content/40">仅标题命中，正文未包含关键词</p>
-                                <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-base-content/35">
+                                <p v-else class="mt-2 text-sm text-base-content/55">仅标题命中，正文未包含关键词</p>
+                                <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-base-content/50">
                                     <span v-if="item.user">{{ item.user.nickname }}</span>
                                     <time class="num">{{ date_text(item.create_at) }}</time>
                                     <span class="num">阅读 {{ item.view_count }}</span>
@@ -382,7 +382,7 @@ watch(
                 <p class="text-base-content/75">
                     未找到与「<span class="font-medium text-base-content">{{ active_keyword }}</span>」相关的文章
                 </p>
-                <ul class="mx-auto mt-4 max-w-md list-disc space-y-1.5 pl-5 text-left text-sm text-base-content/50">
+                <ul class="mx-auto mt-4 max-w-md list-disc space-y-1.5 pl-5 text-left text-sm text-base-content/65">
                     <li>试试更短或更通用的关键词</li>
                     <li>多个关键词需同时命中，可减少关键词数量</li>
                     <li>切换搜索范围（标题 / 正文 / 标题 + 正文）</li>

@@ -163,9 +163,9 @@ onMounted(load_users);
         <div class="flex items-center justify-between mb-4 gap-4">
             <div class="text-sm text-base-content/60">
                 共 <span class="font-medium text-base-content/80">{{ users.length }}</span> 个账户
-                <span class="mx-2 text-base-content/30">·</span>
+                <span class="mx-2 text-base-content/45">·</span>
                 普通账户 <span class="font-medium text-base-content/80">{{ normal_count }}</span>
-                <span class="mx-2 text-base-content/30">·</span>
+                <span class="mx-2 text-base-content/45">·</span>
                 超级管理员 <span class="font-medium text-base-content/80">{{ super_count }}</span>
             </div>
             <button class="btn btn-main btn-primary" @click="open_create">
@@ -177,7 +177,7 @@ onMounted(load_users);
         <p v-if="action_success" role="alert" class="alert alert-success mb-4 text-sm">{{ action_success }}</p>
         <p v-if="list_error" role="alert" class="alert alert-error mb-4 text-sm">{{ list_error }}</p>
 
-        <p class="mb-4 text-xs text-base-content/40">
+        <p class="mb-4 text-xs text-base-content/55">
             注：后端账户接口不返回登录名，此处仅展示 slug —— 旧账户的 slug 即登录名，
             通过本页新建的账户 slug 为随机标识（登录名在创建成功的提示中给出，请及时记录）。
             比对账户请以昵称为准。
@@ -197,7 +197,7 @@ onMounted(load_users);
                 </thead>
                 <tbody class="divide-y divide-base-300 divide-dashed">
                     <tr v-if="!list_error && users.length === 0">
-                        <td colspan="5" class="px-6 py-8 text-center text-base-content/40">暂无账户</td>
+                        <td colspan="5" class="px-6 py-8 text-center text-base-content/55">暂无账户</td>
                     </tr>
                     <tr v-for="(item, index) in users" :key="item.id"
                         class="text-center hover:bg-base-200 link-transition">
@@ -229,7 +229,7 @@ onMounted(load_users);
                                         删除
                                     </button>
                                 </template>
-                                <span v-else class="text-xs text-base-content/30">—</span>
+                                <span v-else class="text-xs text-base-content/45">—</span>
                             </div>
                         </td>
                     </tr>
@@ -252,7 +252,7 @@ onMounted(load_users);
                     <input v-model="form.password" type="password" autocomplete="new-password"
                         placeholder="留空则使用默认密码 abc123"
                         class="input input-bordered w-full mt-1" />
-                    <span class="block mt-1 text-xs text-base-content/40">
+                    <span class="block mt-1 text-xs text-base-content/55">
                         最少 6 位；留空使用默认密码 {{ DEFAULT_USER_PASSWORD }}
                     </span>
                 </label>

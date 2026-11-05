@@ -56,16 +56,16 @@ const submit = async () => {
             </div>
 
             <div class="relative max-w-md">
-                <p class="text-[0.6875rem] font-medium tracking-[0.18em] text-white/40">CONTENT MANAGEMENT</p>
+                <p class="text-[0.6875rem] font-medium tracking-[0.18em] text-white/55">CONTENT MANAGEMENT</p>
                 <h1 class="mt-5 text-[2rem] font-bold leading-tight tracking-tight text-white">
                     管理后台<br />内容与数据的一站式中枢
                 </h1>
-                <p class="mt-5 text-sm leading-7 text-white/55">
+                <p class="mt-5 text-sm leading-7 text-white/70">
                     在这里维护新闻公告、站点档案、影像资料与账号权限。所有改动即时发布到门户前台。
                 </p>
             </div>
 
-            <ul class="relative flex flex-wrap gap-x-6 gap-y-2 text-xs text-white/40">
+            <ul class="relative flex flex-wrap gap-x-6 gap-y-2 text-xs text-white/55">
                 <li>文章与回收站</li>
                 <li>分类与账户</li>
                 <li>图片与附件</li>
@@ -81,7 +81,7 @@ const submit = async () => {
                 </div>
 
                 <h2 class="text-2xl font-bold tracking-tight text-base-content">管理后台登录</h2>
-                <p class="mt-2 text-sm text-base-content/45">请使用管理员账号登录，继续管理站点内容。</p>
+                <p class="mt-2 text-sm text-base-content/60">请使用管理员账号登录，继续管理站点内容。</p>
 
                 <form class="mt-8 flex flex-col gap-5" @submit.prevent="submit">
                     <label class="form-control w-full">
@@ -106,7 +106,7 @@ const submit = async () => {
                     </button>
                 </form>
 
-                <div class="mt-8 flex items-center justify-between border-t border-base-300 pt-5 text-xs text-base-content/35">
+                <div class="mt-8 flex items-center justify-between border-t border-base-300 pt-5 text-xs text-base-content/50">
                     <RouterLink :to="{ name: 'Home' }" class="hover:text-primary">← 返回门户首页</RouterLink>
                     <span>© 2026 沈巷镇水利站</span>
                 </div>

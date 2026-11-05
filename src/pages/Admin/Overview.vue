@@ -137,7 +137,7 @@ onMounted(
                     </svg>
                 </div>
                 <div class="min-w-0">
-                    <p class="truncate text-xs text-base-content/45">{{ item.label }}</p>
+                    <p class="truncate text-xs text-base-content/60">{{ item.label }}</p>
                     <p class="num mt-1.5 text-2xl font-semibold leading-none tracking-tight text-base-content">
                         {{ item.value }}
                     </p>
@@ -164,7 +164,7 @@ onMounted(
                 <li v-if="latest_error" class="px-5 py-10 text-center text-sm text-error">
                     {{ latest_error }}
                 </li>
-                <li v-else-if="!latest_article?.length" class="px-5 py-12 text-center text-sm text-base-content/40">
+                <li v-else-if="!latest_article?.length" class="px-5 py-12 text-center text-sm text-base-content/55">
                     暂无文章
                 </li>
                 <li v-for="(article, index) in latest_article" :key="index">
@@ -172,14 +172,14 @@ onMounted(
                         class="group flex items-center justify-between gap-4 px-5 py-3 transition-colors duration-200 hover:bg-base-200/60">
                         <div class="flex min-w-0 flex-1 items-center gap-3">
                             <span
-                                class="shrink-0 rounded-md bg-base-200 px-2 py-1 text-[0.6875rem] font-medium text-base-content/50 transition-colors duration-200 group-hover:bg-primary/10 group-hover:text-primary">
+                                class="shrink-0 rounded-md bg-base-200 px-2 py-1 text-[0.6875rem] font-medium text-base-content/65 transition-colors duration-200 group-hover:bg-primary/10 group-hover:text-primary">
                                 {{ article.categories?.[0]?.name || '—' }}
                             </span>
                             <span class="min-w-0 flex-1 truncate text-sm text-base-content/80 transition-colors duration-200 group-hover:text-primary">
                                 {{ article.title }}
                             </span>
                         </div>
-                        <time class="num shrink-0 text-xs text-base-content/35">{{ date_text(article.create_at) }}</time>
+                        <time class="num shrink-0 text-xs text-base-content/50">{{ date_text(article.create_at) }}</time>
                     </RouterLink>
                 </li>
             </ul>
