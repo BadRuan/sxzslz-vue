@@ -27,6 +27,14 @@ const DOCX_EXTS = ['docx'];
 const SHEET_EXTS = ['xls', 'xlsx'];
 const TEXT_EXTS = ['txt', 'csv', 'md', 'json', 'log'];
 
+/** 浏览器端确实解析不了的格式：给一句能指导下一步的说明，而不是「解析失败」 */
+const FALLBACK_HINTS: Record<string, string> = {
+    doc: '旧版 Word（.doc）是二进制格式，浏览器无法解析；请下载后用 Word 打开，或另存为 .docx 再上传',
+    ppt: 'PPT 暂不支持在线预览，请下载后查看',
+    pptx: 'PPT 暂不支持在线预览，请下载后查看',
+    wps: 'WPS 专有格式暂不支持在线预览，请下载后查看',
+};
+
 const extension = computed(() => ext_of_filename(props.filename || props.url || ''));
 const display_name = computed(() => {
     if (props.filename) return props.filename;
@@ -40,6 +48,13 @@ const display_name = computed(() => {
 
 const loading = ref(false);
 const error_message = ref('');
+const fallback_hint = computed(
+    () => error_message.value || FALLBACK_HINTS[extension.value] || `浏览器无法直接渲染 ${extension.value || '此'} 文件，可下载后本地打开`,
+);
+const fallback_title = computed(() => {
+    if (error_message.value) return '文件解析失败';
+    return FALLBACK_HINTS[extension.value] ? '该格式需下载后查看' : '该类型暂不支持在线预览';
+});
 const view_kind = ref<'pdf' | 'docx' | 'sheet' | 'text' | 'unsupported'>('unsupported');
 const text_content = ref('');
 const sheet_html = ref('');
@@ -127,6 +142,9 @@ const load = async () => {
         } else if (DOCX_EXTS.includes(ext)) {
             const { renderAsync } = await import('docx-preview');
             view_kind.value = 'docx';
+            // 关键：docx-preview 要往真实 DOM 节点里写，必须先撤掉 loading 让容器渲染出来，
+            // 否则 nextTick 时节点还不存在（就是之前「预览空白」的原因）
+            loading.value = false;
             await nextTick();
             if (docx_container.value) {
                 await renderAsync(buffer, docx_container.value, undefined, {
@@ -271,12 +289,8 @@ onBeforeUnmount(() => {
                         <div v-else class="flex h-full flex-col items-center justify-center gap-4 px-6 text-center">
                             <img :src="doc_icon_for(display_name)" alt="" class="h-14 w-14 opacity-80" />
                             <div>
-                                <p class="text-sm font-medium text-base-content">
-                                    {{ error_message ? '文件解析失败' : '该类型暂不支持在线预览' }}
-                                </p>
-                                <p class="mt-1.5 text-xs text-base-content/55">
-                                    {{ error_message || `浏览器无法直接渲染 ${extension || '此'} 文件，可下载后本地打开` }}
-                                </p>
+                                <p class="text-sm font-medium text-base-content">{{ fallback_title }}</p>
+                                <p class="mt-1.5 max-w-md text-xs leading-5 text-base-content/55">{{ fallback_hint }}</p>
                             </div>
                             <div class="flex gap-3">
                                 <button type="button" class="btn btn-sm btn-primary" @click="download">下载文件</button>
