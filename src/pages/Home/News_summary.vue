@@ -105,46 +105,49 @@ onMounted(async () => {
                     </SplideSlide>
                 </Splide>
 
-                <!-- 通知公告 -->
-                <div class="card flex flex-col rounded-box p-6 lg:col-span-4 sm:p-7">
-                    <div class="flex items-center justify-between">
-                        <h3 class="flex items-center gap-2 text-base font-semibold tracking-tight text-base-content">
-                            <span class="inline-block size-1.5 rounded-full bg-primary" aria-hidden="true"></span>
-                            {{ CATEGORY_NAMES.notice[0] }}
-                        </h3>
-                        <RouterLink :to="{ name: 'ArticleList', query: { category: notice_category_id } }"
-                            class="group inline-flex items-center gap-1 text-xs text-base-content/60 hover:text-primary">
-                            更多
-                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
-                                fill="none" class="transition-transform duration-200 group-hover:translate-x-0.5"
-                                aria-hidden="true">
-                                <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round"></path>
-                            </svg>
-                        </RouterLink>
-                    </div>
-
-                    <ul class="mt-3 flex-1 divide-y divide-base-300">
-                        <li v-for="item in article_obj.notice" :key="item.id">
-                            <RouterLink :to="{ name: 'ArticleDetail', params: { slug: item.slug } }"
-                                class="group flex items-center gap-3.5 py-3.5">
-                                <span
-                                    class="grid w-12 shrink-0 place-items-center rounded-lg bg-base-200 py-1.5 text-center transition-colors duration-200 group-hover:bg-primary/10">
-                                    <span class="num text-[0.8125rem] font-semibold leading-none text-base-content/80">{{
-                                        easy_date_text(item.create_at) }}</span>
-                                    <span class="num mt-1 text-[0.625rem] leading-none text-base-content/50">{{
-                                        year_of(item.create_at) }}</span>
-                                </span>
-                                <span
-                                    class="min-w-0 flex-1 truncate text-sm text-base-content/75 transition-colors duration-200 group-hover:text-primary">{{
-                                        item.title }}</span>
+                <!-- 通知公告：lg 下绝对定位铺满右侧格子，高度严格跟随左侧轮播（16/9），
+                     条目多时在卡片内部滚动，不再把整行撑高 -->
+                <div class="relative lg:col-span-4">
+                    <div class="card flex flex-col rounded-box p-6 sm:p-7 lg:absolute lg:inset-0">
+                        <div class="flex items-center justify-between">
+                            <h3 class="flex items-center gap-2 text-base font-semibold tracking-tight text-base-content">
+                                <span class="inline-block size-1.5 rounded-full bg-primary" aria-hidden="true"></span>
+                                {{ CATEGORY_NAMES.notice[0] }}
+                            </h3>
+                            <RouterLink :to="{ name: 'ArticleList', query: { category: notice_category_id } }"
+                                class="group inline-flex items-center gap-1 text-xs text-base-content/60 hover:text-primary">
+                                更多
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                                    fill="none" class="transition-transform duration-200 group-hover:translate-x-0.5"
+                                    aria-hidden="true">
+                                    <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round"></path>
+                                </svg>
                             </RouterLink>
-                        </li>
-                    </ul>
+                        </div>
 
-                    <p v-if="!article_obj.notice.length" class="py-10 text-center text-sm text-base-content/50">
-                        暂无通知公告
-                    </p>
+                        <ul class="mt-3 flex-1 divide-y divide-base-300 lg:min-h-0 lg:overflow-y-auto lg:pr-1">
+                            <li v-for="item in article_obj.notice" :key="item.id">
+                                <RouterLink :to="{ name: 'ArticleDetail', params: { slug: item.slug } }"
+                                    class="group flex items-center gap-3.5 py-3.5">
+                                    <span
+                                        class="grid w-12 shrink-0 place-items-center rounded-lg bg-base-200 py-1.5 text-center transition-colors duration-200 group-hover:bg-primary/10">
+                                        <span class="num text-[0.8125rem] font-semibold leading-none text-base-content/80">{{
+                                            easy_date_text(item.create_at) }}</span>
+                                        <span class="num mt-1 text-[0.625rem] leading-none text-base-content/50">{{
+                                            year_of(item.create_at) }}</span>
+                                    </span>
+                                    <span
+                                        class="min-w-0 flex-1 truncate text-sm text-base-content/75 transition-colors duration-200 group-hover:text-primary">{{
+                                            item.title }}</span>
+                                </RouterLink>
+                            </li>
+                        </ul>
+
+                        <p v-if="!article_obj.notice.length" class="py-10 text-center text-sm text-base-content/50">
+                            暂无通知公告
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
