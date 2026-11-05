@@ -12,6 +12,9 @@ const vendor_chunks: { test: RegExp, name: string }[] = [
   { test: /[\\/]node_modules[\\/]dayjs[\\/]/, name: 'date' },
   { test: /[\\/]node_modules[\\/](@splidejs|splide)[\\/]/, name: 'carousel' },
   { test: /[\\/]node_modules[\\/]gsap[\\/]/, name: 'animation' },
+  // 正文附件预览按需加载：docx 与 xlsx 各自独立成块，只有点开附件时才下载
+  { test: /[\\/]node_modules[\\/](docx-preview|jszip)[\\/]/, name: 'docx-preview' },
+  { test: /[\\/]node_modules[\\/](xlsx|cfb|ssf)[\\/]/, name: 'sheet-preview' },
 ]
 
 const resolve_manual_chunk = (id: string): string | undefined => {

@@ -7,6 +7,8 @@ import { useArticleStore, articleService } from '@/store/article';
 import { api_error_detail } from '@/utils/apiError';
 import { useBaseinfoStore } from '@/store/base';
 import { render_markdown } from '@/utils/markdown';
+import { ext_of_filename, is_doc_extension } from '@/utils/docIcon';
+import DocumentPreview from '@/components/DocumentPreview.vue';
 import 'github-markdown-css/github-markdown.css';
 
 const route = useRoute();
@@ -95,6 +97,30 @@ const renderedHtml = computed(() => {
     if (!article_detail.value) return '';
     return render_markdown(article_detail.value.content ?? '');
 });
+
+// —— 正文附件预览：图片交给浏览器新窗口看原图，文档类在此接管点击 ——
+// doc / ppt 这类老二进制格式浏览器渲染不了，仍打开预览面板（给出下载入口），保持交互一致
+const PREVIEWABLE_EXTS = ['pdf', 'docx', 'doc', 'xls', 'xlsx', 'csv', 'txt', 'md', 'ppt', 'pptx'];
+const preview_open = ref(false);
+const preview_url = ref('');
+const preview_name = ref('');
+
+const handle_prose_click = (event: MouseEvent) => {
+    // 允许 cmd/ctrl/shift 点击走浏览器原生行为（新窗口/新标签下载）
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return;
+    const target = event.target as HTMLElement | null;
+    const anchor = target?.closest('a');
+    if (!anchor) return;
+    // 图片链接指向原图，直接交给浏览器在新窗口打开
+    if (anchor.classList.contains('md-image-link')) return;
+    const href = anchor.getAttribute('href') ?? '';
+    if (!href || !is_doc_extension(href)) return;
+    if (!PREVIEWABLE_EXTS.includes(ext_of_filename(href))) return;
+    event.preventDefault();
+    preview_name.value = (anchor.textContent ?? '').trim() || href.split('/').pop() || '附件';
+    preview_url.value = href;
+    preview_open.value = true;
+};
 
 </script>
 
@@ -222,7 +248,7 @@ const renderedHtml = computed(() => {
 
                     <!-- 正文区：放宽到 max-w-5xl 并保留舒适留白，长文阅读不局促 -->
                     <div class="prose mx-auto max-w-5xl px-6 py-10 sm:px-10 sm:py-12 prose-headings:mb-4 prose-headings:mt-8 prose-headings:font-bold prose-headings:text-base-content prose-h1:text-2xl prose-h2:text-2xl prose-h3:text-base prose-p:indent-2em prose-p:leading-relaxed prose-strong:font-semibold prose-strong:text-base-content prose-blockquote:rounded-lg prose-blockquote:border-l-primary prose-blockquote:bg-base-200 prose-blockquote:px-4 prose-blockquote:py-2 prose-ul:mx-8 prose-ul:my-4 prose-ul:list-disc prose-ol:mx-8 prose-ol:my-4 prose-ol:list-decimal prose-a:font-semibold prose-a:text-primary prose-a:underline prose-a:underline-offset-2 prose-img:mx-auto prose-img:my-6 prose-img:block prose-img:w-2/3 prose-img:max-w-full prose-img:rounded-sm prose-img:shadow"
-                        :class="font_size_class" v-html="renderedHtml">
+                        :class="font_size_class" v-html="renderedHtml" @click="handle_prose_click">
                     </div>
 
                     <!-- 文末：点赞 + 返回列表，给阅读一个收尾动作 -->
@@ -253,6 +279,8 @@ const renderedHtml = computed(() => {
                 </article>
             </div>
         </div>
+
+        <DocumentPreview v-model="preview_open" :url="preview_url" :filename="preview_name" />
     </main>
 </template>
 
@@ -263,6 +291,17 @@ const renderedHtml = computed(() => {
     padding-left: 0.25rem;
     padding-right: 0.25rem;
     border-radius: 0.125rem;
+}
+
+/* 正文图片外层链接：给一个「可放大」的指针暗示，图片本身仍是块级居中 */
+:deep(.prose .md-image-link) {
+    display: block;
+    cursor: zoom-in;
+}
+
+/* 附件链接：与普通外链区分开，点击是预览而不是离开页面 */
+:deep(.prose .doc-link) {
+    cursor: pointer;
 }
 
 /* 文档图标：prose-img:block 会把图标也压成独占一行，这里强制回行内并贴合基线 */
