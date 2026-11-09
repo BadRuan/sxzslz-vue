@@ -9,7 +9,7 @@ import { articleService, type ArticleModel } from '@/store/article';
 import { useAuthStore } from '@/store/auth';
 import { api_error_detail } from '@/utils/apiError';
 
-// 后端无 /admin/ 统计接口，用公开分页接口的 total 与 /base/ 用户列表近似
+// 概览统计：文章/图片/附件用分页接口的 total；容量与发布量走专用接口
 interface CountModel {
     total_article: number,
     image_count: number,
@@ -25,6 +25,27 @@ const count_info = ref<CountModel>({
     image_count: 0,
     attachment_count: 0,
 });
+/** GET /base/storage：站点容量（磁盘总量/已用/剩余 + 上传目录占用） */
+interface StorageModel {
+    total: number,
+    used: number,
+    free: number,
+    usage_percent: number,
+    uploads_bytes: number | null,
+};
+
+/** GET /articles/stats：超管=本月新增（全站），普通用户=本人近 15 天发布 */
+interface ArticleStatsModel {
+    scope: 'month' | 'half_month',
+    label: string,
+    count: number,
+    start_at: string,
+    end_at: string,
+};
+
+const storage = ref<StorageModel | null>(null);
+const article_stats = ref<ArticleStatsModel | null>(null);
+const system_error = ref('');
 const latest_article = ref<ArticleModel[]>();
 const stats_error = ref('');
 // 最新文章加载失败：与「暂无文章」区分开，避免静默误报为空
@@ -56,6 +77,37 @@ const fetchCountInfo = async () => {
         console.error('获取管理后台统计信息失败:', error)
     }
 }
+
+const fetchSystemInfo = async () => {
+    system_error.value = '';
+    try {
+        const [storage_res, stats_res] = await Promise.all([
+            apiService.get<StorageModel>('/base/storage'),
+            apiService.get<ArticleStatsModel>('/articles/stats'),
+        ]);
+        storage.value = storage_res;
+        article_stats.value = stats_res;
+    } catch (error) {
+        system_error.value = api_error_detail(error, '容量与发布统计暂不可用（后端未升级到最新版本时该接口不存在）');
+        console.error('获取站点容量/发布统计失败:', error);
+    }
+};
+
+/** 字节 → 可读容量（1024 进制；上传目录统计失败时为 —） */
+const format_bytes = (value: number | null): string => {
+    if (value === null) return '—';
+    if (value <= 0) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+    const exp = Math.min(Math.floor(Math.log(value) / Math.log(1024)), units.length - 1);
+    const scaled = value / 1024 ** exp;
+    return `${scaled.toFixed(exp === 0 || scaled >= 100 ? 0 : 1)} ${units[exp] ?? 'B'}`;
+};
+
+/** 统计区间文案（起止日期，口径由后端按角色给定） */
+const stats_period = computed(() => {
+    if (!article_stats.value) return '';
+    return `${date_text(article_stats.value.start_at)} 起至 ${date_text(article_stats.value.end_at)}`;
+});
 
 // 超管看全站最新文章，普通账号看本人最新文章（后端对普通账号强制收敛）
 const getAdminLatestArticle = async () => {
@@ -112,6 +164,7 @@ onMounted(
     async () => {
         consume_denied_query();
         fetchCountInfo();
+        fetchSystemInfo();
         getAdminLatestArticle();
         baseinfo_store.checkBaseinfo();
     }
@@ -142,6 +195,58 @@ onMounted(
                         {{ item.value }}
                     </p>
                 </div>
+            </div>
+        </div>
+
+        <p v-if="system_error" role="status" class="rounded-field border border-dashed border-base-300 bg-base-100 px-4 py-3 text-xs text-base-content/50">
+            {{ system_error }}
+        </p>
+
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <!-- 站点容量：剩余空间一眼可见，进度条表示已用比例 -->
+            <div class="card rounded-box p-5">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <p class="text-xs text-base-content/60">站点可用空间</p>
+                        <p class="num mt-1.5 text-2xl font-semibold leading-none tracking-tight text-base-content">
+                            {{ format_bytes(storage?.free ?? null) }}
+                        </p>
+                    </div>
+                    <span class="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-[0.6875rem] font-medium text-primary">
+                        已用 {{ storage ? storage.usage_percent.toFixed(1) : '—' }}%
+                    </span>
+                </div>
+                <progress class="progress progress-primary mt-4 h-1.5 w-full" :value="storage?.usage_percent ?? 0"
+                    max="100" aria-label="磁盘已用比例"></progress>
+                <dl class="mt-4 grid grid-cols-3 gap-3 text-xs">
+                    <div>
+                        <dt class="text-base-content/50">总容量</dt>
+                        <dd class="num mt-1 text-sm text-base-content/80">{{ format_bytes(storage?.total ?? null) }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-base-content/50">已用</dt>
+                        <dd class="num mt-1 text-sm text-base-content/80">{{ format_bytes(storage?.used ?? null) }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-base-content/50">上传目录</dt>
+                        <dd class="num mt-1 text-sm text-base-content/80">
+                            {{ format_bytes(storage?.uploads_bytes ?? null) }}
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+
+            <!-- 发布量统计：超管=本月新增，普通用户=本人近半月 -->
+            <div class="card rounded-box p-5">
+                <p class="text-xs text-base-content/60">{{ article_stats?.label ?? '发布统计' }}</p>
+                <p class="num mt-1.5 text-2xl font-semibold leading-none tracking-tight text-base-content">
+                    {{ article_stats?.count ?? 0 }}
+                    <span class="text-sm font-normal text-base-content/55">篇</span>
+                </p>
+                <p class="mt-3 text-xs text-base-content/55">{{ stats_period }}</p>
+                <p class="mt-1 text-[0.6875rem] text-base-content/45">
+                    {{ auth_store.is_superuser ? '超级管理员口径：全站本月新增（按发布时间）' : '普通用户口径：本人近 15 天发布' }}
+                </p>
             </div>
         </div>
 

@@ -63,6 +63,12 @@ export interface ArticleSearchModel extends ArticleModel {
     matched_fields: ArticleSearchField[],
 }
 
+/** 搜索结果分页：后端额外返回本次检索的服务端耗时（毫秒） */
+export interface ArticleSearchPage extends PageResponse<ArticleSearchModel> {
+    /** 服务端检索耗时（毫秒，1 位小数）；老后端可能不返回 */
+    elapsed_ms?: number,
+}
+
 export interface ArticleSearchQuery {
     /** 必填，1~50 字；空格分隔多个词（词之间 AND） */
     keyword: string,
@@ -129,7 +135,7 @@ export const articleService = {
      * 后端只返回纯文本与 matched_terms，高亮由前端完成（见 src/utils/highlight.ts）。
      */
     search(params: ArticleSearchQuery) {
-        return apiService.get<PageResponse<ArticleSearchModel>>('/articles/search', { ...params }, read_config({ anonymous: true }));
+        return apiService.get<ArticleSearchPage>('/articles/search', { ...params }, read_config({ anonymous: true }));
     },
 
     getDetail(slug: string, options: ArticleReadOptions = {}) {

@@ -48,6 +48,8 @@ const active_scope = ref<ArticleSearchScope>('all');
 const active_terms = ref<string[]>([]);
 /** 是否已发起过搜索：区分「未搜索」提示与「无结果」 */
 const has_searched = ref(false);
+/** 后端返回的本次检索耗时（毫秒）；未搜索/失败时为 null */
+const elapsed_ms = ref<number | null>(null);
 
 // —— 路由 query 解析（keyword / scope / page 全部可分享、可刷新） ——
 const query_text = (value: unknown): string => {
@@ -86,6 +88,13 @@ const reset_results = () => {
     has_searched.value = false;
     loading.value = false;
     error_message.value = '';
+    elapsed_ms.value = null;
+};
+
+/** 耗时展示：不足 1 秒用毫秒，达到 1 秒自动换算成秒（保留 2 位小数） */
+const format_duration = (value: number | null): string => {
+    if (value === null) return '—';
+    return value >= 1000 ? `${(value / 1000).toFixed(2)} s` : `${value.toFixed(1)} ms`;
 };
 
 const run_search = async (keyword: string, search_scope: ArticleSearchScope, target_page: number) => {
@@ -102,6 +111,7 @@ const run_search = async (keyword: string, search_scope: ArticleSearchScope, tar
     active_keyword.value = keyword;
     active_scope.value = search_scope;
     active_terms.value = split_keyword(keyword);
+    elapsed_ms.value = null;
     try {
         const res = await articleService.search({
             keyword,
@@ -114,6 +124,8 @@ const run_search = async (keyword: string, search_scope: ArticleSearchScope, tar
         total.value = res.total;
         has_next.value = res.has_next;
         page.value = res.page;
+        // 服务端检索耗时（毫秒）：随每次响应更新，翻页也会刷新
+        elapsed_ms.value = typeof res.elapsed_ms === 'number' ? res.elapsed_ms : null;
         // 后端按空白拆分并去重（可能去掉全角空格等），以它为准做高亮
         const terms = (res.data ?? []).flatMap((item) => item.matched_terms ?? []);
         if (terms.length > 0) active_terms.value = [...new Set(terms)];
@@ -281,6 +293,14 @@ watch(
                         </div>
                     </div>
                 </form>
+
+                <!-- 每次搜索的服务端耗时：超 1 秒自动换算为秒 -->
+                <p v-if="has_searched && !loading && !error_message && elapsed_ms !== null"
+                    class="mt-3.5 inline-flex items-center gap-2 text-xs text-white/70">
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-white/50" aria-hidden="true"></span>
+                    本次搜索耗时
+                    <b class="num font-semibold text-white">{{ format_duration(elapsed_ms) }}</b>
+                </p>
             </div>
         </section>
 
