@@ -153,25 +153,33 @@ const post_multipart_with_progress = <T>(
  * 统一 API 封装（函数式对象，无类实例）：
  * 所有方法末位可选 `config`，传 `{ skip_auth: true }` 即匿名请求（公开接口专用）。
  */
+/**
+ * axios ≥1.21 的返回类型是条件类型 `AxiosResponseResult<T, R, D, P>`：
+ * 当 `R` 传入裸类型参数 `T` 时该条件无法在编译期化简，直接赋给 `Promise<T>` 会报 TS2322。
+ * 而 request.ts 的响应拦截器已 `return response.data`，运行时返回的就是数据本体，
+ * 故此处断言回 `Promise<T>` 是安全的（download 用具体类型 Blob，可自行化简，无需断言）。
+ */
+type DataPromise<T> = Promise<T>;
+
 export const apiService = {
     get<T = any>(url: string, params?: Record<string, unknown>, config?: AxiosRequestConfig): Promise<T> {
-        return service.get<T, T>(url, { params, ...config });
+        return service.get<T, T>(url, { params, ...config }) as DataPromise<T>;
     },
 
     post<T = any>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
-        return service.post<T, T>(url, data, config);
+        return service.post<T, T>(url, data, config) as DataPromise<T>;
     },
 
     patch<T = any>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
-        return service.patch<T, T>(url, data, config);
+        return service.patch<T, T>(url, data, config) as DataPromise<T>;
     },
 
     put<T = any>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
-        return service.put<T, T>(url, data, config);
+        return service.put<T, T>(url, data, config) as DataPromise<T>;
     },
 
     delete<T = any>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
-        return service.delete<T, T>(url, { data, ...config });
+        return service.delete<T, T>(url, { data, ...config }) as DataPromise<T>;
     },
 
     /** 需要登录的文件下载：axios 携带 JWT 返回 Blob（<a href> 无法带 Authorization） */
