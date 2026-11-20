@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import dayjs from 'dayjs';
 import AppPagination from '@/components/AppPagination.vue';
@@ -20,6 +20,12 @@ import { url_prefix } from '@/utils/baseInfo';
 import { IMAGE_ACCEPT, validate_images } from '@/utils/upload';
 
 const PAGE_SIZE = 20;
+/** slug 扫描的单页行数（后端 page_size 上限 100，实测 752 条 → 最多 8 页扫完） */
+const SLUG_SCAN_PAGE_SIZE = 100;
+/** 后端 keyword 上限（对接文档 §7：1~50 字，超限 422）：发送前按它校验 */
+const MAX_KEYWORD_LENGTH = 50;
+/** 输入框上限：放宽以容纳整条粘贴链接（前台 /article/detail/{slug} 约 56 字符），keyword 另行校验 */
+const MAX_INPUT_LENGTH = 120;
 
 const { is_superuser, is_normal_user, can_manage_categories, can_manage_article } = usePermissions();
 
@@ -47,6 +53,36 @@ const SORT_OPTIONS: ReadonlyArray<{ value: ArticleSort, label: string }> = [
     { value: 'create_at', label: '发布时间倒序（最新发布）' },
 ];
 
+// —— 标题/slug 搜索（对接文档 §7：keyword 只匹配标题；slug 走前端翻页定位，见 scan_by_slug） ——
+const keyword_input = ref('');
+/** 已生效的搜索词（规整后）：列表请求与空态文案以它为准，而非输入框里尚未提交的内容 */
+const keyword = ref('');
+let keyword_timer: ReturnType<typeof setTimeout> | null = null;
+/** 列表请求序号：输入连续变化时丢弃过期响应，避免旧关键词的结果覆盖新结果 */
+let list_request_seq = 0;
+
+/** 输入规整：去首尾空白、连续空白（含全角空格）折叠为单个半角空格，与站内搜索页规则一致 */
+const normalize_keyword = (value: string): string =>
+    value.trim().replace(/[\s\u3000]+/g, ' ');
+
+/** 裸 slug：文档 §7 为创建时自动生成的 16 位 hex（大小写不敏感，匹配后统一小写） */
+const SLUG_PATTERN = /^[0-9a-f]{16}$/i;
+/** 粘贴链接中的 slug：前台 /article/detail/{slug}、后端 /articles/{slug} */
+const SLUG_IN_LINK_PATTERN = /\/(?:article\/detail|articles)\/([0-9a-f]{16})(?![0-9a-f])/i;
+
+/**
+ * 从输入提取待定位的 slug（裸 slug 或文章链接均可）。
+ * slug 定位只靠前端翻页扫描（scan_by_slug），原因：
+ * - 列表接口没有 slug 过滤参数，keyword 只匹配标题（实测 keyword=slug → 0 条）；
+ * - 详情接口 GET /articles/{slug} 每次成功访问 +1 view_count（污染公开浏览量），
+ *   且已删文章 404（回收站里定位不到），不能用作查找手段。
+ */
+const extract_slug = (value: string): string | null => {
+    const trimmed = value.trim();
+    if (SLUG_PATTERN.test(trimmed)) return trimmed.toLowerCase();
+    return trimmed.match(SLUG_IN_LINK_PATTERN)?.[1]?.toLowerCase() ?? null;
+};
+
 // —— 自定义确认弹窗（替代 window.confirm/alert，与 daisyUI 体系一致）——
 const confirm_dialog = ref<{ show: boolean, title: string, message: string, on_ok: (() => void) | null }>({
     show: false, title: '', message: '', on_ok: null,
@@ -63,9 +99,58 @@ const run_confirm = () => {
 const baseinfo_store = useBaseinfoStore();
 const { categories, users } = storeToRefs(baseinfo_store);
 
+/**
+ * 在当前视图/筛选范围内按 slug 精确定位（纯前端翻页扫描，无需后端改动）。
+ * 扫描用 page_size=100（后端上限）逐页找，命中的那页里取出单条展示；
+ * 可见范围由同一列表接口收敛（超管全量 / 普通账号仅本人），并与回收站、作者筛选、排序一致。
+ * @returns true = 已找到并展示（或已有更新的请求接管）；false = 扫完仍未找到
+ */
+const scan_by_slug = async (request_seq: number, target_slug: string): Promise<boolean> => {
+    for (let page_no = 1; ; page_no++) {
+        const res = await articleService.getArticles({
+            page: page_no,
+            page_size: SLUG_SCAN_PAGE_SIZE,
+            is_deleted: view.value === 'trash',
+            sort: sort.value,
+            ...(is_superuser.value && filter_user_id.value !== ''
+                ? { user_id: filter_user_id.value }
+                : {}),
+        });
+        // 已有更新的请求接管：本轮直接终止，不改状态
+        if (request_seq !== list_request_seq) return true;
+        const hit = (res.data ?? []).find((article) => article.slug.toLowerCase() === target_slug);
+        if (hit) {
+            article_list.value = [hit];
+            total.value = 1;
+            has_next.value = false;
+            return true;
+        }
+        if (!res.has_next) return false;
+    }
+};
+
 const fetch_list = async () => {
+    const request_seq = ++list_request_seq;
     list_error.value = '';
     try {
+        // 粘贴 slug / 文章链接 → 精确定位；普通文本 → 按标题模糊搜索
+        const target_slug = keyword.value ? extract_slug(keyword.value) : null;
+        if (target_slug !== null) {
+            const located = await scan_by_slug(request_seq, target_slug);
+            if (located || request_seq !== list_request_seq) return;
+            article_list.value = [];
+            total.value = 0;
+            has_next.value = false;
+            return;
+        }
+        // 超长输入不发请求：后端 keyword 上限 50 字，超限 422；给出可操作的下一步而不是报错
+        if (keyword.value && [...keyword.value].length > MAX_KEYWORD_LENGTH) {
+            list_error.value = `搜索词过长：关键词最多 ${MAX_KEYWORD_LENGTH} 字；定位文章可直接粘贴 slug 或文章链接`;
+            article_list.value = [];
+            total.value = 0;
+            has_next.value = false;
+            return;
+        }
         const res = await articleService.getArticles({
             page: page.value,
             page_size: PAGE_SIZE,
@@ -76,11 +161,15 @@ const fetch_list = async () => {
             ...(is_superuser.value && filter_user_id.value !== ''
                 ? { user_id: filter_user_id.value }
                 : {}),
+            // 标题模糊搜索：规整后为空则不传（后端对纯空白 keyword 返回 422）
+            ...(keyword.value ? { keyword: keyword.value } : {}),
         });
+        if (request_seq !== list_request_seq) return;
         article_list.value = res.data ?? [];
         total.value = res.total;
         has_next.value = res.has_next;
     } catch (error) {
+        if (request_seq !== list_request_seq) return;
         list_error.value = api_error_detail(error, '获取文章列表失败');
         console.error('获取管理后台文章列表失败:', error)
     }
@@ -345,6 +434,33 @@ const toggle_select = (slug: string) => {
 
 const clear_selection = () => { selected.value = new Set(); };
 
+/** 生效搜索词：值有变化才请求，并回到第一页、清空勾选（行已换了一批） */
+const apply_keyword = () => {
+    if (keyword_timer) { clearTimeout(keyword_timer); keyword_timer = null; }
+    const next = normalize_keyword(keyword_input.value);
+    if (next === keyword.value) return;
+    keyword.value = next;
+    page.value = 1;
+    clear_selection();
+    fetch_list();
+};
+
+/** 清空按钮立即生效，不等防抖（随后的 watch 因值相同会空转返回） */
+const clear_keyword = () => {
+    keyword_input.value = '';
+    apply_keyword();
+};
+
+// 输入防抖 300ms：避免每敲一个字就打一次列表接口
+watch(keyword_input, () => {
+    if (keyword_timer) clearTimeout(keyword_timer);
+    keyword_timer = setTimeout(() => { keyword_timer = null; apply_keyword(); }, 300);
+});
+
+onBeforeUnmount(() => {
+    if (keyword_timer) clearTimeout(keyword_timer);
+});
+
 const show_batch_modal = ref(false);
 const batch_mode = ref<'add' | 'remove'>('add');
 const batch_category_id = ref<number | null>(null);
@@ -403,6 +519,17 @@ watch(sort, () => {
 /** 表格列数随「是否显示勾选列」变化 */
 const column_count = computed(() => (is_superuser.value && view.value === 'active' ? 8 : 7));
 
+/** 空列表文案：slug 未命中 / 标题搜索无结果时说明当前条件，否则按视图/账号给常规空态 */
+const empty_text = computed(() => {
+    if (keyword.value) {
+        const slug = extract_slug(keyword.value);
+        if (slug !== null) return `未找到 slug 为「${slug}」的文章`;
+        return `未找到标题包含「${keyword.value}」的文章`;
+    }
+    if (view.value === 'trash') return '回收站为空';
+    return is_normal_user.value ? '暂无我的文章' : '暂无文章';
+});
+
 onMounted(
     async () => {
         fetch_list();
@@ -427,6 +554,20 @@ onMounted(
                 </div>
             </div>
             <div class="flex flex-wrap items-center gap-3">
+                <!-- 搜索：输入防抖后定位——裸 slug/文章链接走前端扫描精确定位，其余按标题模糊搜索（对接文档 §7 keyword）。
+                     与下方筛选/排序组合生效。
+                     用 text 而非 search：避免 Chrome 原生清除 × 与自定义「清空」按钮重复（Firefox 无原生 ×） -->
+                <div class="relative">
+                    <input v-model="keyword_input" type="text"
+                        class="input input-bordered input-sm w-56 max-w-full pr-12"
+                        :maxlength="MAX_INPUT_LENGTH" autocomplete="off"
+                        placeholder="搜索标题 / 粘贴 slug 或链接…" aria-label="按标题或 slug 搜索文章" />
+                    <button v-if="keyword_input" type="button"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-base-content/55 link-transition hover:text-base-content/75"
+                        aria-label="清空搜索关键词" @click="clear_keyword">
+                        清空
+                    </button>
+                </div>
                 <!-- 排序方式：后端 sort 均为倒序，默认 ID 倒序，可切换为发布时间倒序 -->
                 <label class="flex items-center gap-2 text-sm text-base-content/60 whitespace-nowrap">
                     <span class="hidden sm:inline">排序</span>
@@ -498,7 +639,7 @@ onMounted(
                     </tr>
                     <tr v-else-if="article_list.length === 0">
                         <td :colspan="column_count" class="px-6 py-8 text-center text-base-content/55">
-                            {{ view === 'trash' ? '回收站为空' : (is_normal_user ? '暂无我的文章' : '暂无文章') }}
+                            {{ empty_text }}
                         </td>
                     </tr>
                     <tr v-for="article in article_list" :key="article.slug" class="text-center hover:bg-base-200 link-transition">

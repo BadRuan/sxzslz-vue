@@ -99,6 +99,12 @@ export interface ArticleQuery {
     is_deleted?: boolean
     /** 排序字段（均倒序）；不传时匿名默认 create_at、登录默认 id */
     sort?: ArticleSort
+    /**
+     * 按标题模糊搜索定位（对接文档 §7 keyword，后台管理用）：1~50 字，空格分隔多词 AND，
+     * 大小写不敏感、`%`/`_` 按字面量；在调用者可见范围内过滤，可与 user_id / category_id / is_deleted 组合。
+     * 纯空白或超 50 字 → 422，调用方需先规整（trim）再传。
+     */
+    keyword?: string
 }
 
 /** POST /articles/ / PATCH /articles/{slug}：user_id、create_at 仅超管生效（对接文档 §7） */
