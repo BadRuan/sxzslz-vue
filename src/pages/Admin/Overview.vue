@@ -133,6 +133,7 @@ const stat_items = computed(() => [
     {
         label: auth_store.is_superuser ? '全站文章总数' : '我的文章总数',
         value: count_info.value.total_article,
+        unit: '篇',
         color: 'text-info',
         bg: 'bg-info/10',
         icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
@@ -140,6 +141,7 @@ const stat_items = computed(() => [
     {
         label: auth_store.is_superuser ? '全站图片数量' : '我的图片数量',
         value: count_info.value.image_count,
+        unit: '张',
         color: 'text-secondary',
         bg: 'bg-secondary/10',
         icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
@@ -147,6 +149,7 @@ const stat_items = computed(() => [
     {
         label: auth_store.is_superuser ? '全站附件数量' : '我的附件数量',
         value: count_info.value.attachment_count,
+        unit: '个',
         color: 'text-warning',
         bg: 'bg-warning/10',
         icon: 'M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13',
@@ -154,6 +157,7 @@ const stat_items = computed(() => [
     {
         label: '系统用户',
         value: users.value.length,
+        unit: '人',
         color: 'text-success',
         bg: 'bg-success/10',
         icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z',
@@ -181,19 +185,22 @@ onMounted(
         <p v-if="stats_error" role="alert" class="alert alert-error text-sm">{{ stats_error }}</p>
         <!-- 内容区宽度 = 视口 − 侧栏 240px，lg(1024) 下 4 列偏挤，xl 起才排 4 列 -->
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <!-- .card（DaisyUI）默认纵向排布，行内布局收进内层：图标居左、文字居右；内层无任何类改向，恒为横排 -->
             <div v-for="item in stat_items" :key="item.label"
-                class="card card-hover flex items-center gap-4 rounded-box p-5 hover:shadow-lift">
-                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl" :class="item.bg">
-                    <svg class="h-5 w-5" :class="item.color" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" :d="item.icon" />
-                    </svg>
-                </div>
-                <div class="min-w-0">
-                    <p class="truncate text-xs text-base-content/60">{{ item.label }}</p>
-                    <p class="num mt-1.5 text-2xl font-semibold leading-none tracking-tight text-base-content">
-                        {{ item.value }}
-                    </p>
+                class="card card-hover rounded-box p-5 hover:shadow-lift">
+                <div class="flex items-center gap-4">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl" :class="item.bg">
+                        <svg class="h-5 w-5" :class="item.color" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" :d="item.icon" />
+                        </svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p class="truncate text-sm text-base-content/65">{{ item.label }}</p>
+                        <p class="num mt-1.5 text-2xl font-semibold leading-none tracking-tight text-base-content">
+                            {{ item.value }}<span class="ml-1 text-sm font-normal text-base-content/55">{{ item.unit }}</span>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
