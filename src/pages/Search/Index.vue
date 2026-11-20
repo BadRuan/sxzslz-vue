@@ -13,7 +13,7 @@ import AppPagination from '@/components/AppPagination.vue';
 import ArticleCover from '@/components/ArticleCover.vue';
 import HighlightText from './components/HighlightText.vue';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 30;
 const MAX_KEYWORD_LENGTH = 50;
 
 /** 搜索范围：对应后端 scope（all=标题+正文 / title / content），均为匿名公开全量 */
