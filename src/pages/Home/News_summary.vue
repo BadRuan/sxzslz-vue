@@ -18,7 +18,6 @@ const { categories } = storeToRefs(baseinfo_store);
 const { article_obj, loading, home_error } = storeToRefs(article_store);
 
 // 跳列表页：名称命中一级分类时取其第一个子分类（文章只挂二级）
-const notice_category_id = computed(() => to_second_level_id(categories.value, name_category_id(categories.value, CATEGORY_NAMES.notice)));
 const news_category_id = computed(() => to_second_level_id(categories.value, name_category_id(categories.value, CATEGORY_NAMES.news)));
 
 const options = {
@@ -31,11 +30,11 @@ const options = {
     speed: 800,          // 切换动画时长
 };
 
-/** 首页公告位固定 6 条：多了不撑高卡片，少了留白也不错位 */
-const NOTICE_LIMIT = 6;
-const notice_items = computed(() => article_obj.value.notice.slice(0, NOTICE_LIMIT));
+/** 最新文章栏固定 6 条：多了不撑高卡片，少了留白也不错位 */
+const LATEST_LIMIT = 6;
+const latest_items = computed(() => article_obj.value.latest.slice(0, LATEST_LIMIT));
 
-/** 公告列表的年份单独取，MM/DD 用大字号，年份弱化 */
+/** 最新文章列表的年份单独取，MM/DD 用大字号，年份弱化 */
 const year_of = (value: string) => date_text(value).slice(0, 4);
 
 onMounted(async () => {
@@ -109,16 +108,16 @@ onMounted(async () => {
                     </SplideSlide>
                 </Splide>
 
-                <!-- 通知公告：lg 下绝对定位铺满右侧格子，高度严格跟随左侧轮播（16/9），
+                <!-- 最新文章：lg 下绝对定位铺满右侧格子，高度严格跟随左侧轮播（16/10），
                      条目多时在卡片内部滚动，不再把整行撑高 -->
                 <div class="relative lg:col-span-4">
                     <div class="card flex flex-col rounded-box p-6 sm:p-7 lg:absolute lg:inset-0">
                         <div class="flex items-center justify-between">
                             <h3 class="flex items-center gap-2 text-base font-semibold tracking-tight text-base-content">
                                 <span class="inline-block size-1.5 rounded-full bg-primary" aria-hidden="true"></span>
-                                {{ CATEGORY_NAMES.notice[0] }}
+                                最新文章
                             </h3>
-                            <RouterLink :to="{ name: 'ArticleList', query: { category: notice_category_id } }"
+                            <RouterLink :to="{ name: 'ArticleList' }"
                                 class="group inline-flex items-center gap-1 text-xs text-base-content/60 hover:text-primary">
                                 更多
                                 <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
@@ -132,7 +131,7 @@ onMounted(async () => {
 
                         <ul
                             class="mt-3 flex-1 divide-y divide-base-300 lg:grid lg:grid-rows-6 lg:overflow-hidden">
-                            <li v-for="item in notice_items" :key="item.id" class="min-h-0">
+                            <li v-for="item in latest_items" :key="item.id" class="min-h-0">
                                 <RouterLink :to="{ name: 'ArticleDetail', params: { slug: item.slug } }"
                                     class="group flex h-full items-center gap-3.5 py-1.5 lg:py-0">
                                     <span
@@ -149,8 +148,8 @@ onMounted(async () => {
                             </li>
                         </ul>
 
-                        <p v-if="!article_obj.notice.length" class="py-10 text-center text-sm text-base-content/50">
-                            暂无通知公告
+                        <p v-if="!article_obj.latest.length" class="py-10 text-center text-sm text-base-content/50">
+                            暂无最新文章
                         </p>
                     </div>
                 </div>

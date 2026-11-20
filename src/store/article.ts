@@ -182,13 +182,13 @@ export const useArticleStore = defineStore('article', () => {
     const loading = ref(false);
     const page_number = ref<number>(1);
     const recommended_article = ref<ArticleModel[]>([]);
-    const notice_article = ref<ArticleModel[]>([]);
+    const latest_article = ref<ArticleModel[]>([]);
     const meeting_article = ref<ArticleModel[]>([]);
     const finance_article = ref<ArticleModel[]>([]);
     const hr_job = ref<ArticleModel[]>([]);
     const article_obj = reactive({
         recommended: recommended_article, // 首页封面图
-        notice: notice_article, // 泵站动态（原通知公告栏）
+        latest: latest_article, // 首页「最新文章」栏（全站最新发布，发布时间倒序）
         metting: meeting_article, // 区级通知（原会议公开栏）
         finance: finance_article, // 财务通知（原财务信息栏）
         hr_job: hr_job // 人事通知（原人事动态栏）
@@ -204,6 +204,16 @@ export const useArticleStore = defineStore('article', () => {
         if (category_id === undefined) return;
         const res = await articleService.getArticles(
             { category_id, page: 1, page_size, sort: 'create_at' },
+            { anonymous: true },
+        );
+        target.value = res.data ?? [];
+    }
+
+    /** 首页「最新文章」栏：全站取最新（不按分类过滤），显式发布时间倒序 */
+    const fill_latest = async (target: Ref<ArticleModel[]>, page_size: number) => {
+        if (target.value.length > 0) return;
+        const res = await articleService.getArticles(
+            { page: 1, page_size, sort: 'create_at' },
             { anonymous: true },
         );
         target.value = res.data ?? [];
@@ -241,7 +251,7 @@ export const useArticleStore = defineStore('article', () => {
                 }
             };
 
-            await fill_by_name(notice_article, CATEGORY_NAMES.notice, 8, tree);
+            await fill_latest(latest_article, 8);
             await fill_by_name(meeting_article, CATEGORY_NAMES.meeting, 6, tree);
             await fill_by_name(finance_article, CATEGORY_NAMES.finance, 6, tree);
             await fill_by_name(hr_job, CATEGORY_NAMES.hr, 6, tree);
