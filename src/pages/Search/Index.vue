@@ -342,6 +342,8 @@ watch(
                 <div class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-base-content/55">
                     <span>共 <b class="num text-base-content">{{ total }}</b> 条结果</span>
                     <span class="h-3 w-px bg-base-300" aria-hidden="true"></span>
+                    <span>每页 <b class="num text-base-content">{{ PAGE_SIZE }}</b> 条</span>
+                    <span class="h-3 w-px bg-base-300" aria-hidden="true"></span>
                     <span>关键词：<span class="font-medium text-base-content/80">{{ active_keyword }}</span></span>
                     <span class="h-3 w-px bg-base-300" aria-hidden="true"></span>
                     <span>范围：{{ scope_label(active_scope) }}</span>
