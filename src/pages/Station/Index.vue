@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, nextTick } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 import { url_prefix } from '@/utils/baseInfo';
@@ -33,8 +33,8 @@ const station = computed(() => station_array.value[indexValue.value]);
 const prev_index = computed(() => (indexValue.value - 1 + length) % length);
 const next_index = computed(() => (indexValue.value + 1) % length);
 
-/** 当前激活的标签页 */
-const activeTab = ref<'basic' | 'capacity' | 'equipment' | 'structure'>('basic');
+/** 当前高亮分节（scrollspy 驱动） */
+const activeSection = ref('basic');
 
 /** 图片灯箱状态 */
 const lightbox = ref<{ open: boolean; index: number; src: string; title: string }>({
@@ -60,6 +60,10 @@ const scrollToSection = (id: string) => {
         }
     });
 };
+
+/** 分节 id 顺序（scrollspy 按此取首个命中项） */
+const SECTION_IDS = ['basic', 'capacity', 'equipment', 'structure', 'gallery'] as const;
+let spy: IntersectionObserver | null = null;
 
 /** 打开图片灯箱 */
 const openLightbox = (index: number) => {
@@ -97,14 +101,18 @@ const metrics = computed(() => {
     const s = station.value;
     if (!s) return [];
     return [
-        { label: '装机台数', value: s.zhuangji, unit: '台套', icon: 'M13 10V3L4 14h7v7l9-11h-7z', color: 'primary' },
-        { label: '总装机容量', value: s.zongrongliang.toLocaleString(), unit: 'kW', icon: 'M13 10V3L4 14h7v7l9-11h-7z', color: 'secondary' },
-        { label: '设计流量', value: s.liuliang, unit: 'm³/s', icon: 'M5 12h14M12 5l7 7-7 7', color: 'info' },
-        { label: '受益面积', value: s.shouyimianji, unit: '万亩', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z', color: 'success' },
+        { label: '装机台数', value: s.zhuangji, unit: '台套', icon: 'M13 10V3L4 14h7v7l9-11h-7z', iconClass: 'text-primary-300', iconClassMobile: 'text-primary' },
+        { label: '总装机容量', value: s.zongrongliang.toLocaleString(), unit: 'kW', icon: 'M13 10V3L4 14h7v7l9-11h-7z', iconClass: 'text-secondary-300', iconClassMobile: 'text-secondary' },
+        { label: '设计流量', value: s.liuliang, unit: 'm³/s', icon: 'M5 12h14M12 5l7 7-7 7', iconClass: 'text-info-300', iconClassMobile: 'text-info' },
+        { label: '受益面积', value: s.shouyimianji, unit: '万亩', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z', iconClass: 'text-success-300', iconClassMobile: 'text-success' },
     ];
 });
 
-/** 四大分组数据：改为对象便于标签页切换 */
+/** 空值统一渲染为 —；0 是有效值原样保留 */
+const dval = (v: unknown): string =>
+    v === null || v === undefined || v === '' ? '—' : String(v);
+
+/** 四大分组数据（全部分节常显，供单页全展开长页使用） */
 const buildTabData = (s: NonNullable<typeof station.value>) => {
     return {
         basic: {
@@ -115,12 +123,12 @@ const buildTabData = (s: NonNullable<typeof station.value>) => {
                 { label: '泵站名称', value: s.station_name, type: 'highlight' },
                 { label: '泵站地址', value: s.station_location, type: 'location' },
                 { label: '建站年份', value: `${s.birth_day} 年`, type: 'date' },
-                { label: '改造（建）年份', value: s.gaizaonianfen || '—', type: 'date' },
-                { label: '改造类型', value: s.gailaoleixing || '—', type: 'tag' },
-                { label: '泵站功能', value: s.bengzhangongneng, type: 'tag', tagColor: 'primary' },
-                { label: '所在流域', value: s.suozailiuyu, type: 'tag', tagColor: 'info' },
-                { label: '所在水系', value: s.suozaishuixi, type: 'text' },
-                { label: '所在圩口', value: s.suozaiweikou, type: 'text' },
+                { label: '改造（建）年份', value: dval(s.gaizaonianfen), type: 'date' },
+                { label: '改造类型', value: dval(s.gailaoleixing), type: 'tag', tagClass: 'badge badge-secondary' },
+                { label: '泵站功能', value: dval(s.bengzhangongneng), type: 'tag', tagClass: 'badge badge-primary' },
+                { label: '所在流域', value: dval(s.suozailiuyu), type: 'tag', tagClass: 'badge badge-info' },
+                { label: '所在水系', value: dval(s.suozaishuixi), type: 'text' },
+                { label: '所在圩口', value: dval(s.suozaiweikou), type: 'text' },
             ],
             // 固定信息放在底部
             fixedInfo: [
@@ -139,7 +147,7 @@ const buildTabData = (s: NonNullable<typeof station.value>) => {
                 { label: '设计排涝扬程', value: s.shejipailaoyangchen, unit: 'm', type: 'number' },
                 { label: '设计排涝水位', value: s.shejipailaoshuiwei, unit: 'm', type: 'number' },
                 { label: '排涝最高出水位', value: s.pailaozuigaochushuiwei, unit: 'm', type: 'number' },
-                { label: '受益范围', value: s.shouyimianji, unit: 'km²', type: 'number' },
+                { label: '受益范围', value: dval(s.shouyifanwei), unit: '', type: 'number' },
                 { label: '受益面积', value: s.shouyimianji, unit: '万亩', type: 'number', highlight: true },
             ]
         },
@@ -196,6 +204,41 @@ const formatNumber = (val: number | string) => {
     if (isNaN(num)) return val;
     return num.toLocaleString('zh-CN', { maximumFractionDigits: 2 });
 };
+
+/** 灯箱键盘快捷键（Esc 关闭、←→ 切换）；注册与注销成对，避免监听泄漏 */
+const handleKeydown = (e: KeyboardEvent) => {
+    if (!lightbox.value.open) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') navigateLightbox(-1);
+    if (e.key === 'ArrowRight') navigateLightbox(1);
+};
+
+onMounted(() => {
+    window.addEventListener('keydown', handleKeydown);
+    // scrollspy：观察 5 个分节，滚动时更新高亮；页底兜底落在最后一节
+    spy = new IntersectionObserver((entries) => {
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 2) {
+            activeSection.value = 'gallery';
+            return;
+        }
+        const hit = SECTION_IDS.find((id) =>
+            entries.some((en) => en.isIntersecting && en.target.id === id)
+        );
+        if (hit) activeSection.value = hit;
+    }, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+    void nextTick(() => {
+        SECTION_IDS.forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) spy?.observe(el);
+        });
+    });
+});
+
+onUnmounted(() => {
+    window.removeEventListener('keydown', handleKeydown);
+    spy?.disconnect();
+    spy = null;
+});
 </script>
 
 <template>
@@ -240,7 +283,7 @@ const formatNumber = (val: number | string) => {
                     <div class="w-full grid grid-cols-2 gap-3">
                         <div v-for="(m, i) in metrics" :key="m.label" class="rounded-xl bg-white/10 backdrop-blur-sm p-4 border border-white/10 hover:bg-white/15 transition-all duration-300 group">
                             <div class="flex items-center gap-2 text-white/70 mb-1.5">
-                                <svg class="h-5 w-5 shrink-0" :class="`text-${m.color}-300`" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <svg class="h-5 w-5 shrink-0" :class="m.iconClass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                     <path :d="m.icon" />
                                 </svg>
                                 <span class="text-xs font-medium tracking-wide uppercase">{{ m.label }}</span>
@@ -288,9 +331,9 @@ const formatNumber = (val: number | string) => {
                 <nav class="space-y-1" aria-label="页面内导航">
                     <button v-for="sec in sections" :key="sec.id" type="button"
                         class="w-full flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm text-base-content/65 hover:bg-base-200 hover:text-base-content transition-all duration-200 border-l-2 border-transparent"
-                        :class="activeTab === sec.id ? 'bg-primary/5 text-primary border-primary font-medium' : ''"
+                        :class="activeSection === sec.id ? 'bg-primary/5 text-primary border-primary font-medium' : ''"
                         @click="scrollToSection(sec.id)"
-                        :aria-current="activeTab === sec.id ? 'location' : undefined">
+                        :aria-current="activeSection === sec.id ? 'location' : undefined">
                         <svg class="h-4.5 w-4.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                             <path :d="sec.icon" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
@@ -301,14 +344,13 @@ const formatNumber = (val: number | string) => {
 
             <!-- 主内容 -->
             <div class="flex-1 min-w-0">
-                <!-- 移动端标签页导航 -->
-                <div class="lg:hidden mb-6 overflow-x-auto pb-2 -mx-4 px-4" role="tablist" aria-label="内容分类">
+                <!-- 移动端锚点导航（只做导航，不隐藏内容） -->
+                <div class="lg:hidden mb-6 overflow-x-auto pb-2 -mx-4 px-4" aria-label="页内分节导航">
                     <div class="flex gap-2 min-w-max">
-                        <button v-for="(sec, i) in sections.slice(0, 4)" :key="sec.id" type="button" role="tab"
+                        <button v-for="sec in sections" :key="sec.id" type="button"
                             class="shrink-0 flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 whitespace-nowrap"
-                            :class="activeTab === sec.id ? 'bg-primary text-primary-content shadow-sm' : 'bg-base-100 text-base-content/65 hover:bg-base-200 hover:text-base-content'"
-                            :aria-selected="activeTab === sec.id"
-                            @click="activeTab = sec.id as 'basic' | 'capacity' | 'equipment' | 'structure'">
+                            :class="activeSection === sec.id ? 'bg-primary text-primary-content shadow-sm' : 'bg-base-100 text-base-content/65 hover:bg-base-200 hover:text-base-content'"
+                            @click="scrollToSection(sec.id)">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                 <path :d="sec.icon" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
@@ -322,7 +364,7 @@ const formatNumber = (val: number | string) => {
                     <div class="grid grid-cols-2 gap-3">
                         <div v-for="(m, i) in metrics" :key="m.label" class="card-hover rounded-xl border border-base-300 bg-base-100 p-4 shadow-[var(--shadow-card)]">
                             <div class="flex items-center gap-2 text-base-content/55 mb-1.5">
-                                <svg class="h-5 w-5 shrink-0" :class="`text-${m.color}`" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <svg class="h-5 w-5 shrink-0" :class="m.iconClassMobile" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                     <path :d="m.icon" />
                                 </svg>
                                 <span class="text-xs font-medium tracking-wide uppercase">{{ m.label }}</span>
@@ -335,10 +377,10 @@ const formatNumber = (val: number | string) => {
                     </div>
                 </div>
 
-                <!-- ===== 内容标签页面板 ===== -->
-                <div class="space-y-8" role="tabpanel" :aria-labelledby="`tab-${activeTab}`">
+                <!-- ===== 内容分节（全部常显） ===== -->
+                <div class="space-y-8">
                     <!-- 基本情况 -->
-                    <section id="basic" v-show="activeTab === 'basic'" class="animate-fade-in" role="section" aria-labelledby="basic-heading">
+                    <section id="basic" class="animate-fade-in" role="section" aria-labelledby="basic-heading">
                         <TitleComponent id="basic-heading">
                             <template #first>{{ tabData.basic.title }}</template>
                             <template #second>{{ tabData.basic.subtitle }}</template>
@@ -362,8 +404,7 @@ const formatNumber = (val: number | string) => {
                                         {{ item.value }}
                                     </template>
                                     <template v-else-if="item.type === 'tag'">
-                                        <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium"
-                                            :class="`bg-${item.tagColor || 'primary'}/10 text-${item.tagColor || 'primary'} border border-${item.tagColor || 'primary'}/20`">
+                                        <span :class="item.tagClass">
                                             {{ item.value }}
                                         </span>
                                     </template>
@@ -385,7 +426,7 @@ const formatNumber = (val: number | string) => {
                     </section>
 
                     <!-- 规模与排涝能力 -->
-                    <section id="capacity" v-show="activeTab === 'capacity'" class="animate-fade-in" role="section" aria-labelledby="capacity-heading">
+                    <section id="capacity" class="animate-fade-in" role="section" aria-labelledby="capacity-heading">
                         <TitleComponent id="capacity-heading">
                             <template #first>{{ tabData.capacity.title }}</template>
                             <template #second>{{ tabData.capacity.subtitle }}</template>
@@ -406,7 +447,7 @@ const formatNumber = (val: number | string) => {
                     </section>
 
                     <!-- 机电设备 -->
-                    <section id="equipment" v-show="activeTab === 'equipment'" class="animate-fade-in" role="section" aria-labelledby="equipment-heading">
+                    <section id="equipment" class="animate-fade-in" role="section" aria-labelledby="equipment-heading">
                         <TitleComponent id="equipment-heading">
                             <template #first>{{ tabData.equipment.title }}</template>
                             <template #second>{{ tabData.equipment.subtitle }}</template>
@@ -434,7 +475,7 @@ const formatNumber = (val: number | string) => {
                     </section>
 
                     <!-- 房建与压力箱 -->
-                    <section id="structure" v-show="activeTab === 'structure'" class="animate-fade-in" role="section" aria-labelledby="structure-heading">
+                    <section id="structure" class="animate-fade-in" role="section" aria-labelledby="structure-heading">
                         <TitleComponent id="structure-heading">
                             <template #first>{{ tabData.structure.title }}</template>
                             <template #second>{{ tabData.structure.subtitle }}</template>
@@ -553,17 +594,6 @@ const formatNumber = (val: number | string) => {
         </Transition>
     </Teleport>
 
-    <!-- 键盘快捷键支持 -->
-    <script>
-        const handleKeydown = (e: KeyboardEvent) => {
-            if (!lightbox.open) return;
-            if (e.key === 'Escape') closeLightbox();
-            if (e.key === 'ArrowLeft') navigateLightbox(-1);
-            if (e.key === 'ArrowRight') navigateLightbox(1);
-        };
-        onMounted(() => window.addEventListener('keydown', handleKeydown));
-        // watch lightbox.open 也可以，但 onMounted 只需一次
-    </script>
 </main>
 </template>
 
@@ -576,11 +606,6 @@ const formatNumber = (val: number | string) => {
 
 .animate-fade-in {
     animation: fade-in 0.4s ease-out forwards;
-}
-
-/* 标签页内容淡入 */
-[v-show] {
-    display: block !important;
 }
 
 /* 灯箱动画 */
