@@ -89,6 +89,25 @@ export interface ArticleSearchQuery {
  */
 export type ArticleSort = 'create_at' | 'id'
 
+/** ArticleInfiniteOut：游标滚动加载响应（对接文档 §7 GET /articles/infinite），无 total */
+export interface ArticleInfiniteOut {
+    data: ArticleModel[],
+    limit: number,
+    has_more: boolean,
+    /** 下一页游标（不透明字符串，原样透传；最后一页为 null） */
+    next_cursor: string | null,
+}
+
+export interface ArticleInfiniteQuery {
+    /** 1~100，默认 20 */
+    limit?: number,
+    cursor?: string,
+    category_id?: number,
+    /** 仅超管生效：按作者过滤（普通账号由后端强制收敛为本人） */
+    user_id?: number,
+    sort?: ArticleSort,
+}
+
 export interface ArticleQuery {
     page?: number
     page_size?: number
@@ -133,6 +152,11 @@ const read_config = (options: ArticleReadOptions = {}) =>
 export const articleService = {
     getArticles(params: ArticleQuery = {}, options: ArticleReadOptions = {}) {
         return apiService.get<PageResponse<ArticleModel>>('/articles/', { ...params }, read_config(options));
+    },
+
+    /** 游标滚动加载（前台列表/作者主页）：集合路径需尾斜杠，此端点为固定路径无尾斜杠 */
+    getArticlesInfinite(params: ArticleInfiniteQuery = {}, options: ArticleReadOptions = {}) {
+        return apiService.get<ArticleInfiniteOut>('/articles/infinite', { ...params }, read_config(options));
     },
 
     /**
@@ -297,6 +321,91 @@ export const useArticleStore = defineStore('article', () => {
         }
     }
 
+    // ---- GET /articles/infinite 游标滚动加载（前台文章列表 / 作者主页） ----
+    const infinite_list = ref<ArticleModel[]>([]);
+    const infinite_has_more = ref(true);
+    /** 首屏加载（切分类/切作者时展示骨架屏） */
+    const infinite_loading = ref(false);
+    /** 追加加载（滚动到底部触发） */
+    const infinite_loading_more = ref(false);
+    /** 空串 = 无错；追加失败时展示行内重试，不影响已加载数据 */
+    const infinite_error = ref('');
+    const infinite_cursor = ref<string | null>(null);
+    /** 当前列表的参数快照 key：请求回填前比对，防止旧请求晚到覆盖新列表（切分类/切作者竞态） */
+    let infinite_key = '';
+    /** 最近一次首屏参数：loadMore 沿用；游标失效降级时用于回首批 */
+    let infinite_last_params: ArticleInfiniteQuery = {};
+
+    /** 清空游标列表（切分类/切作者/清空筛选前调用） */
+    const resetInfiniteList = () => {
+        infinite_key = '';
+        infinite_list.value = [];
+        infinite_has_more.value = true;
+        infinite_error.value = '';
+        infinite_cursor.value = null;
+        infinite_loading.value = false;
+        infinite_loading_more.value = false;
+    };
+
+    /**
+     * 拉取首批（不带 cursor）。前台公开页固定匿名请求——
+     * 登录普通账号后带 token 会被后端收敛为本人文章，导致列表串号。
+     * 不抛错：失败写入 infinite_error，由界面展示。
+     */
+    const fetchInfiniteListFirst = async (params: ArticleInfiniteQuery = {}) => {
+        const key = JSON.stringify(params);
+        infinite_key = key;
+        infinite_last_params = { ...params };
+        infinite_loading.value = true;
+        infinite_error.value = '';
+        try {
+            const res = await articleService.getArticlesInfinite(params, { anonymous: true });
+            if (infinite_key !== key) return; // 已被更新的查询取代，丢弃旧响应
+            infinite_list.value = res.data ?? [];
+            infinite_has_more.value = res.has_more;
+            infinite_cursor.value = res.next_cursor;
+        } catch (error) {
+            if (infinite_key !== key) return;
+            infinite_error.value = api_error_detail(error, '文章列表加载失败');
+            console.error('获取滚动文章列表失败:', error);
+        } finally {
+            if (infinite_key === key) infinite_loading.value = false;
+        }
+    };
+
+    /** 追加下一页：在途/无更多/首屏加载中直接返回；不抛错 */
+    const loadMoreInfinite = async () => {
+        if (infinite_loading.value || infinite_loading_more.value || !infinite_has_more.value) return;
+        const key = infinite_key;
+        const cursor = infinite_cursor.value;
+        if (!cursor) return;
+        infinite_loading_more.value = true;
+        try {
+            const res = await articleService.getArticlesInfinite(
+                { ...infinite_last_params, cursor },
+                { anonymous: true },
+            );
+            if (infinite_key !== key) return; // 期间发生了重置/新查询，丢弃
+            infinite_list.value = [...infinite_list.value, ...(res.data ?? [])];
+            infinite_has_more.value = res.has_more;
+            infinite_cursor.value = res.next_cursor;
+        } catch (error) {
+            if (infinite_key !== key) return;
+            const detail = api_error_detail(error, '加载更多文章失败');
+            if (detail.includes('无效的游标')) {
+                // 游标失效（数据变动导致游标不可用）：降级回首批，不让页面卡死
+                const params = infinite_last_params;
+                resetInfiniteList();
+                await fetchInfiniteListFirst(params);
+                return;
+            }
+            infinite_error.value = detail;
+            console.error('加载更多文章失败:', error);
+        } finally {
+            if (infinite_key === key) infinite_loading_more.value = false;
+        }
+    };
+
     const article_detail = ref<ArticleModel>();
     /** 前台详情加载失败原因：区分「文章不存在/已删除（404）」与网络、服务端异常 */
     const article_detail_error = ref('');
@@ -330,6 +439,14 @@ export const useArticleStore = defineStore('article', () => {
         getArticleList,
         article_detail,
         article_detail_error,
+        infinite_list,
+        infinite_has_more,
+        infinite_loading,
+        infinite_loading_more,
+        infinite_error,
+        resetInfiniteList,
+        fetchInfiniteListFirst,
+        loadMoreInfinite,
         home_error,
         getDetail,
         loading,
