@@ -88,6 +88,13 @@ const routes: RouteRecordRaw[] = [
                 meta: { title: '账户管理', requires_superuser: true }
             },
             {
+                path: 'logs',
+                name: 'AdminLogs',
+                component: () => import("@/pages/Admin/Logs.vue"),
+                // 操作日志仅超级管理员：后端 /logs/ 本身 403，路由层再拦一道
+                meta: { title: '操作日志', requires_superuser: true }
+            },
+            {
                 path: 'list',
                 name: 'AdminArticleList',
                 component: () => import("@/pages/Admin/ArticleList.vue"),

@@ -22,6 +22,7 @@ const icon_users = 'M16 19v-1a4 4 0 00-4-4H7a4 4 0 00-4 4v1M9.5 11a3 3 0 100-6 3
 const icon_photo = 'M4 5h16v14H4V5zm2 10l3.5-3.5 3 3L16 11l4 4M15 9h.01';
 const icon_file = 'M12 4v9m0 0l3-3m-3 3l-3-3M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2';
 const icon_lock = 'M6 11h12v9H6v-9zm3 0V8a3 3 0 016 0v3';
+const icon_logs = 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z';
 
 /**
  * 侧边栏菜单：分类管理 / 账户管理仅超级管理员可见（普通账号访问路由也会被守卫拦截）
@@ -52,7 +53,10 @@ const nav_groups = computed<NavGroup[]>(() => [
         label: '系统',
         items: [
             ...(is_superuser.value
-                ? [{ name: 'AdminUsers', label: '账户管理', icon: icon_users }]
+                ? [
+                    { name: 'AdminUsers', label: '账户管理', icon: icon_users },
+                    { name: 'AdminLogs', label: '操作日志', icon: icon_logs },
+                ]
                 : []),
             { name: 'AdminPassword', label: '修改密码', icon: icon_lock },
         ],
