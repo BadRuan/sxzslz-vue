@@ -31,12 +31,21 @@ const total_pages = computed(() => {
         <p class="text-sm text-base-content/80">共 <span class="font-medium">{{ total }}</span> {{ unit ?? '条' }}<template v-if="total_pages > 0">，共 <span class="font-medium">{{ total_pages }}</span> 页</template>，第 <span class="font-medium">{{ page }}</span> 页</p>
         <div class="join">
             <button class="btn" :disabled="page <= 1" :class="{ 'btn-disabled': page <= 1 }"
+                @click="emit('change', 1)">
+                首页
+            </button>
+            <button class="btn" :disabled="page <= 1" :class="{ 'btn-disabled': page <= 1 }"
                 @click="emit('change', page - 1)">
                 上一页
             </button>
             <button class="btn btn-primary" :disabled="!hasNext" :class="{ 'btn-disabled': !hasNext }"
                 @click="emit('change', page + 1)">
                 下一页
+            </button>
+            <button class="btn" :disabled="total_pages === 0 || page >= total_pages"
+                :class="{ 'btn-disabled': total_pages === 0 || page >= total_pages }"
+                @click="emit('change', total_pages)">
+                尾页
             </button>
         </div>
     </nav>

@@ -79,6 +79,38 @@ const object_text = (row: OperationLogRow) => row.object_name || row.object_id |
 /** 操作者展示：昵称优先，其次 id，最后 — */
 const operator_text = (row: OperationLogRow) => row.operator_name || (row.operator_id ? String(row.operator_id) : '—');
 
+/**
+ * 动作中文释义（与后端 app/service 写入的 action 全集对应）。
+ * 未收录的新动作回退英文原样展示，避免后端加新动作后界面空白。
+ */
+const ACTION_LABELS: Record<string, string> = {
+    create_article: '发布文章',
+    update_article: '编辑文章',
+    delete_article: '删除文章',
+    upload_image: '上传图片',
+    delete_image: '删除图片',
+    update_image_name: '修改图片名称',
+    upload_document: '上传文档',
+    delete_document: '删除文档',
+    update_document_name: '修改文档名称',
+    create_account: '创建用户',
+    update_account: '修改用户',
+    delete_account: '删除用户',
+    dedup_hit: '命中重复文件（秒传）',
+    proceed: '正常入库',
+};
+
+/** 对象类型中文释义；未收录回退英文原样 */
+const OBJECT_TYPE_LABELS: Record<string, string> = {
+    article: '文章',
+    image: '图片',
+    document: '文档',
+    account: '账户',
+};
+
+const action_text = (action: string) => ACTION_LABELS[action] || action;
+const object_type_text = (objectType: string) => OBJECT_TYPE_LABELS[objectType] || objectType;
+
 onMounted(() => {
     fetch_logs();
 });
@@ -149,8 +181,8 @@ onMounted(() => {
                     <tbody class="text-sm">
                         <tr v-for="row in rows" :key="row.id">
                             <td class="whitespace-nowrap text-base-content/70">{{ date_text(row.created_at) }}</td>
-                            <td class="whitespace-nowrap font-medium">{{ row.action }}</td>
-                            <td class="whitespace-nowrap text-base-content/70">{{ row.object_type }}</td>
+                            <td class="whitespace-nowrap font-medium" :title="row.action">{{ action_text(row.action) }}</td>
+                            <td class="whitespace-nowrap text-base-content/70" :title="row.object_type">{{ object_type_text(row.object_type) }}</td>
                             <td class="max-w-[12em] truncate" :title="object_text(row)">{{ object_text(row) }}</td>
                             <td class="whitespace-nowrap text-base-content/70">{{ operator_text(row) }}</td>
                             <td>
