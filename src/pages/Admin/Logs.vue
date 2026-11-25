@@ -4,6 +4,7 @@ import AppPagination from '@/components/AppPagination.vue';
 import { apiService } from '@/utils/apiService';
 import { api_error_detail } from '@/utils/apiError';
 import { date_text } from '@/utils/formatters';
+import { useBaseinfoStore } from '@/store/base';
 
 /** 操作日志行（对接文档 §10 OperationLogOut，GET /logs/ 仅超级管理员可见） */
 interface OperationLogRow {
@@ -22,8 +23,11 @@ interface OperationLogRow {
 
 const PAGE_SIZE = 20;
 
-// 筛选条件：空串不传参（后端 Optional[...] = None）
+// 筛选条件：空串不传参（后端 Optional[...] = None）；下拉选中文标签、提交英文原值
 const filters = ref({ action: '', object_type: '', result: '', operator_id: '' });
+
+/** 操作者下拉数据源：/base/ 公开用户列表（昵称 → id） */
+const baseinfo = useBaseinfoStore();
 
 const page = ref(1);
 const total = ref(0);
@@ -111,8 +115,18 @@ const OBJECT_TYPE_LABELS: Record<string, string> = {
 const action_text = (action: string) => ACTION_LABELS[action] || action;
 const object_type_text = (objectType: string) => OBJECT_TYPE_LABELS[objectType] || objectType;
 
+/** 结果中文释义（筛选下拉与表格徽标共用）；未收录回退英文原样 */
+const RESULT_LABELS: Record<string, string> = {
+    success: '成功',
+    failed: '失败',
+};
+
+const result_text = (result: string) => RESULT_LABELS[result] || result;
+
 onMounted(() => {
     fetch_logs();
+    // 操作者下拉的用户列表：失败不阻塞日志加载（只剩「全部操作者」可选）
+    void baseinfo.checkBaseinfo();
 });
 </script>
 
@@ -123,26 +137,38 @@ onMounted(() => {
             <div class="flex flex-wrap items-end gap-3">
                 <label class="form-control">
                     <div class="label py-1"><span class="label-text text-xs">动作</span></div>
-                    <input v-model="filters.action" type="text" placeholder="如 create_article"
-                        class="input input-bordered input-sm w-44" @keyup.enter="apply_filters" />
-                </label>
-                <label class="form-control">
-                    <div class="label py-1"><span class="label-text text-xs">对象类型</span></div>
-                    <input v-model="filters.object_type" type="text" placeholder="article/image/document/account"
-                        class="input input-bordered input-sm w-48" @keyup.enter="apply_filters" />
-                </label>
-                <label class="form-control">
-                    <div class="label py-1"><span class="label-text text-xs">结果</span></div>
-                    <select v-model="filters.result" class="select select-bordered select-sm w-32">
-                        <option value="">全部</option>
-                        <option value="success">success</option>
-                        <option value="failed">failed</option>
+                    <select v-model="filters.action" class="select select-bordered select-sm w-44"
+                        @change="apply_filters">
+                        <option value="">全部动作</option>
+                        <option v-for="(label, key) in ACTION_LABELS" :key="key" :value="key">{{ label }}</option>
                     </select>
                 </label>
                 <label class="form-control">
-                    <div class="label py-1"><span class="label-text text-xs">操作者 ID</span></div>
-                    <input v-model="filters.operator_id" type="number" min="1" placeholder="≥1"
-                        class="input input-bordered input-sm w-28" @keyup.enter="apply_filters" />
+                    <div class="label py-1"><span class="label-text text-xs">对象类型</span></div>
+                    <select v-model="filters.object_type" class="select select-bordered select-sm w-40"
+                        @change="apply_filters">
+                        <option value="">全部类型</option>
+                        <option v-for="(label, key) in OBJECT_TYPE_LABELS" :key="key" :value="key">{{ label }}</option>
+                    </select>
+                </label>
+                <label class="form-control">
+                    <div class="label py-1"><span class="label-text text-xs">结果</span></div>
+                    <select v-model="filters.result" class="select select-bordered select-sm w-32"
+                        @change="apply_filters">
+                        <option value="">全部结果</option>
+                        <option value="success">成功</option>
+                        <option value="failed">失败</option>
+                    </select>
+                </label>
+                <label class="form-control">
+                    <div class="label py-1"><span class="label-text text-xs">操作者</span></div>
+                    <select v-model="filters.operator_id" class="select select-bordered select-sm w-44"
+                        @change="apply_filters">
+                        <option value="">全部操作者</option>
+                        <option v-for="user in baseinfo.users" :key="user.id" :value="String(user.id)">
+                            {{ user.nickname || user.slug }}
+                        </option>
+                    </select>
                 </label>
                 <div class="flex gap-2 pb-0.5">
                     <button type="button" class="btn btn-primary btn-sm" :disabled="loading" @click="apply_filters">查询</button>
@@ -186,8 +212,9 @@ onMounted(() => {
                             <td class="max-w-[12em] truncate" :title="object_text(row)">{{ object_text(row) }}</td>
                             <td class="whitespace-nowrap text-base-content/70">{{ operator_text(row) }}</td>
                             <td>
-                                <span class="badge badge-sm" :class="row.result === 'success' ? 'badge-success' : 'badge-error'">
-                                    {{ row.result }}
+                                <span class="badge badge-sm" :class="row.result === 'success' ? 'badge-success' : 'badge-error'"
+                                    :title="row.result">
+                                    {{ result_text(row.result) }}
                                 </span>
                             </td>
                             <td class="whitespace-nowrap text-base-content/55">{{ row.client_ip || '—' }}</td>
