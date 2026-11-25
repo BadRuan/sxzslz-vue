@@ -1,32 +1,30 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useBaseinfoStore, type CategoryModel } from '@/store/base';
 import { useArticleStore, type ArticleModel } from '@/store/article';
 import { date_text } from '@/utils/formatters';
 import { flatten_categories, name_category_id, categories_compact, to_second_level_id } from '@/utils/category';
 import { CATEGORY_NAMES } from '@/utils/categoryConfig';
-import AppPagination from '@/components/AppPagination.vue';
+import { useInfiniteSentinel } from '@/composables/useInfiniteSentinel';
 import ArticleCover from '@/components/ArticleCover.vue';
 
 const route = useRoute();
-const router = useRouter();
 const baseinfo_store = useBaseinfoStore();
 const article_store = useArticleStore();
 
-/** 每页文章数：同时用于取数与分页条显示总页数，避免两处数字不一致 */
+/** 每批文章数：游标滚动加载的 limit */
 const PAGE_SIZE = 30;
 
 const { categories, error_message: categories_error } = storeToRefs(baseinfo_store);
-const { article_list, article_total, article_page, article_has_next, article_list_error, article_list_error_message } = storeToRefs(article_store);
+const { infinite_list, infinite_has_more, infinite_loading, infinite_loading_more, infinite_error } = storeToRefs(article_store);
 
 const loading = ref(true);
 
 const flattened = computed(() => flatten_categories(categories.value));
 // 文章仅挂二级分类，一级分类只做分组展示不可筛选
 const second_level = computed(() => flattened.value.filter(({ depth }) => depth > 0));
-const page_number = computed(() => Number(route.query.page) || 1);
 
 // 默认分类：集中配置名称（新闻动态）→ 命中一级分类时退化为其第一个子分类 → 找不到则第一个二级分类（兜底）
 const default_category_id = computed(() => {
@@ -87,9 +85,12 @@ const toggle_group = (parent: CategoryModel) => {
 };
 
 // 监听计算属性而非 route.query：分类树异步到达时也能自动补一次取数
-watch([active_category, page_number], ([categoryId, pageNum]) => {
+watch(active_category, (categoryId) => {
     if (categoryId) {
-        article_store.getArticleList(categoryId, pageNum, PAGE_SIZE);
+        article_store.resetInfiniteList();
+        void article_store.fetchInfiniteListFirst({ category_id: categoryId, limit: PAGE_SIZE, sort: 'create_at' });
+    } else {
+        article_store.resetInfiniteList();
     }
 }, { immediate: true });
 
@@ -108,34 +109,23 @@ const article_categories = (article: ArticleModel) =>
 const handleCategoryClick = (categoryId: number) => {
     // 点击当前已激活的分类：路由不变不会再触发导航，直接重新拉取
     if (active_category.value === categoryId) {
-        article_store.getArticleList(categoryId, page_number.value, PAGE_SIZE);
-    }
-};
-
-const goToPage = (page: number) => {
-    router.push({
-        name: 'ArticleList',
-        query: { category: active_category.value, page }
-    });
-};
-
-const goToPrevPage = () => {
-    if (article_page.value > 1) {
-        goToPage(article_page.value - 1);
-    }
-};
-
-const goToNextPage = () => {
-    if (article_has_next.value) {
-        goToPage(article_page.value + 1);
+        article_store.resetInfiniteList();
+        void article_store.fetchInfiniteListFirst({ category_id: categoryId, limit: PAGE_SIZE, sort: 'create_at' });
     }
 };
 
 /** 加载失败重试：分类树可能尚未到达，此时不给按钮可点（active_category 未知） */
 const reload_articles = () => {
     if (active_category.value === undefined) return;
-    article_store.getArticleList(active_category.value, page_number.value, 30);
+    article_store.resetInfiniteList();
+    void article_store.fetchInfiniteListFirst({ category_id: active_category.value, limit: PAGE_SIZE, sort: 'create_at' });
 };
+
+// 滚动到底部哨兵：进入视口且无在途请求时追加下一批
+const sentinel = useInfiniteSentinel(
+    () => { void article_store.loadMoreInfinite(); },
+    () => infinite_has_more.value && !infinite_loading_more.value && !infinite_loading.value,
+);
 </script>
 
 <template>
@@ -150,7 +140,6 @@ const reload_articles = () => {
                     </h1>
                     <p class="text-sm text-base-content/60">
                         当前浏览 <span class="font-medium text-base-content/75">{{ active_category_name }}</span>
-                        <span v-if="article_total" class="ml-2 num">共 {{ article_total }} 条</span>
                     </p>
                 </div>
             </div>
@@ -214,7 +203,7 @@ const reload_articles = () => {
 
                 <div class="min-w-0 flex-1">
                     <!-- 加载状态：骨架屏，比单行 spinner 更少布局跳动 -->
-                    <div v-if="loading" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                    <div v-if="loading || infinite_loading" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                         <div v-for="i in 6" :key="i"
                             class="overflow-hidden rounded-box border border-base-300 bg-base-100">
                             <div class="aspect-[16/10] animate-pulse bg-base-300"></div>
@@ -229,21 +218,21 @@ const reload_articles = () => {
                     <!-- 正常内容 -->
                     <template v-else>
                         <!-- 接口失败与空数据区分：失败给出后端原因与重试，而非误报「暂无文章」 -->
-                        <div v-if="article_list_error"
+                        <div v-if="infinite_error && infinite_list.length === 0"
                             class="rounded-box border border-base-300 bg-base-100 p-12 text-center text-base-content/60">
-                            <p class="mb-2 text-error">{{ article_list_error_message || '文章加载失败' }}</p>
+                            <p class="mb-2 text-error">{{ infinite_error || '文章加载失败' }}</p>
                             <p class="mb-4 text-sm">请检查网络后重试</p>
                             <button type="button" class="btn btn-sm btn-primary" @click="reload_articles">
                                 重新加载
                             </button>
                         </div>
-                        <div v-else-if="article_list.length === 0"
+                        <div v-else-if="infinite_list.length === 0"
                             class="rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-20 text-center">
                             <p class="text-base-content/55">暂无文章</p>
                             <p class="mt-1.5 text-sm text-base-content/50">该分类下还没有发布内容，换个分类看看</p>
                         </div>
                         <div v-else class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                            <article v-for="(article, index) in article_list" :key="index"
+                            <article v-for="article in infinite_list" :key="article.slug"
                                 class="group overflow-hidden rounded-box border border-base-300 bg-base-100 card-hover hover:-translate-y-1 hover:border-primary/25 hover:shadow-[var(--shadow-lift)]">
                                 <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
                                     class="flex h-full flex-col">
@@ -282,8 +271,17 @@ const reload_articles = () => {
                             </article>
                         </div>
 
-                        <AppPagination class="mt-10" :page="article_page" :has-next="article_has_next"
-                            :total="article_total" unit="条" :page-size="PAGE_SIZE" @change="goToPage" />
+                        <!-- 滚动加载状态：追加中 / 追加失败行内重试 / 已到底 -->
+                        <div class="mt-10 flex min-h-8 items-center justify-center text-sm text-base-content/55">
+                            <span v-if="infinite_loading_more" class="loading loading-spinner loading-sm"></span>
+                            <span v-else-if="infinite_error" class="flex items-center gap-3">
+                                <span class="text-error">加载失败</span>
+                                <button type="button" class="btn btn-xs btn-primary"
+                                    @click="() => { void article_store.loadMoreInfinite(); }">重试</button>
+                            </span>
+                            <span v-else-if="!infinite_has_more">没有更多了</span>
+                        </div>
+                        <div ref="sentinel" class="h-px" aria-hidden="true"></div>
                     </template>
                 </div>
             </div>
