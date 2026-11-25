@@ -5,10 +5,9 @@ import { useRoute } from 'vue-router';
 import { useBaseinfoStore } from '@/store/base';
 import { date_text } from '@/utils/formatters';
 import { categories_compact } from '@/utils/category';
-import { api_error_detail } from '@/utils/apiError';
-import { articleService, type ArticleModel } from '@/store/article';
+import { articleService, useArticleStore, type ArticleModel } from '@/store/article';
 import { url_prefix } from '@/utils/baseInfo';
-import AppPagination from '@/components/AppPagination.vue';
+import { useInfiniteSentinel } from '@/composables/useInfiniteSentinel';
 
 const route = useRoute();
 const raw_user_id = Number(route.params.id);
@@ -16,47 +15,45 @@ const raw_user_id = Number(route.params.id);
 const user_id = Number.isInteger(raw_user_id) && raw_user_id > 0 ? raw_user_id : undefined;
 const head_img = '192878a6502947989a25d49d55f39266.jpg';
 
-// 后端无 /profile/ 专用接口：用 GET /articles/?user_id= 服务端过滤作者文章。
+// 后端无 /profile/ 专用接口：用 GET /articles/infinite?user_id= 服务端过滤作者文章（游标滚动加载）。
 // 公开页面必须匿名请求：普通账号带 token 时后端会忽略 user_id 只返回本人文章，导致作者主页串号。
 const PAGE_SIZE = 20;
-const latest_article = ref<ArticleModel[]>([]);
-const page = ref(1);
+const article_store = useArticleStore();
+const { infinite_list, infinite_has_more, infinite_loading, infinite_loading_more, infinite_error } = storeToRefs(article_store);
 const total = ref(0);
-const has_next = ref(false);
-// 列表加载失败：与「暂无文章」区分开，避免静默误报为空
-const list_error = ref('');
-const getArticles = async () => {
+
+// infinite 响应没有 total：页头「共 N 篇」与名片「发布文章」用 page_size=1 的轻量分页请求取真实总数，
+// 失败时按 0 展示且不阻塞列表
+const fetch_total = async () => {
     if (user_id === undefined) {
-        latest_article.value = [];
         total.value = 0;
-        has_next.value = false;
         return;
     }
-    list_error.value = '';
     try {
         const res = await articleService.getArticles(
-            // 作者主页按发布时间倒序（显式传 sort，不依赖后端匿名默认值）
-            { page: page.value, page_size: PAGE_SIZE, user_id, sort: 'create_at' },
+            { page: 1, page_size: 1, user_id, sort: 'create_at' },
             { anonymous: true },
         );
-        latest_article.value = res.data ?? [];
         total.value = res.total;
-        has_next.value = res.has_next;
     } catch (error) {
-        list_error.value = api_error_detail(error, '文章列表加载失败');
-        console.error('获取失败:', error)
+        total.value = 0;
+        console.error('获取文章总数失败:', error);
     }
-}
-
-const go_page = (target: number) => {
-    page.value = target;
-    getArticles();
 };
 
-// 统计口径改为服务端 total（分页后列表长度不再等于发文总数）
+const load_first = () => {
+    article_store.resetInfiniteList();
+    if (user_id === undefined) {
+        total.value = 0;
+        return;
+    }
+    void article_store.fetchInfiniteListFirst({ user_id, limit: PAGE_SIZE, sort: 'create_at' });
+};
+
+// 统计口径改为服务端 total（列表只随滚动追加，长度不等于发文总数）
 const post_count = computed(() => total.value);
 const view_count = computed(() =>
-    latest_article.value.reduce((sum, article) => sum + article.view_count, 0)
+    infinite_list.value.reduce((sum, article) => sum + article.view_count, 0)
 );
 
 const baseinfo_store = useBaseinfoStore();
@@ -79,10 +76,16 @@ const nickname_text = (user_id: number | undefined) => {
     }
 }
 
+// 滚动到底部哨兵：进入视口且无在途请求时追加下一批
+const sentinel = useInfiniteSentinel(
+    () => { void article_store.loadMoreInfinite(); },
+    () => infinite_has_more.value && !infinite_loading_more.value && !infinite_loading.value,
+);
 
 onMounted(
     async () => {
-        getArticles();
+        load_first();
+        fetch_total();
         baseinfo_store.checkBaseinfo();
     }
 );
@@ -132,13 +135,17 @@ onMounted(
                 </div>
 
                 <ul class="divide-y divide-base-300">
-                    <li v-if="list_error" class="px-6 py-10 text-center text-sm text-error">
-                        {{ list_error }}
+                    <li v-if="infinite_error && infinite_list.length === 0" class="px-6 py-10 text-center text-sm text-error">
+                        {{ infinite_error }}
                     </li>
-                    <li v-else-if="latest_article.length === 0" class="px-6 py-14 text-center text-sm text-base-content/55">
+                    <li v-else-if="infinite_loading" class="px-6 py-10 text-center text-sm text-base-content/55">
+                        <span class="loading loading-spinner loading-sm align-middle"></span>
+                        <span class="ml-2">加载中…</span>
+                    </li>
+                    <li v-else-if="infinite_list.length === 0" class="px-6 py-14 text-center text-sm text-base-content/55">
                         暂无文章
                     </li>
-                    <li v-for="(article, index) in latest_article" :key="index">
+                    <li v-for="article in infinite_list" :key="article.slug">
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
                             class="group flex items-center gap-4 px-6 py-4 transition-colors duration-200 hover:bg-base-200/60 sm:px-8">
                             <span
@@ -162,10 +169,19 @@ onMounted(
                         </RouterLink>
                     </li>
                 </ul>
-            </section>
 
-            <AppPagination class="mt-6" :page="page" :has-next="has_next"
-                :total="total" unit="条" :page-size="PAGE_SIZE" @change="go_page" />
+                <!-- 滚动加载状态：追加中 / 已到底 -->
+                <div class="flex min-h-10 items-center justify-center border-t border-base-300 px-6 py-3 text-xs text-base-content/55">
+                    <span v-if="infinite_loading_more" class="loading loading-spinner loading-xs"></span>
+                    <span v-else-if="infinite_error" class="flex items-center gap-3">
+                        <span class="text-error">加载失败</span>
+                        <button type="button" class="btn btn-xs btn-primary"
+                            @click="() => { void article_store.loadMoreInfinite(); }">重试</button>
+                    </span>
+                    <span v-else-if="infinite_list.length > 0 && !infinite_has_more">没有更多了</span>
+                </div>
+                <div ref="sentinel" class="h-px" aria-hidden="true"></div>
+            </section>
         </div>
     </main>
 </template>
