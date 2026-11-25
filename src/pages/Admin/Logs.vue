@@ -69,6 +69,7 @@ const reset_filters = () => {
 };
 
 const go_page = (target: number) => {
+    if (loading.value) return; // 请求在途时忽略翻页，避免乱序响应盖掉新页数据
     page.value = target;
     fetch_logs();
 };

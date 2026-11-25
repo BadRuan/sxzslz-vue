@@ -136,7 +136,9 @@ onMounted(
 
                 <ul class="divide-y divide-base-300">
                     <li v-if="infinite_error && infinite_list.length === 0" class="px-6 py-10 text-center text-sm text-error">
-                        {{ infinite_error }}
+                        <p class="mb-3">{{ infinite_error }}</p>
+                        <!-- 首屏失败时游标为空，loadMoreInfinite 是空操作，必须重新拉首批 -->
+                        <button type="button" class="btn btn-xs btn-primary" @click="load_first">重试</button>
                     </li>
                     <li v-else-if="infinite_loading" class="px-6 py-10 text-center text-sm text-base-content/55">
                         <span class="loading loading-spinner loading-sm align-middle"></span>
@@ -173,7 +175,7 @@ onMounted(
                 <!-- 滚动加载状态：追加中 / 已到底 -->
                 <div class="flex min-h-10 items-center justify-center border-t border-base-300 px-6 py-3 text-xs text-base-content/55">
                     <span v-if="infinite_loading_more" class="loading loading-spinner loading-xs"></span>
-                    <span v-else-if="infinite_error" class="flex items-center gap-3">
+                    <span v-else-if="infinite_error && infinite_list.length > 0" class="flex items-center gap-3">
                         <span class="text-error">加载失败</span>
                         <button type="button" class="btn btn-xs btn-primary"
                             @click="() => { void article_store.loadMoreInfinite(); }">重试</button>

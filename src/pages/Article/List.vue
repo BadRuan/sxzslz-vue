@@ -274,12 +274,12 @@ const sentinel = useInfiniteSentinel(
                         <!-- 滚动加载状态：追加中 / 追加失败行内重试 / 已到底 -->
                         <div class="mt-10 flex min-h-8 items-center justify-center text-sm text-base-content/55">
                             <span v-if="infinite_loading_more" class="loading loading-spinner loading-sm"></span>
-                            <span v-else-if="infinite_error" class="flex items-center gap-3">
+                            <span v-else-if="infinite_error && infinite_list.length > 0" class="flex items-center gap-3">
                                 <span class="text-error">加载失败</span>
                                 <button type="button" class="btn btn-xs btn-primary"
                                     @click="() => { void article_store.loadMoreInfinite(); }">重试</button>
                             </span>
-                            <span v-else-if="!infinite_has_more">没有更多了</span>
+                            <span v-else-if="infinite_list.length > 0 && !infinite_has_more">没有更多了</span>
                         </div>
                         <div ref="sentinel" class="h-px" aria-hidden="true"></div>
                     </template>

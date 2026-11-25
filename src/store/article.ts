@@ -389,6 +389,7 @@ export const useArticleStore = defineStore('article', () => {
             infinite_list.value = [...infinite_list.value, ...(res.data ?? [])];
             infinite_has_more.value = res.has_more;
             infinite_cursor.value = res.next_cursor;
+            infinite_error.value = ''; // 追加成功即清除旧的失败提示，否则状态行会永久停留在「加载失败」
         } catch (error) {
             if (infinite_key !== key) return;
             const detail = api_error_detail(error, '加载更多文章失败');
