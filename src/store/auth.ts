@@ -24,10 +24,7 @@ export interface PasswordChangeInput {
     new_password: string,
 }
 
-/** 后端默认的普通账户初始密码（对接文档 DEFAULT_USER_PASSWORD） */
-export const DEFAULT_USER_PASSWORD = 'abc123';
-
-/** POST /users/ 请求体：password 可省略，服务端默认 abc123 且至少 6 位 */
+/** POST /users/ 请求体：password 可省略，服务端缺省取 DEFAULT_USER_PASSWORD（abc123，对接文档 §2.5） */
 export interface UserCreateInput {
     username: string,
     nickname: string,
@@ -57,7 +54,7 @@ const request_reset_password = (id: number) =>
     apiService.post<DetailResponse>(`/users/${id}/reset-password`);
 
 const request_delete_user = (id: number) =>
-    apiService.delete<DetailResponse>(`/users/${id}`);
+    apiService.delete<void>(`/users/${id}`);
 
 export const useAuthStore = defineStore('auth', () => {
     const user = ref<AuthUserModel | null>(null);
@@ -143,7 +140,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     /**
-     * 重置普通账户密码为 abc123：旧密码立即失效。
+     * 重置普通账户密码：旧密码立即失效，新密码重置为 DEFAULT_USER_PASSWORD（abc123，对接文档 §2.5）。
      * 失败：403 不能重置超级管理员密码 / 404 用户不存在。
      */
     const reset_user_password = async (id: number) => {

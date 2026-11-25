@@ -77,7 +77,7 @@ const pick_files = async (event: Event) => {
     input.value = '';
     if (files.length === 0) return;
 
-    // 预检：格式白名单 → 单张 ≤ 10MB → 空文件 → 批量 ≤ 20 张（与后端限制一致，避免白传）
+    // 预检：格式白名单 → 单张 ≤ 30MB → 空文件 → 批量 ≤ 20 张（与后端限制一致，避免白传）
     const validation_error = validate_images(files);
     if (validation_error) {
         upload_error.value = validation_error;

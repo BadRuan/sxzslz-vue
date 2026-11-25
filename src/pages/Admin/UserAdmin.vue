@@ -4,12 +4,15 @@ import { storeToRefs } from 'pinia';
 import dayjs from 'dayjs';
 import AppModal from '@/components/AppModal.vue';
 import { useBaseinfoStore } from '@/store/base';
-import { useAuthStore, DEFAULT_USER_PASSWORD } from '@/store/auth';
+import { useAuthStore } from '@/store/auth';
 import { api_error_detail } from '@/utils/apiError';
 
 const auth_store = useAuthStore();
 const baseinfo_store = useBaseinfoStore();
 const { users } = storeToRefs(baseinfo_store);
+
+/** 默认密码提示文案：对接文档 §2.5，缺省/重置均为 abc123（DEFAULT_USER_PASSWORD） */
+const DEFAULT_PASSWORD_NOTICE = 'abc123';
 
 const list_error = ref('');
 const action_error = ref('');
@@ -61,7 +64,7 @@ const submit_create = async () => {
         } catch {
             refresh_note = '（列表刷新失败，可刷新页面查看）';
         }
-        flash_success(`已创建账户「${created.nickname}」，登录名 ${created.slug}，初始密码 ${DEFAULT_USER_PASSWORD}${refresh_note}`);
+        flash_success(`已创建账户「${created.nickname}」，登录名 ${created.slug}，初始密码 ${DEFAULT_PASSWORD_NOTICE}${refresh_note}`);
     } catch (error: any) {
         create_error.value = error?.message || '创建账户失败，请稍后重试';
     } finally {
@@ -97,13 +100,13 @@ const flash_success = (message: string) => {
 const reset_password = (id: number, nickname: string) => {
     ask_confirm(
         '重置密码',
-        `确认将账户「${nickname}」的密码重置为 ${DEFAULT_USER_PASSWORD} 吗？重置后旧密码立即失效。`,
+        `确认将账户「${nickname}」的密码重置吗？重置后旧密码立即失效，新密码重置为 ${DEFAULT_PASSWORD_NOTICE}。`,
         async () => {
             action_id.value = id;
             action_error.value = '';
             try {
                 const detail = await auth_store.reset_user_password(id);
-                flash_success(detail || `已重置「${nickname}」的密码为 ${DEFAULT_USER_PASSWORD}`);
+                flash_success(detail || `已重置「${nickname}」的密码，${DEFAULT_PASSWORD_NOTICE}`);
             } catch (error: any) {
                 action_error.value = error?.message || '重置密码失败，请稍后重试';
             } finally {
@@ -250,10 +253,10 @@ onMounted(load_users);
                 </label>
                 <label class="text-sm text-base-content/70">密码
                     <input v-model="form.password" type="password" autocomplete="new-password"
-                        placeholder="留空则使用默认密码 abc123"
+                        placeholder="留空则初始密码为 abc123"
                         class="input input-bordered w-full mt-1" />
                     <span class="block mt-1 text-xs text-base-content/55">
-                        最少 6 位；留空使用默认密码 {{ DEFAULT_USER_PASSWORD }}
+                        最少 6 位；留空则 {{ DEFAULT_PASSWORD_NOTICE }}
                     </span>
                 </label>
                 <p v-if="create_error" class="text-sm text-error">{{ create_error }}</p>

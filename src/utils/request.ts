@@ -1,6 +1,7 @@
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
 import { url_prefix } from '@/utils/baseInfo';
 import { get_token, clear_token } from '@/utils/token';
+import { redirect_to_login } from '@/utils/authRedirect';
 
 const service: AxiosInstance = axios.create({
     baseURL: url_prefix.api_prefix,
@@ -28,11 +29,7 @@ service.interceptors.response.use(
         // 匿名请求（skip_auth）不参与该跳转，避免公开页面因历史失效 token 被强制登出。
         if (error.response?.status === 401 && !error.config?.skip_auth) {
             clear_token();
-            if (!window.location.pathname.startsWith('/admin/login')) {
-                // 带上当前地址，登录后可回跳（与路由守卫的 redirect 约定一致）
-                const redirect = `${window.location.pathname}${window.location.search}`;
-                window.location.href = `/admin/login?redirect=${encodeURIComponent(redirect)}`;
-            }
+            redirect_to_login();
         }
         console.error('请求失败:', error.message);
         return Promise.reject(error);

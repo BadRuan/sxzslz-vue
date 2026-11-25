@@ -4,6 +4,7 @@ import { url_prefix } from './baseInfo';
 import { get_token, clear_token } from '@/utils/token';
 import { api_error_message } from '@/utils/apiError';
 import { MAX_BATCH_FILES } from '@/utils/upload';
+import { redirect_to_login } from '@/utils/authRedirect';
 
 export { MAX_BATCH_FILES };
 
@@ -131,9 +132,7 @@ const post_multipart_with_progress = <T>(
         // 与 axios 拦截器一致：401 清 token 回登录页（登录页本身不跳转）
         if (xhr.status === 401) {
             clear_token();
-            if (!window.location.pathname.startsWith('/admin/login')) {
-                window.location.href = '/admin/login';
-            }
+            redirect_to_login();
         }
 
         const message = api_error_message(xhr.status, body, '上传失败，请稍后重试');

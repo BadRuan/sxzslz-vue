@@ -286,7 +286,7 @@ const pick_cover = async (event: Event) => {
     const file = input.files?.[0];
     input.value = '';
     if (!file) return;
-    // 预检与 Photo 页共用同一套白名单/大小限制（图片 ≤ 10MB）
+    // 预检与 Photo 页共用同一套白名单/大小限制（图片 ≤ 30MB）
     const validation_error = validate_images([file]);
     if (validation_error) {
         modal_error.value = validation_error;

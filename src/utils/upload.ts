@@ -1,6 +1,6 @@
 /**
  * 上传限制与预检（与后端 `app/settings.py` 保持一致）：
- * - 图片：单文件 ≤ 10MB（MAX_IMAGE_SIZE_MB），MIME 白名单见后端 `allow_type.image`
+ * - 图片：单文件 ≤ 30MB（MAX_IMAGE_SIZE_MB），MIME 白名单见后端 `allow_type.image`
  * - 文档：单文件 ≤ 50MB（MAX_DOCUMENT_SIZE_MB），MIME 白名单见后端 `allow_type.document`
  * - 批量：单次 ≤ 20 个文件（MAX_BATCH_FILES）
  *
@@ -61,12 +61,12 @@ export const DOCUMENT_MIME_WHITELIST: readonly string[] = [
     'application/epub+zip',
 ];
 
-export const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
+export const MAX_IMAGE_SIZE_BYTES = 30 * 1024 * 1024;
 export const MAX_DOCUMENT_SIZE_BYTES = 50 * 1024 * 1024;
 /** 批量上传单次上限（对接文档 MAX_BATCH_FILES，超出后端 400） */
 export const MAX_BATCH_FILES = 20;
 
-export const MAX_IMAGE_SIZE_TEXT = '10MB';
+export const MAX_IMAGE_SIZE_TEXT = '30MB';
 export const MAX_DOCUMENT_SIZE_TEXT = '50MB';
 
 /** `<input type="file" accept>`：给系统选择器做初次过滤，真正的白名单校验仍走 validate_* */
