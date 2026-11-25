@@ -5,8 +5,12 @@ import { apiService } from '@/utils/apiService';
 import { api_error_detail } from '@/utils/apiError';
 import dayjs from 'dayjs';
 import { useBaseinfoStore } from '@/store/base';
+import { usePermissions } from '@/composables/usePermissions';
 
-/** 操作日志行（对接文档 §10 OperationLogOut，GET /logs/ 仅超级管理员可见） */
+/** 操作者过滤仅超管可用（普通用户后端固定只看本人，传 operator_id 会被忽略） */
+const { is_superuser } = usePermissions();
+
+/** 操作日志行（对接文档 §10 OperationLogOut，GET /logs/ 登录可见：超管看全量，普通用户只看本人） */
 interface OperationLogRow {
     id: number;
     action: string;
@@ -166,7 +170,7 @@ onMounted(() => {
                         <option value="failed">失败</option>
                     </select>
                 </label>
-                <label class="form-control">
+                <label v-if="is_superuser" class="form-control">
                     <div class="label py-1"><span class="label-text text-xs">操作者</span></div>
                     <select v-model="filters.operator_id" class="select select-bordered select-sm w-44"
                         @change="apply_filters">

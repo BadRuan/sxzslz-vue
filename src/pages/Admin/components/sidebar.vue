@@ -53,11 +53,10 @@ const nav_groups = computed<NavGroup[]>(() => [
         label: '系统',
         items: [
             ...(is_superuser.value
-                ? [
-                    { name: 'AdminUsers', label: '账户管理', icon: icon_users },
-                    { name: 'AdminLogs', label: '操作日志', icon: icon_logs },
-                ]
+                ? [{ name: 'AdminUsers', label: '账户管理', icon: icon_users }]
                 : []),
+            // 操作日志登录可见：超管看全量，普通用户只看本人
+            { name: 'AdminLogs', label: '操作日志', icon: icon_logs },
             { name: 'AdminPassword', label: '修改密码', icon: icon_lock },
         ],
     },

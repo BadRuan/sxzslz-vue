@@ -91,8 +91,8 @@ const routes: RouteRecordRaw[] = [
                 path: 'logs',
                 name: 'AdminLogs',
                 component: () => import("@/pages/Admin/Logs.vue"),
-                // 操作日志仅超级管理员：后端 /logs/ 本身 403，路由层再拦一道
-                meta: { title: '操作日志', requires_superuser: true }
+                // 操作日志登录可见：超管看全量，普通用户只看本人（后端 /logs/ 收敛）
+                meta: { title: '操作日志' }
             },
             {
                 path: 'list',
