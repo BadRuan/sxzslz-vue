@@ -215,9 +215,9 @@ const open_create = (parent_id = 0) => {
     modal_mode.value = 'create';
     editing_id.value = null;
     original_parent_id.value = 0;
-    // 默认取同级最后一项的排序（同级按 sort,id 升序，最大 sort 即末位；无同级则 0）
+    // 默认取同级末位的排序 +1（同级按 sort,id 升序，最大 sort 即末位；无同级则 0）
     const siblings = categories.value.filter(c => c.parent_id === parent_id);
-    const last_sort = siblings.length ? Math.max(...siblings.map(c => c.sort)) : 0;
+    const last_sort = siblings.length ? Math.max(...siblings.map(c => c.sort)) + 1 : 0;
     form.value = { name: '', parent_id, sort: last_sort };
     modal_error.value = '';
     show_modal.value = true;
