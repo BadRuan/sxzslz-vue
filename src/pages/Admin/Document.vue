@@ -290,9 +290,9 @@ onMounted(fetch_list);
             :total="total" unit="个" :page-size="PAGE_SIZE" @change="go_page" />
 
         <AppModal v-model="show_rename_modal" title="重命名文档" max-width="max-w-md">
-            <label class="form-control w-full">
-                <span class="label-text mb-1 text-base-content/70">展示名（下载时的文件名）</span>
-                <input v-model="rename_value" class="input input-bordered w-full" maxlength="255"
+            <label class="w-full">
+                <span class="mb-1 text-base-content/70">展示名（下载时的文件名）</span>
+                <input v-model="rename_value" class="input w-full" maxlength="255"
                     placeholder="请输入新文件名" @keyup.enter="submit_rename" />
             </label>
             <p v-if="rename_error" role="alert" class="alert alert-error text-sm mt-3">{{ rename_error }}</p>

@@ -84,15 +84,15 @@ const submit = async () => {
                 <p class="mt-2 text-sm text-base-content/60">请使用管理员账号登录，继续管理站点内容。</p>
 
                 <form class="mt-8 flex flex-col gap-5" @submit.prevent="submit">
-                    <label class="form-control w-full">
-                        <span class="label-text mb-2 text-xs font-medium text-base-content/55">用户名</span>
+                    <label class="w-full">
+                        <span class="mb-2 text-xs font-medium text-base-content/55">用户名</span>
                         <input v-model="username" autocomplete="username" placeholder="请输入用户名"
-                            class="input input-bordered h-11 w-full rounded-lg" />
+                            class="input h-11 w-full rounded-lg" />
                     </label>
-                    <label class="form-control w-full">
-                        <span class="label-text mb-2 text-xs font-medium text-base-content/55">密码</span>
+                    <label class="w-full">
+                        <span class="mb-2 text-xs font-medium text-base-content/55">密码</span>
                         <input v-model="password" type="password" autocomplete="current-password" placeholder="请输入密码"
-                            class="input input-bordered h-11 w-full rounded-lg" />
+                            class="input h-11 w-full rounded-lg" />
                     </label>
 
                     <p v-if="error_message" role="alert" class="alert alert-error rounded-lg py-2 text-sm">

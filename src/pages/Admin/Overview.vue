@@ -185,22 +185,21 @@ onMounted(
         <p v-if="stats_error" role="alert" class="alert alert-error text-sm">{{ stats_error }}</p>
         <!-- 内容区宽度 = 视口 − 侧栏 240px，lg(1024) 下 4 列偏挤，xl 起才排 4 列 -->
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <!-- .card（DaisyUI）默认纵向排布，行内布局收进内层：图标居左、文字居右；内层无任何类改向，恒为横排 -->
+            <!-- .card（DaisyUI）作白底外壳，内层用 .stat（DaisyUI）语义：stat-title/stat-value/stat-figure -->
             <div v-for="item in stat_items" :key="item.label"
-                class="card card-hover rounded-box p-5 hover:shadow-lift">
-                <div class="flex items-center gap-4">
-                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl" :class="item.bg">
-                        <svg class="h-5 w-5" :class="item.color" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" :d="item.icon" />
-                        </svg>
+                class="card card-hover rounded-box hover:shadow-lift">
+                <div class="stat">
+                    <div class="stat-figure">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl" :class="item.bg">
+                            <svg class="h-5 w-5" :class="item.color" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" :d="item.icon" />
+                            </svg>
+                        </div>
                     </div>
-                    <div class="min-w-0 flex-1">
-                        <p class="truncate text-sm text-base-content/65">{{ item.label }}</p>
-                        <p class="num mt-1.5 text-2xl font-semibold leading-none tracking-tight text-base-content">
-                            {{ item.value }}<span class="ml-1 text-sm font-normal text-base-content/55">{{ item.unit }}</span>
-                        </p>
-                    </div>
+                    <div class="stat-title">{{ item.label }}</div>
+                    <div class="stat-value num">{{ item.value }}<span
+                            class="ml-1 text-sm font-normal text-base-content/55">{{ item.unit }}</span></div>
                 </div>
             </div>
         </div>

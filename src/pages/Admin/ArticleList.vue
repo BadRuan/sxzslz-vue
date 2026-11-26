@@ -559,7 +559,7 @@ onMounted(
                      用 text 而非 search：避免 Chrome 原生清除 × 与自定义「清空」按钮重复（Firefox 无原生 ×） -->
                 <div class="relative">
                     <input v-model="keyword_input" type="text"
-                        class="input input-bordered input-sm w-56 max-w-full pr-12"
+                        class="input input-sm w-56 max-w-full pr-12"
                         :maxlength="MAX_INPUT_LENGTH" autocomplete="off"
                         placeholder="搜索标题 / 粘贴 slug 或链接…" aria-label="按标题或 slug 搜索文章" />
                     <button v-if="keyword_input" type="button"
@@ -572,7 +572,7 @@ onMounted(
                 <label class="flex items-center gap-2 text-sm text-base-content/60 whitespace-nowrap">
                     <span class="hidden sm:inline">排序</span>
                     <select v-model="sort" aria-label="文章列表排序方式"
-                        class="select select-bordered select-sm w-56 max-w-full">
+                        class="select select-sm w-56 max-w-full">
                         <option v-for="opt in SORT_OPTIONS" :key="opt.value" :value="opt.value">
                             {{ opt.label }}
                         </option>
@@ -580,7 +580,7 @@ onMounted(
                 </label>
                 <!-- 超管：按发布主体筛选（普通账号由后端固定收敛为本人，无需筛选） -->
                 <select v-if="is_superuser" v-model="filter_user_id"
-                    class="select select-bordered select-sm w-48">
+                    class="select select-sm w-48">
                     <option :value="''">全部作者</option>
                     <option v-for="u in users" :key="u.id" :value="u.id">{{ u.nickname }}</option>
                 </select>
@@ -709,7 +709,7 @@ onMounted(
                     <div class="flex flex-col gap-4">
                         <label class="text-sm text-base-content/70">标题
                             <input v-model="form.title"
-                                class="input input-bordered w-full mt-1" />
+                                class="input w-full mt-1" />
                         </label>
 
                         <div class="text-sm text-base-content/70">
@@ -736,7 +736,7 @@ onMounted(
                                     loading="lazy" decoding="async"
                                     class="h-16 w-24 rounded-lg object-cover ring-1 ring-base-300" />
                                 <input v-model="form.cover_img_slug" placeholder="或直接填图片 slug"
-                                    class="input input-bordered flex-1 mt-1" />
+                                    class="input flex-1 mt-1" />
                                 <button v-if="form.cover_img_slug" class="btn btn-ghost btn-xs text-error shrink-0"
                                     @click="form.cover_img_slug = ''">清除</button>
                             </div>
@@ -746,14 +746,14 @@ onMounted(
                         <template v-if="is_superuser">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-base-content/70">
                                 <label>发布主体（作者）
-                                    <select v-model="form.user_id" class="select select-bordered w-full mt-1">
+                                    <select v-model="form.user_id" class="select w-full mt-1">
                                         <option :value="''">默认：当前登录用户</option>
                                         <option v-for="u in users" :key="u.id" :value="u.id">{{ u.nickname }}</option>
                                     </select>
                                 </label>
                                 <label>发布时间
                                     <input v-model="form.create_at" type="datetime-local"
-                                        class="input input-bordered w-full mt-1" />
+                                        class="input w-full mt-1" />
                                     <span class="block mt-1 text-xs text-base-content/55">留空则新增时用服务器当前时间，编辑时保持不变</span>
                                 </label>
                             </div>

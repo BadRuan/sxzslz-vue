@@ -85,20 +85,20 @@ const go_relogin = () => {
                     </p>
 
                     <form class="flex flex-col gap-4" @submit.prevent="submit">
-                        <label class="form-control w-full">
-                            <span class="label-text mb-1 text-base-content/70">当前密码</span>
+                        <label class="w-full">
+                            <span class="mb-1 text-base-content/70">当前密码</span>
                             <input v-model="old_password" type="password" autocomplete="current-password"
-                                placeholder="请输入当前密码" class="input input-bordered w-full" />
+                                placeholder="请输入当前密码" class="input w-full" />
                         </label>
-                        <label class="form-control w-full">
-                            <span class="label-text mb-1 text-base-content/70">新密码</span>
+                        <label class="w-full">
+                            <span class="mb-1 text-base-content/70">新密码</span>
                             <input v-model="new_password" type="password" autocomplete="new-password"
-                                placeholder="请输入新密码（至少 6 位）" class="input input-bordered w-full" />
+                                placeholder="请输入新密码（至少 6 位）" class="input w-full" />
                         </label>
-                        <label class="form-control w-full">
-                            <span class="label-text mb-1 text-base-content/70">确认新密码</span>
+                        <label class="w-full">
+                            <span class="mb-1 text-base-content/70">确认新密码</span>
                             <input v-model="confirm_password" type="password" autocomplete="new-password"
-                                placeholder="请再次输入新密码" class="input input-bordered w-full" />
+                                placeholder="请再次输入新密码" class="input w-full" />
                         </label>
 
                         <p v-if="error_message" role="alert" class="alert alert-error text-sm">

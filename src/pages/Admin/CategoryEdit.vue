@@ -36,6 +36,133 @@ const run_confirm = () => {
 
 const tree_rows = computed(() => flatten_tree(build_category_tree(categories.value)));
 
+// —— 同级排序（拖拽为主 + ↑↓ 按钮兜底，共用同一持久化核心）——
+const reordering = ref(false);
+const drag_id = ref<number | null>(null);
+const drop_hint = ref<{ id: number; pos: 'before' | 'after' } | null>(null);
+
+/** 每行的同级位置：按 parent_id 分组，组内顺序即当前展示顺序（基于先序 tree_rows） */
+const sibling_info = computed(() => {
+    const groups = new Map<number, number[]>();
+    for (const { node } of tree_rows.value) {
+        const g = groups.get(node.parent_id) ?? [];
+        g.push(node.id);
+        groups.set(node.parent_id, g);
+    }
+    const info = new Map<number, { parent_id: number; index: number; length: number }>();
+    for (const [parent_id, ids] of groups) {
+        ids.forEach((id, index) => info.set(id, { parent_id, index, length: ids.length }));
+    }
+    return info;
+});
+
+/** 同级是否可向 dir 方向移动一位 */
+const can_move = (row: CategoryFlat, dir: -1 | 1) => {
+    const i = sibling_info.value.get(row.id);
+    if (!i || i.length < 2) return false;
+    const t = i.index + dir;
+    return t >= 0 && t < i.length;
+};
+
+/** 按当前展示顺序取同级 id 列表 */
+const sibling_ids = (parent_id: number) =>
+    tree_rows.value.filter(n => n.node.parent_id === parent_id).map(n => n.node.id);
+
+/**
+ * 同级重排持久化：乐观本地换位 → 仅对 sort 变化行串行 PATCH → 一律刷新回服务端真实顺序。
+ * 任一请求失败即停止后续请求、记 action_error，由刷新兜底回滚显示。
+ */
+const apply_reorder = async (parent_id: number, ordered_ids: number[]) => {
+    if (reordering.value) return;
+    reordering.value = true;
+    action_error.value = '';
+    const old_sorts = new Map(categories.value.map(c => [c.id, c.sort]));
+    // 乐观更新：同级项在原数组槽位内换位（build_category_tree 只认数组顺序）
+    const slots: number[] = [];
+    categories.value.forEach((c, idx) => { if (c.parent_id === parent_id) slots.push(idx); });
+    const by_id = new Map(categories.value.map(c => [c.id, c]));
+    slots.forEach((slot, k) => {
+        const id = ordered_ids[k];
+        const item = id === undefined ? undefined : by_id.get(id);
+        if (item) { categories.value[slot] = item; item.sort = k; }
+    });
+    try {
+        for (const [sort, id] of ordered_ids.entries()) {
+            if (old_sorts.get(id) !== sort) {
+                await apiService.patch('/categories/' + id, { sort });
+            }
+        }
+    } catch (error: any) {
+        action_error.value = api_error_detail(error, '排序保存失败，请稍后重试');
+    } finally {
+        await queryCategoryInfo();
+        reordering.value = false;
+    }
+};
+
+/** ↑↓ 按钮：与同级相邻项交换 */
+const move_sibling = (row: CategoryFlat, dir: -1 | 1) => {
+    if (reordering.value || !can_move(row, dir)) return;
+    const ids = sibling_ids(row.parent_id);
+    const info = sibling_info.value.get(row.id)!;
+    const target = info.index + dir;
+    const from_id = ids[info.index]!;
+    const to_id = ids[target]!;
+    ids[info.index] = to_id;
+    ids[target] = from_id;
+    void apply_reorder(row.parent_id, ids);
+};
+
+// —— 拖拽（原生 HTML5，仅限同级）——
+const on_drag_start = (row: CategoryFlat, e: DragEvent) => {
+    // 操作列按钮发起的拖动不视为排序拖拽；同级不足 2 个无处可拖
+    if (reordering.value || (e.target as HTMLElement).closest('.btn')
+        || !can_move(row, -1) && !can_move(row, 1)) {
+        e.preventDefault();
+        return;
+    }
+    drag_id.value = row.id;
+    e.dataTransfer?.setData('text/plain', String(row.id));
+    if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
+};
+
+const on_drag_over = (row: CategoryFlat, e: DragEvent) => {
+    const dragged = drag_id.value;
+    if (dragged === null) return;
+    const from = categories.value.find(c => c.id === dragged);
+    // 跨级（parent_id 不同）不接受落点，同时清掉残留指示线
+    if (!from || from.parent_id !== row.parent_id || row.id === dragged) {
+        drop_hint.value = null;
+        return;
+    }
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const pos = e.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
+    drop_hint.value = { id: row.id, pos };
+};
+
+const on_drop = (row: CategoryFlat, e: DragEvent) => {
+    e.preventDefault();
+    const dragged = drag_id.value;
+    const hint = drop_hint.value;
+    drag_id.value = null;
+    drop_hint.value = null;
+    if (dragged === null || !hint || hint.id !== row.id) return;
+    const ids = sibling_ids(row.parent_id);
+    const from = ids.indexOf(dragged);
+    if (from === -1) return;
+    const rest = ids.filter(id => id !== dragged);
+    const at = rest.indexOf(hint.id) + (hint.pos === 'after' ? 1 : 0);
+    const ordered = [...rest.slice(0, at), dragged, ...rest.slice(at)];
+    void apply_reorder(row.parent_id, ordered);
+};
+
+const on_drag_end = () => {
+    drag_id.value = null;
+    drop_hint.value = null;
+};
+
 const queryCategoryInfo = async () => {
     list_error.value = '';
     try {
@@ -224,7 +351,18 @@ onMounted(load_category_page);
                         <tr v-if="!list_error && tree_rows.length === 0">
                             <td colspan="4" class="px-6 py-8 text-center text-base-content/55">暂无分类</td>
                         </tr>
-                        <tr v-for="{ node, depth } in tree_rows" :key="node.id" class="hover:bg-base-200 link-transition">
+                        <tr v-for="{ node, depth } in tree_rows" :key="node.id"
+                            class="hover:bg-base-200 link-transition cursor-grab"
+                            :draggable="reordering ? 'false' : 'true'"
+                            :class="{
+                                'dragging': drag_id === node.id,
+                                'drag-line-before': drop_hint?.id === node.id && drop_hint.pos === 'before',
+                                'drag-line-after': drop_hint?.id === node.id && drop_hint.pos === 'after',
+                            }"
+                            @dragstart="on_drag_start(node, $event)"
+                            @dragover="on_drag_over(node, $event)"
+                            @drop="on_drop(node, $event)"
+                            @dragend="on_drag_end()">
                             <td class="px-6 py-3.5 text-base-content/80 text-left"
                                 :style="{ paddingLeft: `${1.25 + depth * 1.5}rem` }">
                                 {{ node.name }}
@@ -233,6 +371,13 @@ onMounted(load_category_page);
                             <td class="px-6 py-3.5 text-base-content/60">{{ node.sort }}</td>
                             <td class="px-6 py-3.5">
                                 <div class="flex items-center justify-center gap-1">
+                                    <!-- 同级排序：↑↓ 按钮兜底（拖拽为主） -->
+                                    <button class="btn btn-ghost btn-xs" title="上移（同级内）"
+                                        :disabled="reordering || !can_move(node, -1)"
+                                        @click="move_sibling(node, -1)">↑</button>
+                                    <button class="btn btn-ghost btn-xs" title="下移（同级内）"
+                                        :disabled="reordering || !can_move(node, 1)"
+                                        @click="move_sibling(node, 1)">↓</button>
                                     <!-- 仅一级分类可添加子分类（严格二级） -->
                                     <button v-if="depth === 0" class="btn btn-ghost btn-xs text-primary whitespace-nowrap"
                                         @click="open_create(node.id)">添加子分类</button>
@@ -251,11 +396,11 @@ onMounted(load_category_page);
                 <div class="flex flex-col gap-3">
                     <label class="text-sm text-base-content/70">名称
                         <input v-model="form.name"
-                            class="input input-bordered w-full mt-1" />
+                            class="input w-full mt-1" />
                     </label>
                     <label class="text-sm text-base-content/70">父分类
                         <select v-model.number="form.parent_id" :disabled="editing_is_first_level"
-                            class="select select-bordered w-full mt-1 disabled:opacity-60">
+                            class="select w-full mt-1 disabled:opacity-60">
                             <option :value="0">一级分类</option>
                             <option v-for="opt in parent_options" :key="opt.id" :value="opt.id">{{ opt.label }}</option>
                         </select>
@@ -267,7 +412,7 @@ onMounted(load_category_page);
                     </label>
                     <label class="text-sm text-base-content/70">排序
                         <input v-model.number="form.sort" type="number"
-                            class="input input-bordered w-full mt-1" />
+                            class="input w-full mt-1" />
                     </label>
                     <p v-if="modal_error" class="text-sm text-error">{{ modal_error }}</p>
                 </div>
@@ -292,3 +437,18 @@ onMounted(load_category_page);
         </template>
     </main>
 </template>
+
+<style scoped>
+/* 拖拽排序视觉反馈（daisyUI 无对应 API，属自建补充） */
+.dragging {
+    opacity: 0.4;
+}
+
+.drag-line-before {
+    box-shadow: inset 0 2px 0 0 var(--color-primary);
+}
+
+.drag-line-after {
+    box-shadow: inset 0 -2px 0 0 var(--color-primary);
+}
+</style>

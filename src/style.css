@@ -53,7 +53,7 @@
 }
 
 @theme {
-    --font-sans: "GoogleSansCode", "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif;
+    --font-sans: "MiSans VF", "GoogleSansCode", "Inter", "PingFang SC", "Microsoft YaHei", ui-sans-serif;
     /* 卡片阴影只有两级，避免页面上出现七八种投影 */
     --shadow-card: 0 1px 2px rgb(11 20 32 / 0.04), 0 1px 3px rgb(11 20 32 / 0.05);
     --shadow-lift: 0 12px 28px -12px rgb(11 20 32 / 0.18), 0 2px 6px rgb(11 20 32 / 0.06);
@@ -68,12 +68,6 @@
     background-color: var(--color-base-100);
     border: 1px solid var(--color-base-300);
     box-shadow: var(--shadow-card);
-}
-
-/* 菜单激活项 */
-@utility menu-active {
-    background-color: color-mix(in oklab, var(--color-primary) 10%, transparent);
-    color: var(--color-primary);
 }
 
 /* 主操作按钮字号 14→15px */

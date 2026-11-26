@@ -32,10 +32,11 @@ const handle_logout = () => {
 
         <div class="flex shrink-0 items-center gap-2 sm:gap-3">
             <div class="flex items-center gap-2.5">
-                <span
-                    class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                    {{ initial }}
-                </span>
+                <div class="avatar avatar-placeholder">
+                    <div class="w-8 rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                        {{ initial }}
+                    </div>
+                </div>
                 <div class="hidden flex-col leading-tight sm:flex">
                     <span class="max-w-[9rem] truncate text-sm font-medium text-base-content">{{ nickname }}</span>
                     <span class="text-[0.625rem] text-base-content/50">

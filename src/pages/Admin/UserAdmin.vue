@@ -245,16 +245,16 @@ onMounted(load_users);
             <div class="flex flex-col gap-4">
                 <label class="text-sm text-base-content/70">登录名
                     <input v-model="form.username" placeholder="登录用，唯一，如 zhangsan"
-                        class="input input-bordered w-full mt-1" />
+                        class="input w-full mt-1" />
                 </label>
                 <label class="text-sm text-base-content/70">昵称
                     <input v-model="form.nickname" placeholder="展示名，唯一，如 张三"
-                        class="input input-bordered w-full mt-1" />
+                        class="input w-full mt-1" />
                 </label>
                 <label class="text-sm text-base-content/70">密码
                     <input v-model="form.password" type="password" autocomplete="new-password"
                         placeholder="留空则初始密码为 abc123"
-                        class="input input-bordered w-full mt-1" />
+                        class="input w-full mt-1" />
                     <span class="block mt-1 text-xs text-base-content/55">
                         最少 6 位；留空则 {{ DEFAULT_PASSWORD_NOTICE }}
                     </span>

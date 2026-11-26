@@ -145,34 +145,34 @@ onMounted(() => {
         <!-- 筛选行：空条件不传参，查询回第 1 页 -->
         <div class="rounded-box border border-base-300 bg-base-100 p-4 shadow-[var(--shadow-card)]">
             <div class="flex flex-wrap items-end gap-3">
-                <label class="form-control">
-                    <div class="label py-1"><span class="label-text text-xs">动作</span></div>
-                    <select v-model="filters.action" class="select select-bordered select-sm w-44"
+                <label>
+                    <div class="label py-1"><span class="text-xs">动作</span></div>
+                    <select v-model="filters.action" class="select select-sm w-44"
                         @change="apply_filters">
                         <option value="">全部动作</option>
                         <option v-for="(label, key) in ACTION_LABELS" :key="key" :value="key">{{ label }}</option>
                     </select>
                 </label>
-                <label class="form-control">
-                    <div class="label py-1"><span class="label-text text-xs">对象类型</span></div>
-                    <select v-model="filters.object_type" class="select select-bordered select-sm w-40"
+                <label>
+                    <div class="label py-1"><span class="text-xs">对象类型</span></div>
+                    <select v-model="filters.object_type" class="select select-sm w-40"
                         @change="apply_filters">
                         <option value="">全部类型</option>
                         <option v-for="(label, key) in OBJECT_TYPE_LABELS" :key="key" :value="key">{{ label }}</option>
                     </select>
                 </label>
-                <label class="form-control">
-                    <div class="label py-1"><span class="label-text text-xs">结果</span></div>
-                    <select v-model="filters.result" class="select select-bordered select-sm w-32"
+                <label>
+                    <div class="label py-1"><span class="text-xs">结果</span></div>
+                    <select v-model="filters.result" class="select select-sm w-32"
                         @change="apply_filters">
                         <option value="">全部结果</option>
                         <option value="success">成功</option>
                         <option value="failed">失败</option>
                     </select>
                 </label>
-                <label v-if="is_superuser" class="form-control">
-                    <div class="label py-1"><span class="label-text text-xs">操作者</span></div>
-                    <select v-model="filters.operator_id" class="select select-bordered select-sm w-44"
+                <label v-if="is_superuser">
+                    <div class="label py-1"><span class="text-xs">操作者</span></div>
+                    <select v-model="filters.operator_id" class="select select-sm w-44"
                         @change="apply_filters">
                         <option value="">全部操作者</option>
                         <option v-for="user in baseinfo.users" :key="user.id" :value="String(user.id)">
@@ -199,10 +199,12 @@ onMounted(() => {
             </div>
             <div v-else-if="rows.length === 0" class="p-14 text-center text-sm text-base-content/55">
                 暂无日志
+                <p v-if="filters.action || filters.object_type || filters.result || filters.operator_id"
+                    class="mt-1.5 text-xs text-base-content/40">可调整筛选条件后查询</p>
             </div>
             <div v-else class="overflow-x-auto">
-                <table class="table table-zebra">
-                    <thead>
+                <table class="table table-zebra logs-table">
+                    <thead class="border-b border-base-300">
                         <tr class="text-xs text-base-content/60">
                             <th>序号</th>
                             <th>时间</th>
@@ -216,7 +218,7 @@ onMounted(() => {
                         </tr>
                     </thead>
                     <tbody class="text-sm">
-                        <tr v-for="(row, index) in rows" :key="row.id">
+                        <tr v-for="(row, index) in rows" :key="row.id" class="link-transition hover:bg-base-300">
                             <td class="whitespace-nowrap text-base-content/60">{{ row_index(index) }}</td>
                             <td class="whitespace-nowrap text-base-content/70">{{ datetime_text(row.created_at) }}</td>
                             <td class="whitespace-nowrap font-medium" :title="row.action">{{ action_text(row.action) }}</td>
@@ -243,3 +245,21 @@ onMounted(() => {
             :total="total" unit="条" :page-size="PAGE_SIZE" @change="go_page" />
     </div>
 </template>
+
+<style scoped>
+/*
+ * 斑马条纹加强：daisyUI 的 table-zebra 用 --color-base-200，
+ * 与白卡底色亮度差太小几乎不可见；这里用主题变量混色加深偶数行，
+ * 不硬编码色值、不影响其他页面。scoped 无层样式优先级高于组件库分层样式。
+ */
+.logs-table tbody tr:nth-child(even) {
+    background-color: color-mix(in oklab, var(--color-base-200), var(--color-base-300));
+}
+
+/* 偶数行悬停：其行底色会被上面的规则盖住，需单独给更深一档的反馈色 */
+@media (hover: hover) {
+    .logs-table tbody tr:nth-child(even):hover {
+        background-color: var(--color-base-300);
+    }
+}
+</style>

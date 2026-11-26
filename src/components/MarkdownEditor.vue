@@ -299,7 +299,7 @@ const pick_upload = async (event: Event) => {
         <div class="grid gap-3" :class="mode === 'split' ? 'md:grid-cols-2' : 'grid-cols-1'">
             <textarea v-show="mode !== 'preview'" ref="textarea" v-model="content" rows="14"
                 placeholder="在此输入 Markdown 正文，右侧实时预览；相对路径图片/附件会自动补全为站内地址"
-                class="textarea textarea-bordered w-full font-mono text-sm leading-6 resize-y"></textarea>
+                class="textarea w-full font-mono text-sm leading-6 resize-y"></textarea>
 
             <div v-show="mode !== 'edit'"
                 class="h-[360px] overflow-y-auto rounded-lg border border-base-300 bg-base-100 px-4 py-3">
