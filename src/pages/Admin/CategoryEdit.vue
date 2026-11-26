@@ -115,8 +115,10 @@ const move_sibling = (row: CategoryFlat, dir: -1 | 1) => {
 
 // —— 拖拽（原生 HTML5，仅限同级）——
 const on_drag_start = (row: CategoryFlat, e: DragEvent) => {
-    // 操作列按钮发起的拖动不视为排序拖拽；同级不足 2 个无处可拖
-    if (reordering.value || (e.target as HTMLElement).closest('.btn')
+    // 按钮不可拖，浏览器会把拖源归到最近的可拖 tr，故用起点命中元素判断是否从操作列按钮发起；
+    // 同级不足 2 个无处可拖
+    const hit = document.elementFromPoint(e.clientX, e.clientY);
+    if (reordering.value || hit?.closest('.btn')
         || !can_move(row, -1) && !can_move(row, 1)) {
         e.preventDefault();
         return;
@@ -352,9 +354,10 @@ onMounted(load_category_page);
                             <td colspan="4" class="px-6 py-8 text-center text-base-content/55">暂无分类</td>
                         </tr>
                         <tr v-for="{ node, depth } in tree_rows" :key="node.id"
-                            class="hover:bg-base-200 link-transition cursor-grab"
+                            class="hover:bg-base-200 link-transition"
                             :draggable="reordering ? 'false' : 'true'"
                             :class="{
+                                'cursor-grab': can_move(node, -1) || can_move(node, 1),
                                 'dragging': drag_id === node.id,
                                 'drag-line-before': drop_hint?.id === node.id && drop_hint.pos === 'before',
                                 'drag-line-after': drop_hint?.id === node.id && drop_hint.pos === 'after',
