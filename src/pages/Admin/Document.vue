@@ -61,20 +61,27 @@ const can_manage = (doc: DocumentModel) =>
 /** 表格行序号：跨页连续编号 */
 const row_index = (index: number) => (page.value - 1) * PAGE_SIZE + index + 1;
 
+/** 列表请求序号：连续请求时丢弃乱序返回，旧请求的 finally 不得收起新请求的骨架 */
+let list_request_seq = 0;
+
 const fetch_list = async () => {
+    const request_seq = ++list_request_seq;
     list_error.value = '';
     list_loading.value = true;
     try {
         // 后端默认即为上传时间倒序（sort=uploaded_at）
         const res = await apiService.get('/document/', { page: page.value, page_size: PAGE_SIZE });
+        if (request_seq !== list_request_seq) return;
         document_list.value = res.data ?? [];
         total.value = res.total;
         has_next.value = res.has_next;
     } catch (error) {
+        if (request_seq !== list_request_seq) return;
         list_error.value = api_error_detail(error, '获取文件列表失败');
         console.error('获取管理后台文件列表失败:', error)
     } finally {
-        list_loading.value = false;
+        // 乱序响应：仅当仍是最新请求时才收起骨架，旧请求不得覆盖新请求的加载态
+        if (request_seq === list_request_seq) list_loading.value = false;
     }
 }
 

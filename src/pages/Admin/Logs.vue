@@ -194,9 +194,23 @@ onMounted(() => {
                 <p class="mb-3 text-error">{{ list_error }}</p>
                 <button type="button" class="btn btn-sm btn-primary" @click="fetch_logs">重新加载</button>
             </div>
-            <!-- 加载状态：容器与行内边距跟随真实表格（overflow-x-auto + table 默认 px-4 py-3），避免加载→内容切换跳动 -->
+            <!-- 加载状态：容器与行内边距跟随真实表格（overflow-x-auto + table 默认 px-4 py-3），
+                 表头行 + 行骨架镜像真实 thead/tbody 结构，避免加载→内容切换跳动 -->
             <div v-else-if="loading && rows.length === 0" class="overflow-x-auto">
-                <div v-for="n in 6" :key="n" class="flex items-center gap-4 px-4 py-3">
+                <!-- 表头骨架：对齐真实 thead 高度（text-xs 16px + py-3 + border-b ≈ 41px），块宽对齐真实列 -->
+                <div class="flex items-center gap-4 border-b border-base-300 px-4 py-3">
+                    <SkeletonBlock class="h-4 w-10 shrink-0" />
+                    <SkeletonBlock class="h-4 w-28 shrink-0" />
+                    <SkeletonBlock class="h-4 w-20 shrink-0" />
+                    <SkeletonBlock class="h-4 w-16 shrink-0" />
+                    <SkeletonBlock class="h-4 min-w-0 flex-1" />
+                    <SkeletonBlock class="h-4 w-20 shrink-0" />
+                    <SkeletonBlock class="h-4 w-14 shrink-0" />
+                    <SkeletonBlock class="h-4 w-24 shrink-0" />
+                    <SkeletonBlock class="h-4 w-32 shrink-0" />
+                </div>
+                <!-- 行骨架：py-3.5 + h-4 = 44px，对齐真实行高（text-sm 20px + py-3） -->
+                <div v-for="n in 6" :key="n" class="flex items-center gap-4 px-4 py-3.5">
                     <SkeletonBlock class="h-4 w-10 shrink-0" />
                     <SkeletonBlock class="h-4 w-28 shrink-0" />
                     <SkeletonBlock class="h-4 w-20 shrink-0" />
