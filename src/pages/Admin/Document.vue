@@ -7,6 +7,7 @@ import dayjs from 'dayjs';
 import AppPagination from '@/components/AppPagination.vue';
 import AppModal from '@/components/AppModal.vue';
 import CopyButton from '@/components/CopyButton.vue';
+import SkeletonBlock from '@/components/SkeletonBlock.vue';
 import { useUpload } from '@/composables/useUpload';
 import { doc_icon_for } from '@/utils/docIcon';
 import {
@@ -37,6 +38,8 @@ const total = ref(0);
 const page = ref(1);
 const has_next = ref(false);
 const list_error = ref('');
+/** 列表加载中（内容级加载位用） */
+const list_loading = ref(false);
 const action_error = ref('');
 
 /** 上传进度 / 错误 / 取消：与照片管理共用同一套组合式逻辑 */
@@ -60,6 +63,7 @@ const row_index = (index: number) => (page.value - 1) * PAGE_SIZE + index + 1;
 
 const fetch_list = async () => {
     list_error.value = '';
+    list_loading.value = true;
     try {
         // 后端默认即为上传时间倒序（sort=uploaded_at）
         const res = await apiService.get('/document/', { page: page.value, page_size: PAGE_SIZE });
@@ -69,6 +73,8 @@ const fetch_list = async () => {
     } catch (error) {
         list_error.value = api_error_detail(error, '获取文件列表失败');
         console.error('获取管理后台文件列表失败:', error)
+    } finally {
+        list_loading.value = false;
     }
 }
 
@@ -244,7 +250,19 @@ onMounted(fetch_list);
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-base-300 divide-dashed">
-                    <tr v-if="!list_error && document_list.length === 0">
+                    <!-- 加载状态：行骨架的行高对齐真实行 py-3.5 节奏，避免加载→内容切换跳动 -->
+                    <tr v-if="list_loading && document_list.length === 0">
+                        <td :colspan="auth_store.is_superuser ? 8 : 7" class="px-4 py-0">
+                            <div v-for="n in 6" :key="n" class="flex items-center gap-4 py-3.5">
+                                <SkeletonBlock class="h-4 w-10 shrink-0" />
+                                <SkeletonBlock class="h-4 min-w-0 flex-1" />
+                                <SkeletonBlock class="h-4 w-16 shrink-0" />
+                                <SkeletonBlock class="h-4 w-24 shrink-0" />
+                                <SkeletonBlock class="h-4 w-32 shrink-0" />
+                            </div>
+                        </td>
+                    </tr>
+                    <tr v-else-if="!list_error && document_list.length === 0">
                         <td :colspan="auth_store.is_superuser ? 8 : 7" class="px-4 py-8 text-center text-base-content/55">暂无文件</td>
                     </tr>
                     <tr v-for="(doc, index) in document_list" :key="doc.id" class="hover:bg-base-200 link-transition">

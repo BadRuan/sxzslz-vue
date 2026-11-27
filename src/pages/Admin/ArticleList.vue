@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia';
 import dayjs from 'dayjs';
 import AppPagination from '@/components/AppPagination.vue';
 import AppModal from '@/components/AppModal.vue';
+import SkeletonBlock from '@/components/SkeletonBlock.vue';
 import MarkdownEditor from '@/components/MarkdownEditor.vue';
 import apiService, { type UploadPhase } from '@/utils/apiService';
 import { useBaseinfoStore } from '@/store/base';
@@ -36,6 +37,8 @@ const total = ref(0);
 const page = ref(1);
 const has_next = ref(false);
 const list_error = ref('');
+/** 列表加载中（内容级加载位用；由 fetch_list 收尾，乱序响应不覆盖新请求） */
+const list_loading = ref(false);
 const action_error = ref('');
 const action_success = ref('');
 const action_slug = ref<string | null>(null); // 正在操作（删除/恢复/切换状态）的文章 slug
@@ -132,6 +135,7 @@ const scan_by_slug = async (request_seq: number, target_slug: string): Promise<b
 const fetch_list = async () => {
     const request_seq = ++list_request_seq;
     list_error.value = '';
+    list_loading.value = true;
     try {
         // 粘贴 slug / 文章链接 → 精确定位；普通文本 → 按标题模糊搜索
         const target_slug = keyword.value ? extract_slug(keyword.value) : null;
@@ -172,6 +176,9 @@ const fetch_list = async () => {
         if (request_seq !== list_request_seq) return;
         list_error.value = api_error_detail(error, '获取文章列表失败');
         console.error('获取管理后台文章列表失败:', error)
+    } finally {
+        // 乱序响应：仅当仍是最新请求时才收起骨架，旧请求不得覆盖新请求的加载态
+        if (request_seq === list_request_seq) list_loading.value = false;
     }
 };
 
@@ -636,6 +643,18 @@ onMounted(
                 <tbody class="divide-y divide-base-300 divide-dashed">
                     <tr v-if="list_error">
                         <td :colspan="column_count" class="px-6 py-8 text-center text-error">{{ list_error }}</td>
+                    </tr>
+                    <!-- 加载状态：行骨架的行高对齐真实行 py-3.5 节奏，避免加载→内容切换跳动 -->
+                    <tr v-else-if="list_loading && article_list.length === 0">
+                        <td :colspan="column_count" class="px-4 py-0">
+                            <div v-for="n in 6" :key="n" class="flex items-center gap-4 py-3.5">
+                                <SkeletonBlock class="h-4 w-16 shrink-0" />
+                                <SkeletonBlock class="h-4 min-w-0 flex-1" />
+                                <SkeletonBlock class="h-4 w-16 shrink-0" />
+                                <SkeletonBlock class="h-4 w-12 shrink-0" />
+                                <SkeletonBlock class="h-4 w-24 shrink-0" />
+                            </div>
+                        </td>
                     </tr>
                     <tr v-else-if="article_list.length === 0">
                         <td :colspan="column_count" class="px-6 py-8 text-center text-base-content/55">

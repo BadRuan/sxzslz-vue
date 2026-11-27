@@ -8,6 +8,7 @@ import { date_text } from '@/utils/formatters';
 import { articleService, type ArticleModel } from '@/store/article';
 import { useAuthStore } from '@/store/auth';
 import { api_error_detail } from '@/utils/apiError';
+import SkeletonBlock from '@/components/SkeletonBlock.vue';
 
 // 概览统计：文章/图片/附件用分页接口的 total；容量与发布量走专用接口
 interface CountModel {
@@ -274,6 +275,16 @@ onMounted(
             <ul class="divide-y divide-base-300">
                 <li v-if="latest_error" class="px-5 py-10 text-center text-sm text-error">
                     {{ latest_error }}
+                </li>
+                <!-- 加载状态：数据未返回（undefined）时给行骨架，行结构与真实行一致（分类标签 + 标题 + 日期） -->
+                <li v-else-if="latest_article === undefined">
+                    <div v-for="n in 4" :key="n" class="flex items-center justify-between gap-4 px-5 py-3">
+                        <div class="flex min-w-0 flex-1 items-center gap-3">
+                            <SkeletonBlock class="h-6 w-16 shrink-0" rounded="rounded-md" />
+                            <SkeletonBlock class="h-4 min-w-0 flex-1" />
+                        </div>
+                        <SkeletonBlock class="h-4 w-16 shrink-0" />
+                    </div>
                 </li>
                 <li v-else-if="!latest_article?.length" class="px-5 py-12 text-center text-sm text-base-content/55">
                     暂无文章

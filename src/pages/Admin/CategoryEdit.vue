@@ -5,6 +5,7 @@ import { api_error_detail } from '@/utils/apiError';
 import { useAuthStore } from '@/store/auth';
 import { get_token } from '@/utils/token';
 import AppModal from '@/components/AppModal.vue';
+import SkeletonBlock from '@/components/SkeletonBlock.vue';
 import {
     type CategoryFlat,
     type CategoryTreeNode,
@@ -318,9 +319,27 @@ onMounted(load_category_page);
 
 <template>
     <main class="flex-1 overflow-y-auto p-6">
-        <div v-if="is_loading" class="card rounded-box p-12 text-center text-base-content/60">
-            <span class="loading loading-spinner loading-md mx-auto mb-4 block"></span>
-            <p>加载中...</p>
+        <!-- 加载状态：跟随真实内容结构（右侧按钮行 + 卡片表格），避免加载→内容切换跳动 -->
+        <div v-if="is_loading">
+            <div class="flex items-center justify-end mb-6">
+                <SkeletonBlock class="h-10 w-32" rounded="rounded-field" />
+            </div>
+            <div class="card rounded-box overflow-x-auto">
+                <div class="flex items-center gap-8 border-b border-base-300 px-6 py-4">
+                    <SkeletonBlock class="h-4 w-20" />
+                    <SkeletonBlock class="h-4 w-12" />
+                    <SkeletonBlock class="h-4 w-12" />
+                    <SkeletonBlock class="h-4 w-12" />
+                </div>
+                <div class="divide-y divide-base-300 divide-dashed">
+                    <div v-for="n in 6" :key="n" class="flex items-center gap-8 px-6 py-3.5">
+                        <SkeletonBlock class="h-4 w-44" />
+                        <SkeletonBlock class="h-4 w-12" />
+                        <SkeletonBlock class="h-4 w-12" />
+                        <SkeletonBlock class="h-4 flex-1" />
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div v-else-if="is_forbidden" role="alert" class="alert alert-warning text-sm">

@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import AppPagination from '@/components/AppPagination.vue';
 import AppModal from '@/components/AppModal.vue';
 import CopyButton from '@/components/CopyButton.vue';
+import SkeletonBlock from '@/components/SkeletonBlock.vue';
 import { useUpload } from '@/composables/useUpload';
 import {
     IMAGE_ACCEPT,
@@ -37,6 +38,8 @@ const total = ref(0);
 const page = ref(1);
 const has_next = ref(false);
 const list_error = ref('');
+/** 列表首次加载中（仅内容级加载位用；翻页时列表已有数据，不显示骨架） */
+const list_loading = ref(false);
 const action_error = ref('');
 
 /** 上传进度 / 错误 / 取消：与文档管理共用同一套组合式逻辑 */
@@ -55,6 +58,7 @@ const can_manage = (image: ImageModel) =>
 
 const getImageList = async () => {
     list_error.value = '';
+    list_loading.value = true;
     try {
         const res = await apiService.get('/image/', { page: page.value, page_size: PAGE_SIZE });
         image_list.value = res.data ?? [];
@@ -63,6 +67,8 @@ const getImageList = async () => {
     } catch (error) {
         list_error.value = api_error_detail(error, '获取图片列表失败');
         console.error('获取管理后台图片列表失败:', error)
+    } finally {
+        list_loading.value = false;
     }
 }
 
@@ -201,6 +207,19 @@ onMounted(getImageList);
         <!-- 照片网格 -->
         <!-- 内容区=视口−侧栏，lg 下 6 列每格仅 ~110px 无法辨图，xl 起才多列 -->
         <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
+            <!-- 加载状态：卡片骨架复用真实卡片的容器/内边距，避免加载→内容切换跳动 -->
+            <template v-if="list_loading && image_list.length === 0">
+                <div v-for="n in 8" :key="n" class="card rounded-box border border-base-300 overflow-hidden">
+                    <SkeletonBlock class="aspect-square w-full" rounded="rounded-none" />
+                    <div class="p-3">
+                        <SkeletonBlock class="my-1 h-4 w-3/4" />
+                        <SkeletonBlock class="mt-2 h-3 w-1/2" />
+                        <SkeletonBlock v-if="auth_store.is_superuser" class="mt-2 h-3 w-2/3" />
+                        <SkeletonBlock class="mt-2 h-3 w-1/2" />
+                        <SkeletonBlock class="mt-2 h-3 w-32" />
+                    </div>
+                </div>
+            </template>
             <div v-for="image in image_list" :key="image.id"
                 class="card rounded-box border border-base-300 overflow-hidden group">
                 <div class="relative overflow-hidden aspect-square">
@@ -229,7 +248,7 @@ onMounted(getImageList);
             </div>
         </div>
 
-        <p v-if="!list_error && image_list.length === 0" class="py-16 text-center text-base-content/55">暂无图片</p>
+        <p v-if="!list_loading && !list_error && image_list.length === 0" class="py-16 text-center text-base-content/55">暂无图片</p>
 
         <AppPagination class="mt-8" :page="page" :has-next="has_next"
             :total="total" unit="张" :page-size="PAGE_SIZE" @change="go_page" />
