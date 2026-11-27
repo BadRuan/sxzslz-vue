@@ -16,6 +16,9 @@
 - **公开数据不受登录态影响** - 前台文章列表/详情、站内搜索、首页栏目、作者主页均以匿名身份读取，普通账号登录后台后浏览前台仍可看到全站公开文章
 - **站内搜索** - `/search` 支持**标题 / 正文 / 标题+正文**三种范围，多关键词用空格分隔（AND，需同时命中）；结果按发布时间倒序，标题与正文片段由前端按 `matched_terms` 高亮（`<mark>`，不拼 HTML），并标注「标题命中 / 正文命中」；关键词、范围、页码写入 URL，可刷新/分享；导航栏（≥1280 全框 / 1024~1279 图标入口）与页脚「站内搜索」为入口
 - **统一错误提示** - 各接口失败时解析后端 `detail` 并展示可读原因（如「原密码错误」「无权修改他人文章」「仅超级管理员可管理文章分类」）；非 JSON 错误响应（网关 HTML 413/502）按 HTTP 状态码兜底，超时/断网/取消均有明确文案，不再出现「失败但无提示」
+- **骨架屏加载** - 前台（文章列表/详情、首页栏目、搜索、个人主页）与后台（概览/文章/日志/分类/照片/文档）内容加载位统一用 `SkeletonBlock` / `ArticleCardSkeleton` 展示，形状与真实内容一致（无加载完成跳动）；行内操作型按钮仍用 spinner，路由级 Suspense 仍用 `PageLoading`
+- **克制动效** - 列表卡片依次浮现（`card-stagger`，260ms、逐项 40ms 错峰封顶 240ms）、空状态淡入（`fade-in`，200ms），单次过渡 ≤300ms；全局 `prefers-reduced-motion` 降级时长与延迟归零
+- **统一空状态** - 全站空数据（无文章/无分类/无搜索结果/无图片/无文档/无账户/无日志等）统一走 `EmptyState` 组件（虚线框+图标+说明+可选操作按钮，表格内用 `compact` 单行变体）；**失败永远渲染为「错误+重试」，绝不显示为空状态**；文章列表在「无任何分类」时侧栏与正文分别给出占位，不渲染空骨架网格
 - **PC 多分辨率适配** - 针对 1024×768、1366×768、1920×1080 等桌面分辨率统一布局体验（不做移动端专项适配）
 
 ## 技术栈
@@ -42,7 +45,10 @@ src/
 │   ├── AppPagination.vue # 分页
 │   ├── ArticleCover.vue  # 文章封面（contain 展示 + 灰底衬托 + 懒加载）
 │   ├── CopyButton.vue    # 一键复制按钮（slug / Markdown）
+│   ├── EmptyState.vue    # 统一空状态（虚线框/图标/操作按钮，compact 表格变体）
 │   ├── PageLoading.vue   # 路由 Suspense fallback
+│   ├── SkeletonBlock.vue # 骨架原子（行/块占位，全站骨架位复用）
+│   ├── ArticleCardSkeleton.vue # 文章卡片骨架（与真实卡等高）
 │   └── TitleComponent.vue
 ├── composables/          # 组合式函数
 │   ├── usePermissions.ts # 角色权限统一判定（超管/普通账号能力边界）
@@ -297,6 +303,7 @@ npm run preview
 - **路由懒加载 + Suspense**：路由组件均为动态 import，`MainLayout` / 后台 `Layout` 用
   `<Suspense>` 包裹 `RouterView`，异步阶段展示 `PageLoading` fallback。
 - **首屏骨架**：`index.html` 内联加载动画，JS 加载/挂载前不白屏（Vue mount 时自动替换）。
+- **数据骨架屏**：接口加载阶段以 `SkeletonBlock` / `ArticleCardSkeleton` 占位（前台与后台内容级加载位），尺寸对齐真实内容，消除 spinner→内容的布局跳动。
 - **封面懒加载**：`ArticleCover` 默认 `loading="lazy"` + `decoding="async"`，首屏外封面不阻塞 LCP。
 - **构建分块**（`vite.config.ts` 的 `build.rollupOptions.output.manualChunks`）：`vue-core` /
   `markdown` / `http` / `date` / `carousel` / `animation` / `vendor` 独立 chunk，便于长期缓存与按需并行加载。
