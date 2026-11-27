@@ -8,6 +8,7 @@ import AppPagination from '@/components/AppPagination.vue';
 import AppModal from '@/components/AppModal.vue';
 import CopyButton from '@/components/CopyButton.vue';
 import SkeletonBlock from '@/components/SkeletonBlock.vue';
+import EmptyState from '@/components/EmptyState.vue';
 import { useUpload } from '@/composables/useUpload';
 import { doc_icon_for } from '@/utils/docIcon';
 import {
@@ -270,7 +271,9 @@ onMounted(fetch_list);
                         </td>
                     </tr>
                     <tr v-else-if="!list_error && document_list.length === 0">
-                        <td :colspan="auth_store.is_superuser ? 8 : 7" class="px-4 py-8 text-center text-base-content/55">暂无文件</td>
+                        <td :colspan="auth_store.is_superuser ? 8 : 7" class="px-4 py-8 text-center">
+                            <EmptyState compact icon="file" title="暂无文件" />
+                        </td>
                     </tr>
                     <tr v-for="(doc, index) in document_list" :key="doc.id" class="hover:bg-base-200 link-transition">
                         <td class="px-4 py-3.5 text-base-content/60 whitespace-nowrap">{{ row_index(index) }}</td>

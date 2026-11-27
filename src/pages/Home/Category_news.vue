@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import TitleComponent from '@/components/TitleComponent.vue';
+import EmptyState from '@/components/EmptyState.vue';
 import { computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useArticleStore } from '@/store/article';
@@ -82,7 +83,8 @@ const columns = computed(() => [
                         </li>
                     </ul>
 
-                    <p v-if="!col.list.length" class="py-10 text-center text-sm text-base-content/50">暂无内容</p>
+                    <EmptyState v-if="!col.list.length" compact icon="article" title="暂无内容"
+                        class="py-10" />
                 </div>
             </div>
         </div>

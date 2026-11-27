@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/auth';
 import { get_token } from '@/utils/token';
 import AppModal from '@/components/AppModal.vue';
 import SkeletonBlock from '@/components/SkeletonBlock.vue';
+import EmptyState from '@/components/EmptyState.vue';
 import {
     type CategoryFlat,
     type CategoryTreeNode,
@@ -373,7 +374,9 @@ onMounted(load_category_page);
                     </thead>
                     <tbody class="divide-y divide-base-300 divide-dashed">
                         <tr v-if="!list_error && tree_rows.length === 0">
-                            <td colspan="4" class="px-6 py-8 text-center text-base-content/55">暂无分类</td>
+                            <td colspan="4" class="px-6 py-8 text-center">
+                                <EmptyState compact icon="category" title="暂无分类" />
+                            </td>
                         </tr>
                         <tr v-for="{ node, depth } in tree_rows" :key="node.id"
                             class="hover:bg-base-200 link-transition"

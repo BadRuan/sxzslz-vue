@@ -11,6 +11,7 @@ import { name_category_id, categories_label, to_second_level_id } from '@/utils/
 import { CATEGORY_NAMES } from '@/utils/categoryConfig';
 import ArticleCover from '@/components/ArticleCover.vue';
 import SkeletonBlock from '@/components/SkeletonBlock.vue';
+import EmptyState from '@/components/EmptyState.vue';
 
 const baseinfo_store = useBaseinfoStore();
 const article_store = useArticleStore();
@@ -162,9 +163,8 @@ onMounted(async () => {
                             </li>
                         </ul>
 
-                        <p v-if="!article_obj.latest.length" class="py-10 text-center text-sm text-base-content/50">
-                            暂无最新文章
-                        </p>
+                        <EmptyState v-if="!article_obj.latest.length" compact icon="article"
+                            title="暂无最新文章" class="py-10" />
                     </div>
                 </div>
             </div>

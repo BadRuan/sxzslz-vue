@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import AppPagination from '@/components/AppPagination.vue';
 import SkeletonBlock from '@/components/SkeletonBlock.vue';
+import EmptyState from '@/components/EmptyState.vue';
 import { apiService } from '@/utils/apiService';
 import { api_error_detail } from '@/utils/apiError';
 import dayjs from 'dayjs';
@@ -222,10 +223,9 @@ onMounted(() => {
                     <SkeletonBlock class="h-4 w-32 shrink-0" />
                 </div>
             </div>
-            <div v-else-if="rows.length === 0" class="p-14 text-center text-sm text-base-content/55">
-                暂无日志
-                <p v-if="filters.action || filters.object_type || filters.result || filters.operator_id"
-                    class="mt-1.5 text-xs text-base-content/40">可调整筛选条件后查询</p>
+            <div v-else-if="rows.length === 0" class="p-14">
+                <EmptyState compact icon="log" title="暂无日志"
+                    :description="(filters.action || filters.object_type || filters.result || filters.operator_id) ? '可调整筛选条件后查询' : undefined" />
             </div>
             <div v-else class="overflow-x-auto">
                 <table class="table table-zebra logs-table">

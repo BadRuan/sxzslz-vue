@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { url_prefix } from '@/utils/baseInfo';
 import TitleComponent from '@/components/TitleComponent.vue';
 import AppModal from '@/components/AppModal.vue';
+import EmptyState from '@/components/EmptyState.vue';
 import { useStationStore } from '@/store/station';
 
 const station_store = useStationStore();
@@ -540,14 +541,7 @@ onUnmounted(() => {
                                 </figcaption>
                             </figure>
                         </div>
-                        <p v-else class="mt-8 rounded-xl border border-dashed border-base-300 bg-base-100/50 px-6 py-12 text-center text-sm text-base-content/55">
-                            <svg class="mx-auto h-12 w-12 text-base-content/30 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                                <circle cx="8.5" cy="8.5" r="1.5" />
-                                <path d="M21 15l-5-5L5 21" />
-                            </svg>
-                            暂无站区影像资料
-                        </p>
+                        <EmptyState v-else class="mt-8" icon="image" title="暂无站区影像资料" />
                     </section>
                 </div>
             </div>

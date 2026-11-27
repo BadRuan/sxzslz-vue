@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import AppPagination from '@/components/AppPagination.vue';
 import AppModal from '@/components/AppModal.vue';
 import SkeletonBlock from '@/components/SkeletonBlock.vue';
+import EmptyState from '@/components/EmptyState.vue';
 import MarkdownEditor from '@/components/MarkdownEditor.vue';
 import apiService, { type UploadPhase } from '@/utils/apiService';
 import { useBaseinfoStore } from '@/store/base';
@@ -657,8 +658,8 @@ onMounted(
                         </td>
                     </tr>
                     <tr v-else-if="article_list.length === 0">
-                        <td :colspan="column_count" class="px-6 py-8 text-center text-base-content/55">
-                            {{ empty_text }}
+                        <td :colspan="column_count" class="px-6 py-8 text-center">
+                            <EmptyState compact icon="article" :title="empty_text" />
                         </td>
                     </tr>
                     <tr v-for="article in article_list" :key="article.slug" class="text-center hover:bg-base-200 link-transition">

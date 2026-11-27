@@ -9,6 +9,7 @@ import { articleService, useArticleStore, type ArticleModel } from '@/store/arti
 import { url_prefix } from '@/utils/baseInfo';
 import { useInfiniteSentinel } from '@/composables/useInfiniteSentinel';
 import SkeletonBlock from '@/components/SkeletonBlock.vue';
+import EmptyState from '@/components/EmptyState.vue';
 
 const route = useRoute();
 const raw_user_id = Number(route.params.id);
@@ -110,7 +111,7 @@ onMounted(
                                 </h1>
                                 <img class="h-5 w-5 shrink-0" src="/icon/v.png" alt="认证">
                             </div>
-                            <p class="mt-1.5 text-sm text-base-content/55">暂无简介及其他补充信息</p>
+                            <EmptyState compact icon="user" title="暂无简介及其他补充信息" class="mt-1.5" />
                         </div>
                     </div>
 
@@ -151,8 +152,8 @@ onMounted(
                             </div>
                         </div>
                     </li>
-                    <li v-else-if="infinite_list.length === 0" class="px-6 py-14 text-center text-sm text-base-content/55">
-                        暂无文章
+                    <li v-else-if="infinite_list.length === 0" class="px-6 py-14">
+                        <EmptyState compact icon="article" title="暂无文章" />
                     </li>
                     <!-- transition 类为加载→内容切换预留淡入（仅展示层） -->
                     <li v-for="article in infinite_list" :key="article.slug" class="transition-opacity duration-200">

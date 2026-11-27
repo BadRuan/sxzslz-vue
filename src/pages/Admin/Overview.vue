@@ -9,6 +9,7 @@ import { articleService, type ArticleModel } from '@/store/article';
 import { useAuthStore } from '@/store/auth';
 import { api_error_detail } from '@/utils/apiError';
 import SkeletonBlock from '@/components/SkeletonBlock.vue';
+import EmptyState from '@/components/EmptyState.vue';
 
 // 概览统计：文章/图片/附件用分页接口的 total；容量与发布量走专用接口
 interface CountModel {
@@ -286,8 +287,8 @@ onMounted(
                         <SkeletonBlock class="h-4 w-16 shrink-0" />
                     </div>
                 </li>
-                <li v-else-if="!latest_article?.length" class="px-5 py-12 text-center text-sm text-base-content/55">
-                    暂无文章
+                <li v-else-if="!latest_article?.length" class="m-3">
+                    <EmptyState icon="article" title="暂无文章" />
                 </li>
                 <li v-for="(article, index) in latest_article" :key="index">
                     <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"

@@ -12,6 +12,7 @@ import { split_keyword } from '@/utils/highlight';
 import AppPagination from '@/components/AppPagination.vue';
 import ArticleCover from '@/components/ArticleCover.vue';
 import SkeletonBlock from '@/components/SkeletonBlock.vue';
+import EmptyState from '@/components/EmptyState.vue';
 import HighlightText from './components/HighlightText.vue';
 
 const PAGE_SIZE = 30;
@@ -413,19 +414,10 @@ watch(
             </div>
 
             <!-- 已搜索但无结果：给出可操作的下一步，而不是只说「暂无数据」 -->
-            <div v-else class="rounded-box border border-base-300 bg-base-100 px-6 py-14 text-center transition-opacity duration-200">
-                <p class="text-base-content/75">
-                    未找到与「<span class="font-medium text-base-content">{{ active_keyword }}</span>」相关的文章
-                </p>
-                <ul class="mx-auto mt-4 max-w-md list-disc space-y-1.5 pl-5 text-left text-sm text-base-content/65">
-                    <li>试试更短或更通用的关键词</li>
-                    <li>多个关键词需同时命中，可减少关键词数量</li>
-                    <li>切换搜索范围（标题 / 正文 / 标题 + 正文）</li>
-                </ul>
-                <button v-if="page > 1" type="button" class="btn btn-sm btn-primary mt-6" @click="go_to_page(1)">
-                    返回第一页
-                </button>
-            </div>
+            <EmptyState v-else icon="search" :title="`未找到与「${active_keyword}」相关的文章`"
+                description="试试更短或更通用的关键词；多个关键词需同时命中，可减少关键词数量；切换搜索范围（标题 / 正文 / 标题 + 正文）"
+                :action-label="page > 1 ? '返回第一页' : undefined" class="transition-opacity duration-200"
+                @action="go_to_page(1)" />
         </div>
     </main>
 </template>

@@ -9,6 +9,7 @@ import AppPagination from '@/components/AppPagination.vue';
 import AppModal from '@/components/AppModal.vue';
 import CopyButton from '@/components/CopyButton.vue';
 import SkeletonBlock from '@/components/SkeletonBlock.vue';
+import EmptyState from '@/components/EmptyState.vue';
 import { useUpload } from '@/composables/useUpload';
 import {
     IMAGE_ACCEPT,
@@ -255,7 +256,8 @@ onMounted(getImageList);
             </div>
         </div>
 
-        <p v-if="!list_loading && !list_error && image_list.length === 0" class="py-16 text-center text-base-content/55">暂无图片</p>
+        <EmptyState v-if="!list_loading && !list_error && image_list.length === 0" icon="image"
+            title="暂无图片" />
 
         <AppPagination class="mt-8" :page="page" :has-next="has_next"
             :total="total" unit="张" :page-size="PAGE_SIZE" @change="go_page" />

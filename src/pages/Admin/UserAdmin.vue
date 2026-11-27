@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import dayjs from 'dayjs';
 import AppModal from '@/components/AppModal.vue';
+import EmptyState from '@/components/EmptyState.vue';
 import { useBaseinfoStore } from '@/store/base';
 import { useAuthStore } from '@/store/auth';
 import { api_error_detail } from '@/utils/apiError';
@@ -200,7 +201,9 @@ onMounted(load_users);
                 </thead>
                 <tbody class="divide-y divide-base-300 divide-dashed">
                     <tr v-if="!list_error && users.length === 0">
-                        <td colspan="5" class="px-6 py-8 text-center text-base-content/55">暂无账户</td>
+                        <td colspan="5" class="px-6 py-8 text-center">
+                            <EmptyState compact icon="user" title="暂无账户" />
+                        </td>
                     </tr>
                     <tr v-for="(item, index) in users" :key="item.id"
                         class="text-center hover:bg-base-200 link-transition">

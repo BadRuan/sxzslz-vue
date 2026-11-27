@@ -10,6 +10,7 @@ import { CATEGORY_NAMES } from '@/utils/categoryConfig';
 import { useInfiniteSentinel } from '@/composables/useInfiniteSentinel';
 import ArticleCover from '@/components/ArticleCover.vue';
 import ArticleCardSkeleton from '@/components/ArticleCardSkeleton.vue';
+import EmptyState from '@/components/EmptyState.vue';
 
 const route = useRoute();
 const baseinfo_store = useBaseinfoStore();
@@ -42,6 +43,13 @@ const default_category_id = computed(() => {
 const active_category = computed(() =>
     to_second_level_id(categories.value, Number(route.query.category) || undefined)
     ?? default_category_id.value);
+
+/** 无文章分类专项：分类加载成功但树为空（激活分类随之未知）。与分类失败分支互斥，失败优先 */
+const no_categories = computed(() =>
+    !loading.value
+    && !categories_error.value
+    && flattened.value.length === 0
+    && active_category.value === undefined);
 
 /** 当前激活分类所属的一级分类 id（侧边栏默认展开用） */
 const parent_of_active = computed(() => {
@@ -193,6 +201,9 @@ const sentinel = useInfiniteSentinel(
                                 </template>
                             </template>
                         </nav>
+                        <!-- 无分类专项：侧栏给出空态引导；分类树加载失败时下面的错误分支优先（互斥） -->
+                        <EmptyState v-if="no_categories" compact icon="category" title="暂无分类"
+                            description="请先在管理后台创建分类" />
                         <!-- 分类树加载失败：给出后端原因与重试，而不是静默展示空侧栏 -->
                         <div v-if="categories_error" class="mt-3">
                             <p class="alert alert-error text-xs">{{ categories_error }}</p>
@@ -204,7 +215,7 @@ const sentinel = useInfiniteSentinel(
 
                 <div class="min-w-0 flex-1">
                     <!-- 加载状态：骨架屏，比单行 spinner 更少布局跳动 -->
-                    <div v-if="loading || infinite_loading" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                    <div v-if="(loading || infinite_loading) && !no_categories" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                         <ArticleCardSkeleton v-for="i in 6" :key="i" />
                     </div>
 
@@ -219,11 +230,10 @@ const sentinel = useInfiniteSentinel(
                                 重新加载
                             </button>
                         </div>
-                        <div v-else-if="infinite_list.length === 0"
-                            class="rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-20 text-center">
-                            <p class="text-base-content/55">暂无文章</p>
-                            <p class="mt-1.5 text-sm text-base-content/50">该分类下还没有发布内容，换个分类看看</p>
-                        </div>
+                        <EmptyState v-else-if="no_categories" icon="category" title="暂无文章分类"
+                            description="尚无可用分类，请先在管理后台创建分类" />
+                        <EmptyState v-else-if="infinite_list.length === 0" icon="article" title="暂无文章"
+                            description="该分类下还没有发布内容，换个分类看看" />
                         <div v-else class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                             <article v-for="article in infinite_list" :key="article.slug"
                                 class="group overflow-hidden rounded-box border border-base-300 bg-base-100 card-hover hover:-translate-y-1 hover:border-primary/25 hover:shadow-[var(--shadow-lift)]">

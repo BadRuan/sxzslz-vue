@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia';
 import { useStationStore } from '@/store/station';
 import { url_prefix } from '@/utils/baseInfo';
 import TitleComponent from '@/components/TitleComponent.vue';
+import EmptyState from '@/components/EmptyState.vue';
 
 const station_store = useStationStore();
 const { station_array } = storeToRefs(station_store);
@@ -58,7 +59,8 @@ const gallery = (() => {
                 </figure>
             </div>
 
-            <p v-else class="mt-8 text-sm text-white/55">暂无站区影像</p>
+            <!-- 深色底上用默认变体白底虚线卡，保证 base-content 文字可读 -->
+            <EmptyState v-else class="mt-8" icon="image" title="暂无站区影像" />
         </div>
     </section>
 </template>
