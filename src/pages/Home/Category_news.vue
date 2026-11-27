@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import TitleComponent from '@/components/TitleComponent.vue';
 import EmptyState from '@/components/EmptyState.vue';
+import SkeletonBlock from '@/components/SkeletonBlock.vue';
 import { computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useArticleStore } from '@/store/article';
@@ -12,7 +13,7 @@ import type { ArticleModel } from '@/store/article';
 
 const article_store = useArticleStore();
 const baseinfo_store = useBaseinfoStore();
-const { article_obj, home_error } = storeToRefs(article_store);
+const { article_obj, loading, home_error } = storeToRefs(article_store);
 const { categories, error_message: baseinfo_error } = storeToRefs(baseinfo_store);
 
 // 「更多」跳列表页：名称命中一级分类时取其第一个子分类（文章只挂二级）
@@ -71,6 +72,13 @@ const columns = computed(() => [
                     </div>
 
                     <ul class="mt-4 flex-1 divide-y divide-base-300/80">
+                        <!-- 首次加载：轻骨架占位，避免空数据被渲染成「暂无内容」 -->
+                        <template v-if="loading && !col.list.length">
+                            <li v-for="i in 4" :key="`sk-${col.key}-${i}`" class="flex items-center gap-4 py-3">
+                                <SkeletonBlock class="h-4 min-w-0 flex-1" />
+                                <SkeletonBlock class="h-3 w-14 shrink-0" />
+                            </li>
+                        </template>
                         <li v-for="item in col.list" :key="item.id">
                             <RouterLink :to="{ name: 'ArticleDetail', params: { slug: item.slug } }"
                                 class="group flex items-center justify-between gap-4 py-3">
@@ -83,8 +91,9 @@ const columns = computed(() => [
                         </li>
                     </ul>
 
-                    <EmptyState v-if="!col.list.length" compact icon="article" title="暂无内容"
-                        class="py-10" />
+                    <!-- 加载中/接口失败时不渲染空态：失败只由上方错误条承担，加载完仍无数据才算真空 -->
+                    <EmptyState v-if="!loading && !baseinfo_error && !home_error && !col.list.length" compact
+                        icon="article" title="暂无内容" class="py-10" />
                 </div>
             </div>
         </div>
