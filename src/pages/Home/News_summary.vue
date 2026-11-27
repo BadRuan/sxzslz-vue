@@ -10,6 +10,7 @@ import { useArticleStore } from '@/store/article';
 import { name_category_id, categories_label, to_second_level_id } from '@/utils/category';
 import { CATEGORY_NAMES } from '@/utils/categoryConfig';
 import ArticleCover from '@/components/ArticleCover.vue';
+import ArticleCardSkeleton from '@/components/ArticleCardSkeleton.vue';
 
 const baseinfo_store = useBaseinfoStore();
 const article_store = useArticleStore();
@@ -64,9 +65,9 @@ onMounted(async () => {
                 </template>
             </TitleComponent>
 
-            <div v-if="loading" class="card mt-8 rounded-box p-12 text-center">
-                <span class="loading loading-spinner loading-md mx-auto mb-4 block"></span>
-                <p class="text-sm text-base-content/65">正在加载动态…</p>
+            <!-- 加载状态：3 张骨架卡片，比单行 spinner 更少布局跳动 -->
+            <div v-if="loading" class="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                <ArticleCardSkeleton v-for="i in 3" :key="i" />
             </div>
 
             <!-- 接口失败：展示后端 detail 并提供重试，避免首页静默空白 -->
@@ -77,7 +78,7 @@ onMounted(async () => {
                 </button>
             </div>
 
-            <div v-else class="mt-8 grid gap-6 lg:grid-cols-12 lg:gap-8">
+            <div v-else class="mt-8 grid gap-6 transition-opacity duration-200 lg:grid-cols-12 lg:gap-8">
                 <!-- 推荐动态轮播 -->
                 <Splide :options="options"
                     class="news-splide w-full overflow-hidden rounded-box border border-base-300 lg:col-span-8">

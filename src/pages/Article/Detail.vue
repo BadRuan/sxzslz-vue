@@ -9,6 +9,7 @@ import { useBaseinfoStore } from '@/store/base';
 import { render_markdown } from '@/utils/markdown';
 import { ext_of_filename, is_doc_extension } from '@/utils/docIcon';
 import DocumentPreview from '@/components/DocumentPreview.vue';
+import SkeletonBlock from '@/components/SkeletonBlock.vue';
 import 'github-markdown-css/github-markdown.css';
 
 const route = useRoute();
@@ -146,12 +147,12 @@ const handle_prose_click = (event: MouseEvent) => {
                 <!-- 加载状态：骨架屏，形状贴近正文避免白屏跳动 -->
                 <div v-if="loading" class="overflow-hidden rounded-box border border-base-300 bg-base-100">
                     <div class="space-y-4 px-6 py-12 sm:px-12">
-                        <div class="mx-auto h-7 w-3/4 animate-pulse rounded bg-base-300"></div>
-                        <div class="mx-auto h-4 w-1/3 animate-pulse rounded bg-base-300"></div>
-                        <div class="mx-auto mt-8 h-3 w-full animate-pulse rounded bg-base-300"></div>
-                        <div class="mx-auto h-3 w-11/12 animate-pulse rounded bg-base-300"></div>
-                        <div class="mx-auto h-3 w-full animate-pulse rounded bg-base-300"></div>
-                        <div class="mx-auto h-3 w-4/5 animate-pulse rounded bg-base-300"></div>
+                        <SkeletonBlock class="mx-auto h-7 w-3/4" />
+                        <SkeletonBlock class="mx-auto h-4 w-1/3" />
+                        <SkeletonBlock class="mx-auto mt-8 h-3 w-full" />
+                        <SkeletonBlock class="mx-auto h-3 w-11/12" />
+                        <SkeletonBlock class="mx-auto h-3 w-full" />
+                        <SkeletonBlock class="mx-auto h-3 w-4/5" />
                     </div>
                 </div>
 
@@ -175,8 +176,8 @@ const handle_prose_click = (event: MouseEvent) => {
                     </div>
                 </div>
 
-                <!-- 正常内容 -->
-                <article v-else class="overflow-hidden rounded-box border border-base-300 bg-base-100">
+                <!-- 正常内容：transition 类为加载→内容切换预留淡入（仅展示层） -->
+                <article v-else class="overflow-hidden rounded-box border border-base-300 bg-base-100 transition-opacity duration-200">
                     <header class="px-6 pb-8 pt-10 text-center sm:px-12 sm:pt-12">
                         <RouterLink v-if="category_crumb"
                             :to="{ name: 'ArticleList', query: { category: category_crumb.id } }"

@@ -11,6 +11,7 @@ import { date_text } from '@/utils/formatters';
 import { split_keyword } from '@/utils/highlight';
 import AppPagination from '@/components/AppPagination.vue';
 import ArticleCover from '@/components/ArticleCover.vue';
+import ArticleCardSkeleton from '@/components/ArticleCardSkeleton.vue';
 import HighlightText from './components/HighlightText.vue';
 
 const PAGE_SIZE = 30;
@@ -305,11 +306,10 @@ watch(
         </section>
 
         <div class="page-container py-8 sm:py-10">
-            <!-- 首次搜索中（旧结果为空）：加载提示，而不是空白 -->
+            <!-- 首次搜索中（旧结果为空）：3 张骨架卡片，而不是空白 -->
             <div v-if="loading && results.length === 0"
-                class="flex flex-col items-center gap-3 rounded-box border border-base-300 bg-base-100 p-12 text-center">
-                <span class="loading loading-spinner loading-md text-primary"></span>
-                <p class="text-sm text-base-content/65">正在搜索…</p>
+                class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                <ArticleCardSkeleton v-for="i in 3" :key="i" />
             </div>
 
             <!-- 接口失败：展示后端原因并提供重试，而不是误报「无结果」 -->
@@ -324,7 +324,7 @@ watch(
 
             <!-- 未发起搜索：引导输入 -->
             <div v-else-if="!has_searched"
-                class="rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-16 text-center">
+                class="rounded-box border border-dashed border-base-300 bg-base-100 px-6 py-16 text-center transition-opacity duration-200">
                 <div
                     class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
@@ -337,8 +337,8 @@ watch(
                 <p class="mt-2 text-sm text-base-content/55">支持多关键词（空格分隔、同时命中）与按标题/正文限定范围</p>
             </div>
 
-            <!-- 有结果：摘要 + 列表 + 分页 -->
-            <template v-else-if="results.length > 0">
+            <!-- 有结果：摘要 + 列表 + 分页（transition 类为加载→内容切换预留淡入，仅展示层） -->
+            <div v-else-if="results.length > 0" class="transition-opacity duration-200">
                 <div class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-base-content/55">
                     <span>共 <b class="num text-base-content">{{ total }}</b> 条结果</span>
                     <span class="h-3 w-px bg-base-300" aria-hidden="true"></span>
@@ -397,10 +397,10 @@ watch(
 
                 <AppPagination class="mt-8" :page="page" :has-next="has_next" :total="total" unit="条"
                     :page-size="PAGE_SIZE" @change="go_to_page" />
-            </template>
+            </div>
 
             <!-- 已搜索但无结果：给出可操作的下一步，而不是只说「暂无数据」 -->
-            <div v-else class="rounded-box border border-base-300 bg-base-100 px-6 py-14 text-center">
+            <div v-else class="rounded-box border border-base-300 bg-base-100 px-6 py-14 text-center transition-opacity duration-200">
                 <p class="text-base-content/75">
                     未找到与「<span class="font-medium text-base-content">{{ active_keyword }}</span>」相关的文章
                 </p>

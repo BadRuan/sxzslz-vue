@@ -9,6 +9,7 @@ import { flatten_categories, name_category_id, categories_compact, to_second_lev
 import { CATEGORY_NAMES } from '@/utils/categoryConfig';
 import { useInfiniteSentinel } from '@/composables/useInfiniteSentinel';
 import ArticleCover from '@/components/ArticleCover.vue';
+import ArticleCardSkeleton from '@/components/ArticleCardSkeleton.vue';
 
 const route = useRoute();
 const baseinfo_store = useBaseinfoStore();
@@ -204,19 +205,11 @@ const sentinel = useInfiniteSentinel(
                 <div class="min-w-0 flex-1">
                     <!-- 加载状态：骨架屏，比单行 spinner 更少布局跳动 -->
                     <div v-if="loading || infinite_loading" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                        <div v-for="i in 6" :key="i"
-                            class="overflow-hidden rounded-box border border-base-300 bg-base-100">
-                            <div class="aspect-[16/10] animate-pulse bg-base-300"></div>
-                            <div class="space-y-3 p-5">
-                                <div class="h-4 w-4/5 animate-pulse rounded bg-base-300"></div>
-                                <div class="h-4 w-3/5 animate-pulse rounded bg-base-300"></div>
-                                <div class="h-3 w-1/3 animate-pulse rounded bg-base-300"></div>
-                            </div>
-                        </div>
+                        <ArticleCardSkeleton v-for="i in 6" :key="i" />
                     </div>
 
-                    <!-- 正常内容 -->
-                    <template v-else>
+                    <!-- 正常内容：transition 类为加载→内容切换预留淡入（仅展示层） -->
+                    <div v-else class="transition-opacity duration-200">
                         <!-- 接口失败与空数据区分：失败给出后端原因与重试，而非误报「暂无文章」 -->
                         <div v-if="infinite_error && infinite_list.length === 0"
                             class="rounded-box border border-base-300 bg-base-100 p-12 text-center text-base-content/60">
@@ -282,7 +275,7 @@ const sentinel = useInfiniteSentinel(
                             <span v-else-if="infinite_list.length > 0 && !infinite_has_more">没有更多了</span>
                         </div>
                         <div ref="sentinel" class="h-px" aria-hidden="true"></div>
-                    </template>
+                    </div>
                 </div>
             </div>
         </div>

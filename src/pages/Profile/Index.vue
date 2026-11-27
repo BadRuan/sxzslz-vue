@@ -8,6 +8,7 @@ import { categories_compact } from '@/utils/category';
 import { articleService, useArticleStore, type ArticleModel } from '@/store/article';
 import { url_prefix } from '@/utils/baseInfo';
 import { useInfiniteSentinel } from '@/composables/useInfiniteSentinel';
+import ArticleCardSkeleton from '@/components/ArticleCardSkeleton.vue';
 
 const route = useRoute();
 const raw_user_id = Number(route.params.id);
@@ -140,14 +141,14 @@ onMounted(
                         <!-- 首屏失败时游标为空，loadMoreInfinite 是空操作，必须重新拉首批 -->
                         <button type="button" class="btn btn-xs btn-primary" @click="load_first">重试</button>
                     </li>
-                    <li v-else-if="infinite_loading" class="px-6 py-10 text-center text-sm text-base-content/55">
-                        <span class="loading loading-spinner loading-sm align-middle"></span>
-                        <span class="ml-2">加载中…</span>
+                    <li v-else-if="infinite_loading" class="space-y-6 p-6">
+                        <ArticleCardSkeleton v-for="i in 3" :key="i" />
                     </li>
                     <li v-else-if="infinite_list.length === 0" class="px-6 py-14 text-center text-sm text-base-content/55">
                         暂无文章
                     </li>
-                    <li v-for="article in infinite_list" :key="article.slug">
+                    <!-- transition 类为加载→内容切换预留淡入（仅展示层） -->
+                    <li v-for="article in infinite_list" :key="article.slug" class="transition-opacity duration-200">
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
                             class="group flex items-center gap-4 px-6 py-4 transition-colors duration-200 hover:bg-base-200/60 sm:px-8">
                             <span
