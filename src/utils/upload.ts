@@ -4,8 +4,11 @@
  * - 文档：单文件 ≤ 50MB（MAX_DOCUMENT_SIZE_MB），MIME 白名单见后端 `allow_type.document`
  * - 批量：单次 ≤ 20 个文件（MAX_BATCH_FILES）
  *
- * 后端按 multipart part 的 `Content-Type` 精确校验，因此前端白名单必须逐项对齐；
- * 选择文件后先在这里预检，避免大文件白传（后端超限会返回 400，往返耗时且无意义）。
+ * 后端按 multipart part 的 `Content-Type` 校验，因此前端白名单必须逐项对齐；
+ * 浏览器 `File.type` 由系统 MIME 表查得、并不可靠（部分国产浏览器对 doc/docx/xls/xlsx
+ * 报 application/octet-stream 或空串），文档另有扩展名兜底集合（对齐后端
+ * `DOCUMENT_EXTENSIONS`）：MIME 或扩展名任一命中即通过。预检在选择文件后立即进行，
+ * 避免大文件白传（后端超限会返回 400，往返耗时且无意义）。
  */
 
 /** 图片 MIME 白名单（对接文档 §8） */
@@ -63,6 +66,19 @@ export const DOCUMENT_MIME_WHITELIST: readonly string[] = [
 
 export const MAX_IMAGE_SIZE_BYTES = 30 * 1024 * 1024;
 export const MAX_DOCUMENT_SIZE_BYTES = 50 * 1024 * 1024;
+
+/**
+ * 文档扩展名兜底白名单（对齐后端 `DOCUMENT_EXTENSIONS`，同步维护）。
+ * 浏览器 MIME 映射不可靠时按扩展名放行；扩展名与 Content-Type 同为客户端提供，
+ * 兜底不降低现有信任级别。
+ */
+export const DOCUMENT_EXTENSIONS: readonly string[] = [
+    'txt', 'csv', 'md', 'rtf', 'pdf',
+    'doc', 'docx', 'docm', 'xls', 'xlsx', 'xlsm',
+    'ppt', 'pptx', 'pptm',
+    'odt', 'ods', 'odp',
+    'zip', '7z', 'rar', 'gz', 'tgz', 'tar', 'epub',
+];
 /** 批量上传单次上限（对接文档 MAX_BATCH_FILES，超出后端 400） */
 export const MAX_BATCH_FILES = 20;
 
@@ -113,17 +129,24 @@ export const validate_images = (files: File[]): string | null => {
     return validate_batch_count(files, '张图片');
 };
 
+/** 取文件扩展名（小写、不含点）；无扩展名返回 '' */
+const file_extension = (name: string): string => {
+    const dot = name.lastIndexOf('.');
+    return dot >= 0 ? name.slice(dot + 1).toLowerCase() : '';
+};
+
 /**
- * 文档选择预检：MIME 为空/不在白名单 → 单文件大小 → 空文件 → 批量数量。
- * 返回首条可展示的错误文案（带原始文件名），全部合法返回 null。
+ * 文档选择预检：MIME 白名单或扩展名兜底 → 单文件大小 → 空文件 → 批量数量。
+ * 返回首条可展示的错误文案（带原始文件名与浏览器识别的 MIME，便于诊断），全部合法返回 null。
  */
 export const validate_documents = (files: File[]): string | null => {
     for (const file of files) {
-        if (file.type === '') {
-            return `「${file.name}」无法识别文件类型，请改用标准扩展名的文件`;
-        }
-        if (!DOCUMENT_MIME_WHITELIST.includes(file.type)) {
-            return `「${file.name}」格式不支持，${DOCUMENT_FORMAT_HINT}`;
+        const ext_ok = DOCUMENT_EXTENSIONS.includes(file_extension(file.name));
+        if (!DOCUMENT_MIME_WHITELIST.includes(file.type) && !ext_ok) {
+            if (file.type === '') {
+                return `「${file.name}」无法识别文件类型，请改用标准扩展名的文件`;
+            }
+            return `「${file.name}」格式不支持（浏览器识别类型：${file.type}），${DOCUMENT_FORMAT_HINT}`;
         }
         if (file.size > MAX_DOCUMENT_SIZE_BYTES) {
             return `「${file.name}」超过 ${MAX_DOCUMENT_SIZE_TEXT}（当前 ${format_bytes(file.size)}）`;
