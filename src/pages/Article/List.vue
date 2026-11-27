@@ -232,7 +232,8 @@ const sentinel = useInfiniteSentinel(
                         </div>
                         <EmptyState v-else-if="no_categories" icon="category" title="暂无文章分类"
                             description="尚无可用分类，请先在管理后台创建分类" />
-                        <EmptyState v-else-if="infinite_list.length === 0" icon="article" title="暂无文章"
+                        <!-- 分类加载失败时不得误显空态：此时文章根本没拉过，等侧栏错误与重试 -->
+                        <EmptyState v-else-if="infinite_list.length === 0 && !categories_error" icon="article" title="暂无文章"
                             description="该分类下还没有发布内容，换个分类看看" />
                         <TransitionGroup v-else name="card-stagger" appear tag="div"
                             class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
