@@ -8,7 +8,7 @@ import { categories_compact } from '@/utils/category';
 import { articleService, useArticleStore, type ArticleModel } from '@/store/article';
 import { url_prefix } from '@/utils/baseInfo';
 import { useInfiniteSentinel } from '@/composables/useInfiniteSentinel';
-import ArticleCardSkeleton from '@/components/ArticleCardSkeleton.vue';
+import SkeletonBlock from '@/components/SkeletonBlock.vue';
 
 const route = useRoute();
 const raw_user_id = Number(route.params.id);
@@ -141,8 +141,15 @@ onMounted(
                         <!-- 首屏失败时游标为空，loadMoreInfinite 是空操作，必须重新拉首批 -->
                         <button type="button" class="btn btn-xs btn-primary" @click="load_first">重试</button>
                     </li>
-                    <li v-else-if="infinite_loading" class="space-y-6 p-6">
-                        <ArticleCardSkeleton v-for="i in 3" :key="i" />
+                    <li v-else-if="infinite_loading">
+                        <div class="divide-y divide-base-300">
+                            <div v-for="i in 3" :key="i" class="flex items-center gap-4 px-6 py-4 sm:px-8">
+                                <SkeletonBlock class="h-6 w-16 shrink-0" />
+                                <SkeletonBlock class="h-4 min-w-0 flex-1" />
+                                <SkeletonBlock class="h-3 w-16 shrink-0" />
+                                <SkeletonBlock class="hidden h-3.5 w-3.5 shrink-0 sm:block" />
+                            </div>
+                        </div>
                     </li>
                     <li v-else-if="infinite_list.length === 0" class="px-6 py-14 text-center text-sm text-base-content/55">
                         暂无文章

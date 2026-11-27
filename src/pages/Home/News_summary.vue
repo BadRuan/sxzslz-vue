@@ -10,7 +10,7 @@ import { useArticleStore } from '@/store/article';
 import { name_category_id, categories_label, to_second_level_id } from '@/utils/category';
 import { CATEGORY_NAMES } from '@/utils/categoryConfig';
 import ArticleCover from '@/components/ArticleCover.vue';
-import ArticleCardSkeleton from '@/components/ArticleCardSkeleton.vue';
+import SkeletonBlock from '@/components/SkeletonBlock.vue';
 
 const baseinfo_store = useBaseinfoStore();
 const article_store = useArticleStore();
@@ -65,9 +65,22 @@ onMounted(async () => {
                 </template>
             </TitleComponent>
 
-            <!-- 加载状态：3 张骨架卡片，比单行 spinner 更少布局跳动 -->
-            <div v-if="loading" class="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                <ArticleCardSkeleton v-for="i in 3" :key="i" />
+            <!-- 加载状态：跟随真实内容的 lg:grid-cols-12 结构（轮播 + 最新文章侧栏），避免布局跳动 -->
+            <div v-if="loading" class="mt-8 grid gap-6 lg:grid-cols-12 lg:gap-8">
+                <!-- 主区：与真实轮播同尺寸（16/10） -->
+                <div class="news-splide w-full overflow-hidden rounded-box border border-base-300 bg-base-200 lg:col-span-8">
+                    <SkeletonBlock class="h-full w-full" rounded="rounded-none" />
+                </div>
+                <!-- 侧栏：与真实「最新文章」卡片同结构 -->
+                <div class="card flex flex-col rounded-box border border-base-300 bg-base-100 p-6 sm:p-7 lg:col-span-4">
+                    <SkeletonBlock class="h-5 w-28" />
+                    <div class="mt-3 divide-y divide-base-300">
+                        <div v-for="i in 6" :key="i" class="flex items-center gap-3.5 py-1.5 lg:py-2">
+                            <SkeletonBlock class="h-9 w-12 shrink-0" rounded="rounded-lg" />
+                            <SkeletonBlock class="h-4 min-w-0 flex-1" />
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 接口失败：展示后端 detail 并提供重试，避免首页静默空白 -->

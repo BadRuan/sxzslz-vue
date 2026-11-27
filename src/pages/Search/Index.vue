@@ -11,7 +11,7 @@ import { date_text } from '@/utils/formatters';
 import { split_keyword } from '@/utils/highlight';
 import AppPagination from '@/components/AppPagination.vue';
 import ArticleCover from '@/components/ArticleCover.vue';
-import ArticleCardSkeleton from '@/components/ArticleCardSkeleton.vue';
+import SkeletonBlock from '@/components/SkeletonBlock.vue';
 import HighlightText from './components/HighlightText.vue';
 
 const PAGE_SIZE = 30;
@@ -306,10 +306,23 @@ watch(
         </section>
 
         <div class="page-container py-8 sm:py-10">
-            <!-- 首次搜索中（旧结果为空）：3 张骨架卡片，而不是空白 -->
-            <div v-if="loading && results.length === 0"
-                class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                <ArticleCardSkeleton v-for="i in 3" :key="i" />
+            <!-- 首次搜索中（旧结果为空）：按真实结果的单列行形状铺骨架，避免加载→内容布局跳动 -->
+            <div v-if="loading && results.length === 0" class="space-y-3">
+                <article v-for="i in 3" :key="i"
+                    class="flex gap-4 overflow-hidden rounded-box border border-base-300 bg-base-100 p-4 sm:gap-5 sm:p-5">
+                    <div class="hidden h-28 w-40 shrink-0 overflow-hidden rounded-lg bg-base-300 sm:block">
+                        <SkeletonBlock class="h-full w-full" rounded="rounded-lg" />
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="mb-2 flex gap-1.5">
+                            <SkeletonBlock class="h-4 w-14" />
+                            <SkeletonBlock class="h-4 w-20" />
+                        </div>
+                        <SkeletonBlock class="h-5 w-3/4" />
+                        <SkeletonBlock class="mt-2 h-4 w-full" />
+                        <SkeletonBlock class="mt-3 h-3 w-1/3" />
+                    </div>
+                </article>
             </div>
 
             <!-- 接口失败：展示后端原因并提供重试，而不是误报「无结果」 -->
