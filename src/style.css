@@ -205,6 +205,26 @@
     transform: translateY(6px);
 }
 
+/* 空状态淡入：条件出现时 200ms 淡入（离场不定义 leave 类，保持即时移除） */
+.fade-in-enter-active {
+    transition: opacity 200ms ease-out;
+}
+
+.fade-in-enter-from {
+    opacity: 0;
+}
+
+/* 卡片依次浮现：按索引 40ms 递延、封顶 240ms，260ms 淡入 + 上移 10px */
+.card-stagger-enter-active {
+    transition: opacity 260ms ease-out, transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: min(calc(var(--stagger, 0) * 40ms), 240ms);
+}
+
+.card-stagger-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
 /* 键盘可达性：焦点环 + 偏移 */
 :focus-visible {
     outline: 2px solid var(--color-primary);

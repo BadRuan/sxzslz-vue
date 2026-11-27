@@ -234,8 +234,10 @@ const sentinel = useInfiniteSentinel(
                             description="尚无可用分类，请先在管理后台创建分类" />
                         <EmptyState v-else-if="infinite_list.length === 0" icon="article" title="暂无文章"
                             description="该分类下还没有发布内容，换个分类看看" />
-                        <div v-else class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                            <article v-for="article in infinite_list" :key="article.slug"
+                        <TransitionGroup v-else name="card-stagger" appear tag="div"
+                            class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                            <article v-for="(article, index) in infinite_list" :key="article.slug"
+                                :style="{ '--stagger': index }"
                                 class="group overflow-hidden rounded-box border border-base-300 bg-base-100 card-hover hover:-translate-y-1 hover:border-primary/25 hover:shadow-[var(--shadow-lift)]">
                                 <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
                                     class="flex h-full flex-col">
@@ -272,7 +274,7 @@ const sentinel = useInfiniteSentinel(
                                     </div>
                                 </RouterLink>
                             </article>
-                        </div>
+                        </TransitionGroup>
 
                         <!-- 滚动加载状态：追加中 / 追加失败行内重试 / 已到底 -->
                         <div class="mt-10 flex min-h-8 items-center justify-center text-sm text-base-content/55">

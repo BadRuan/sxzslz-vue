@@ -136,13 +136,14 @@ onMounted(
                     <span class="num text-xs text-base-content/50">共 {{ total }} 篇</span>
                 </div>
 
-                <ul class="divide-y divide-base-300">
-                    <li v-if="infinite_error && infinite_list.length === 0" class="px-6 py-10 text-center text-sm text-error">
+                <TransitionGroup name="card-stagger" appear tag="ul" class="divide-y divide-base-300">
+                    <li v-if="infinite_error && infinite_list.length === 0" key="error"
+                        class="px-6 py-10 text-center text-sm text-error">
                         <p class="mb-3">{{ infinite_error }}</p>
                         <!-- 首屏失败时游标为空，loadMoreInfinite 是空操作，必须重新拉首批 -->
                         <button type="button" class="btn btn-xs btn-primary" @click="load_first">重试</button>
                     </li>
-                    <li v-else-if="infinite_loading">
+                    <li v-else-if="infinite_loading" key="loading">
                         <div class="divide-y divide-base-300">
                             <div v-for="i in 3" :key="i" class="flex items-center gap-4 px-6 py-4 sm:px-8">
                                 <SkeletonBlock class="h-6 w-16 shrink-0" />
@@ -152,11 +153,10 @@ onMounted(
                             </div>
                         </div>
                     </li>
-                    <li v-else-if="infinite_list.length === 0" class="px-6 py-14">
+                    <li v-else-if="infinite_list.length === 0" key="empty" class="px-6 py-14">
                         <EmptyState compact icon="article" title="暂无文章" />
                     </li>
-                    <!-- transition 类为加载→内容切换预留淡入（仅展示层） -->
-                    <li v-for="article in infinite_list" :key="article.slug" class="transition-opacity duration-200">
+                    <li v-for="(article, index) in infinite_list" :key="article.slug" :style="{ '--stagger': index }">
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
                             class="group flex items-center gap-4 px-6 py-4 transition-colors duration-200 hover:bg-base-200/60 sm:px-8">
                             <span
@@ -179,7 +179,7 @@ onMounted(
                             </svg>
                         </RouterLink>
                     </li>
-                </ul>
+                </TransitionGroup>
 
                 <!-- 滚动加载状态：追加中 / 已到底 -->
                 <div class="flex min-h-10 items-center justify-center border-t border-base-300 px-6 py-3 text-xs text-base-content/55">

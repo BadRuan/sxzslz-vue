@@ -364,11 +364,11 @@ watch(
                     <span class="ml-auto text-xs text-base-content/50">按发布时间倒序</span>
                 </div>
 
-                <!-- 翻页时保留旧结果并降透明度，避免整块闪烁 -->
-                <div class="space-y-3"
+                <!-- 翻页时保留旧结果并降透明度，避免整块闪烁；新结果行依次浮现 -->
+                <TransitionGroup name="card-stagger" appear tag="div" class="space-y-3"
                     :class="loading ? 'pointer-events-none opacity-60 transition-opacity duration-150' : ''"
                     :aria-busy="loading">
-                    <article v-for="item in results" :key="item.id"
+                    <article v-for="(item, index) in results" :key="item.id" :style="{ '--stagger': index }"
                         class="group overflow-hidden rounded-box border border-base-300 bg-base-100 card-hover hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-[var(--shadow-card)]">
                         <RouterLink :to="{ name: 'ArticleDetail', params: { slug: item.slug } }"
                             class="flex gap-4 p-4 sm:gap-5 sm:p-5">
@@ -407,7 +407,7 @@ watch(
                             </div>
                         </RouterLink>
                     </article>
-                </div>
+                </TransitionGroup>
 
                 <AppPagination class="mt-8" :page="page" :has-next="has_next" :total="total" unit="条"
                     :page-size="PAGE_SIZE" @change="go_to_page" />
